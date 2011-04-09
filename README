@@ -1,0 +1,69 @@
+
+Intro
+=====
+
+Hydra ia a suite of applications and libraries for non-invasive image
+and file tagging.
+
+This allows you to:
+
+ * Tag images collections of images with any number of tags
+ * Lets you do queries (searches) on directories of images based on tags.
+ * Included programs:
+    - hydratag, the command line interface
+    - hydraweb, the static web site generator
+    - hydradesktop, a Qt based desktop application
+
+How is this different that the other hundred image taggins applications:
+
+ * The core tagging code is in a library, permitting more applications
+   based on the database. Stay tuned.
+ * The tags are non-invasive...
+   The tags are stored in a central database on your computer.
+   They are NOT stored in the images (the image files are not touched)
+   and they are NOT stored in files in each directory (those get lost).
+   This means that you can move the files anywhere, and when
+   Hydra, upon recognizing the file (via its signature) will
+   automatically know what tags it has.
+
+How to compile
+==============
+
+Linux
+-----
+
+  Tested with a recent version of Linux, GCC, CMake and Qt.
+  You'll need the dev version of sqlite installed.
+
+  Run CMake on the hydra.src directory.
+
+Windows
+-------
+
+  Tested with Visual Studio 2010, CMake and Qt. You'll also need
+  the the SQLite amalgomation (the single sqlite3.c) to build with the
+  library.
+
+  Run CMake on the hydra.src directory.
+
+  Other compilers should work too.
+
+Contact info
+============
+
+Site:
+  http://demko.ca/hydra/
+
+Source:
+  https://github.com/ademko/hydra
+
+E-mail:
+  ademko@gmail.com
+
+License
+=======
+
+  Copyright (C) 2005-2011 Aleksander B. Demko
+  This source code is distributed under the MIT license.
+  See the accompanying file LICENSE.MIT.txt for details.
+
