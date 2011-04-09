@@ -16,6 +16,12 @@
 #define HYDRA_VERSION_STRING "0.20"
 #define HYDRA_COPYRIGHT_STRING "2007-2011"
 
+/**
+ * The core hydra namespace contains all the classes
+ * of the core hydra library.
+ *
+ * @author Aleksander Demko
+ */ 
 namespace hydra
 {
   class Engine;
@@ -26,7 +32,9 @@ namespace hydra
 }
 
 /**
- * The main processing engine
+ * The main processing engine for hydra applications.
+ * It is a singleton class that should be instatiated
+ * by your main or similar function.
  *
  * @author Aleksander Demko
  */

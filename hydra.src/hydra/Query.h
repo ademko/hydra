@@ -32,9 +32,11 @@ namespace hydra
   bool isQueryChar(const QChar &c); 
 
   /**
-   * Parse a given string into a token tree.
+   * Parse a given search/query string into a token tree.
    * Returns true on success, false on failure. tok is no modified on failures.
-   * Empty strings return an always true query.
+   * Empty strings return an always true query that matches everything.
+   * The resulting hydra::Token can they be used to test
+   * against hydra::Tags
    *
    * @author Aleksander Demko
    */ 
@@ -42,8 +44,10 @@ namespace hydra
 }
 
 /**
- * Core token/query object for token trees (basically, this represents
- * a query expression
+ * Core token/query object for token trees. This is an object
+ * reprentation of a query that can then be used to
+ * test against tag sets for matches.
+ *
  * @author Aleksander Demko
  */ 
 class hydra::Token
@@ -51,6 +55,12 @@ class hydra::Token
   public:
     virtual ~Token() { }
 
+    /**
+     * Does this token tree match against the
+     * given tags?
+     *
+     * @author Aleksander Demko
+     */ 
     virtual bool isMatch(const hydra::tags_t &t) = 0;
 };
 

@@ -29,13 +29,15 @@ namespace hydra
 }
 
 /**
- * Generator and maintainer of image thumbnails (and other scalled versions
+ * Generator and maintainer of image thumbnails (and other scaled versions
  * of an image).
  *
- * Thumbnails are stores usually in ~/.hydra/thumbs/imghash[.SIZE].jpg
- * Where size is the thumbnail-desired size (but maybe not the image size, as the
+ * Thumbnails are stores in ~/.hydradb/thumbs/imghash.wantedsize.rotatecode.jpg and generated when needed.
+ *
+ * Where size is the thumbnail-desired size (but maybe not the final thumb size, as the
  * aspect ratio will be conserved and therefore the image size will often be smaller
  * than the thumbnail size.
+ * The rotatecode is the rotate code that was applied to the thumbnail.
  *
  * @author Aleksander Demko
  */

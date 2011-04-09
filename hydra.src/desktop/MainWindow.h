@@ -20,6 +20,13 @@
 #include <desktop/RunnableEvent.h>
 #include <desktop/FutureLoader.h>
 
+/**
+ * The desktop namespace contains all the classes
+ * for the Hydra Desktop GUI application.
+ * This application uses the hydra library.
+ *
+ * @author Aleksander Demko
+ */ 
 namespace desktop
 {
   class MainPlugin;
