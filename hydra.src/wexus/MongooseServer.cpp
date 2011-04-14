@@ -168,12 +168,11 @@ void * MongooseServer::callback(enum mg_event event, struct mg_connection *conn,
   // process the request
 qDebug() << "MongooseServer::callback handling: " << req.request();
 
-  if (here->dm_opt.handler()) {
-    bool ret = here->dm_opt.handler()->handleRequest(req, rep);
-    assert(ret);    // FUTURE if ret false, run the error handler
-  } else {
+  if (here->dm_opt.handler())
+    here->dm_opt.handler()->handleRequest(req, rep);
+
+  if (!rep.hasReply())
     ErrorHTTPHandler().handleRequest(req, rep);
-  }
 
   return here;  // always returning non-null to show that ive handled the request
 }

@@ -29,8 +29,8 @@ HTTPRequest::HTTPRequest(void)
 //
 //
 
-HTTPReply::HTTPReply(QTextStream &outstream, int status)
-  : dm_outs(outstream), dm_status(status),
+HTTPReply::HTTPReply(QTextStream &outstream)
+  : dm_outs(outstream), dm_status(0),
   dm_calledcommit(false), dm_contenttype("text/html")
 {
 }
@@ -65,14 +65,25 @@ const char * HTTPReply::statusToString(int status)
 
 void HTTPReply::setStatus(int status)
 {
+  assert(!dm_calledcommit && "[setStatus() must be called BEFORE any output() calls]");
   dm_status = status;
 }
 
 void HTTPReply::setContentType(const QString &type)
 {
+  assert(!dm_calledcommit && "[setContentType() must be called BEFORE any output() calls]");
   assert(!type.isEmpty());
 
   dm_contenttype = type;
+}
+
+QTextStream & HTTPReply::output(void)
+{
+   if (dm_status == 0)
+     dm_status = 200;
+  if (!dm_calledcommit)
+    commitHeader();
+  return dm_outs;
 }
 
 void HTTPReply::commitHeader(void)
@@ -101,14 +112,6 @@ void HTTPReply::commitHeader(void)
     "\r\n";   // end of header, now the body
 }
 
-QTextStream & HTTPReply::output(void)
-{
-  assert(dm_status > 0);
-  if (!dm_calledcommit)
-    commitHeader();
-  return dm_outs;
-}
-
 //
 //
 // HTTPHandler
@@ -125,10 +128,8 @@ HTTPHandler::~HTTPHandler()
 //
 //
 
-bool ErrorHTTPHandler::handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &reply)
+void ErrorHTTPHandler::handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &reply)
 {
   reply.output() << "Error 432: ErrorHTTPHandler called.";
-
-  return true;
 }
 

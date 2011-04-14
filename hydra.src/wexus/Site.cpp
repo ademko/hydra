@@ -48,9 +48,8 @@ void Site::wait(void)
   dm_httpserver->wait();
 }
 
-bool Site::handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &reply)
+void Site::handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &reply)
 {
   reply.output() << "Hello, from Site";
-  return true;
 }
 

@@ -56,7 +56,7 @@ class wexus::Site : public wexus::HTTPHandler
     void wait(void);
 
     // implemented for HTTPHandler
-    virtual bool handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &reply);
+    virtual void handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &reply);
 
   private:
     QString dm_siteDir;

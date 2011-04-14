@@ -13,11 +13,11 @@
 class TestHandler : public wexus::HTTPHandler
 {
   public:
-    virtual bool handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &reply);
+    virtual void handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &reply);
 
 };
 
-bool TestHandler::handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &reply)
+void TestHandler::handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &reply)
 {
   reply.setContentType("text/plain");
   reply.output() << "hello, world!\n\n"
@@ -25,8 +25,6 @@ bool TestHandler::handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &reply
     << "query = " << req.query() << "\n"
     << "referer = " << req.referer() << "\n"
     << "userAgent = " << req.userAgent() << "\n";
-
-  return true;
 }
 
 int main(void)

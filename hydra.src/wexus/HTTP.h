@@ -56,14 +56,13 @@ class wexus::HTTPReply
     /**
      * Constructs an http reply, using the given stream
      * and with the given status code.
-     * The actual headers and output will be written when
-     * commitHeader() is called.
-     * You often don't need to call commitHeader() yourself,
-     * as output() will do it for you, as needed.
+     *
+     * If your handler wants to respond to a request, must call output() (and
+     * produce some output), setStatus() or both.
      *
      * @author Aleksander Demko
      */ 
-    HTTPReply(QTextStream &outstream, int status = 200);
+    HTTPReply(QTextStream &outstream);
     /**
      * This calls the commitHeader method if status is >0 AND commitHeader() has not
      * yet been called.
@@ -81,18 +80,27 @@ class wexus::HTTPReply
     static const char * statusToString(int status);
 
     /**
-     * Sets the current status code that will be returned.
+     * Sets the current status code that will be returned. The default status
+     * is 0, unless output() is used, in which case it is 200.
      *
      * @author Aleksander Demko
      */ 
     void setStatus(int status);
 
     /**
-     * Gets the current return status code.
+     * Gets the current return status code. If its 0, it means
+     * unset (reply not set).
      *
      * @author Aleksander Demko
      */ 
     int status(void) const { return dm_status; }
+
+    /**
+     * True is a reply has been status (status is non-zero)
+     *
+     * @author Aleksander Demko
+     */ 
+    bool hasReply(void) const { return dm_status != 0; }
 
     /**
      * Sets the content type.
@@ -111,16 +119,6 @@ class wexus::HTTPReply
     const QString & contentType(void) const { return dm_contenttype; }
 
     /**
-     * Commits and flushes any data to the output stream.
-     * The constructor will also automatically call this.
-     * You can this repeadedly, only the first call does something.
-     * Calling this with Status set to 0 is an error.
-     *
-     * @author Aleksander Demko
-     */ 
-    void commitHeader(void);
-
-    /**
      * Returns a stream that you can use to write the 
      * reply body. This called commitHeader() before hand, if it hasn't been called already.
      *
@@ -129,6 +127,17 @@ class wexus::HTTPReply
      * @author Aleksander Demko
      */ 
     QTextStream & output(void);
+
+  private:
+    /**
+     * Commits and flushes any data to the output stream.
+     * The constructor will also automatically call this.
+     * You can this repeadedly, only the first call does something.
+     * Calling this with Status set to 0 is an error.
+     *
+     * @author Aleksander Demko
+     */ 
+    void commitHeader(void);
 
   protected:
     QTextStream &dm_outs;
@@ -157,7 +166,7 @@ class wexus::HTTPHandler
      * receive this event. false if this consumer does not want to process this event.
      * @author Aleksander Demko
      */ 
-    virtual bool handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &reply) = 0;
+    virtual void handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &reply) = 0;
 };
 
 /**
@@ -168,7 +177,7 @@ class wexus::HTTPHandler
 class wexus::ErrorHTTPHandler
 {
   public:
-    bool handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &reply);
+    void handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &reply);
 };
 
 #endif
