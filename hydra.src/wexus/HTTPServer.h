@@ -8,6 +8,8 @@
 #ifndef __INCLUDED_WEXUS_HTTPSERVER_H__
 #define __INCLUDED_WEXUS_HTTPSERVER_H__
 
+#include <hydra/TR1.h>
+
 namespace wexus
 {
   class HTTPParams;
@@ -58,6 +60,17 @@ class wexus::HTTPServer
   public:
     /// destructor - will stop the server is needed
     virtual ~HTTPServer();
+
+    /**
+     * Create a new HTTPServer implementation, based on some decendant.
+     * This is a factory method. In the future, this could take a string
+     * or perhaps be moved to a whole factory class system.
+     *
+     * Exceptions might be thrown.
+     *
+     * @author Aleksander Demko
+     */ 
+    static std::shared_ptr<wexus::HTTPServer> factoryNew(const wexus::HTTPParams &params);
 
     /// is the web server currently running?
     virtual bool isRunning(void) const = 0;

@@ -134,10 +134,9 @@ TARGET_LINK_LIBRARIES(hydradesktop hydra)
 # experiement wexus2 stuff
 ADD_EXECUTABLE(wexusserver
     ${THIS_PATH}/wexus/wexusserver.cpp
-    ${THIS_PATH}/wexus/HTTP.cpp
-    ${THIS_PATH}/wexus/HTTPServer.cpp
-    ${THIS_PATH}/wexus/MongooseServer.cpp
-    ${THIS_PATH}/wexus/mongoose.c
+    ${THIS_PATH}/wexus/HTTP.cpp ${THIS_PATH}/wexus/HTTPServer.cpp
+    ${THIS_PATH}/wexus/Site.cpp
+    ${THIS_PATH}/wexus/MongooseServer.cpp ${THIS_PATH}/wexus/mongoose.c
     )
 TARGET_LINK_LIBRARIES(wexusserver hydra)
 

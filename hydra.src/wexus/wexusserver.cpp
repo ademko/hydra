@@ -8,6 +8,7 @@
 #include <wexus/MongooseServer.h>
 
 #include <wexus/HTTP.h>
+#include <wexus/Site.h>
 
 class TestHandler : public wexus::HTTPHandler
 {
@@ -32,12 +33,13 @@ int main(void)
 {
   TestHandler h;
 
-  wexus::HTTPParams params;
+ /* wexus::HTTPParams params;
   params.setHandler(&h);
 
-  wexus::MongooseServer server(params);
+  wexus::MongooseServer server(params);*/
+  wexus::Site s(".");
 
-  server.start();
-  server.wait();
+  s.start();
+  s.wait();
 }
 

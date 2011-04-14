@@ -7,10 +7,9 @@
 
 #include <wexus/HTTPServer.h>
 
-#include <stddef.h>
-#include "mongoose.h"
-
 #include <assert.h>
+
+#include <wexus/MongooseServer.h>
 
 //
 //
@@ -47,5 +46,10 @@ wexus::HTTPServer::HTTPServer(void)
 
 wexus::HTTPServer::~HTTPServer()
 {
+}
+
+std::shared_ptr<wexus::HTTPServer> wexus::HTTPServer::factoryNew(const wexus::HTTPParams &params)
+{
+  return std::shared_ptr<wexus::HTTPServer>(new wexus::MongooseServer(params));
 }
 
