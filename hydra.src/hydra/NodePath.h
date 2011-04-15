@@ -8,6 +8,8 @@
 #ifndef __INCLUDED_HYDRA_NODEPATH_H__
 #define __INCLUDED_HYDRA_NODEPATH_H__
 
+#include <exception>
+
 #include <QDomDocument>
 
 namespace hydra
@@ -21,7 +23,10 @@ namespace hydra
 class NodePath
 {
   public:
-    class error {};
+    class error : public std::exception {
+      virtual const char* what() const throw ()
+      { return "NodePath::error"; }
+    };
     class xml_error : public error {};
     class numeric_error : public error {};
     class verify_error : public error {};

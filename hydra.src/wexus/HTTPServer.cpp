@@ -11,27 +11,46 @@
 
 #include <wexus/MongooseServer.h>
 
+using namespace wexus;
+
 //
 //
 // HTTPParams
 //
 //
 
-wexus::HTTPParams::HTTPParams(void)
+HTTPParams::HTTPParams(void)
 {
   dm_port = 8080;
   dm_handler = 0;
 }
 
-void wexus::HTTPParams::setPort(int p)
+void HTTPParams::setPort(int p)
 {
   assert(p>0);
   dm_port = p;
 }
 
-void wexus::HTTPParams::setHandler(HTTPHandler *handler)
+void HTTPParams::setHandler(HTTPHandler *handler)
 {
   dm_handler = handler;
+}
+
+//
+// HTTPException
+//
+
+HTTPException::HTTPException(void)
+{
+}
+
+HTTPException::HTTPException(const QString &usermsg)
+  : dm_usermsg(usermsg)
+{
+}
+
+HTTPException::~HTTPException() throw ()
+{
 }
 
 //
@@ -40,11 +59,11 @@ void wexus::HTTPParams::setHandler(HTTPHandler *handler)
 //
 //
 
-wexus::HTTPServer::HTTPServer(void)
+HTTPServer::HTTPServer(void)
 {
 }
 
-wexus::HTTPServer::~HTTPServer()
+HTTPServer::~HTTPServer()
 {
 }
 

@@ -168,11 +168,17 @@ void * MongooseServer::callback(enum mg_event event, struct mg_connection *conn,
   // process the request
 qDebug() << "MongooseServer::callback handling: " << req.request();
 
-  if (here->dm_opt.handler())
-    here->dm_opt.handler()->handleRequest(req, rep);
+  // the followin will eventually be moved into the HTTPServer base
+  try {
+    if (here->dm_opt.handler())
+      here->dm_opt.handler()->handleRequest(req, rep);
 
-  if (!rep.hasReply())
-    ErrorHTTPHandler().handleRequest(req, rep);
+    if (!rep.hasReply())
+      ErrorHTTPHandler().handleRequest(req, rep);
+  }
+  catch (wexus::HTTPException &e) {
+    ErrorHTTPHandler(e.userMessage()).handleRequest(req, rep);
+  }
 
   return here;  // always returning non-null to show that ive handled the request
 }

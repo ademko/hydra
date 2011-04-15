@@ -174,10 +174,19 @@ class wexus::HTTPHandler
  *
  * @author Aleksander Demko
  */ 
-class wexus::ErrorHTTPHandler
+class wexus::ErrorHTTPHandler : public wexus::HTTPHandler
 {
   public:
+    /// no userMessage constructor
+    ErrorHTTPHandler(void);
+    /// with userMessage constructor
+    ErrorHTTPHandler(const QString &usermsg);
+
+  public:
     void handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &reply);
+
+  protected:
+    QString dm_usermsg;
 };
 
 #endif

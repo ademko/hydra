@@ -16,7 +16,8 @@ using namespace wexus;
 //
 
 Site::Site(const QString &siteDir, const wexus::HTTPParams &params)
-  : dm_siteDir(siteDir), dm_httpparms(params)
+  : dm_siteDir(siteDir), dm_httpparms(params),
+    dm_filehandler(siteDir)
 {
   dm_httpparms.setHandler(this);
   dm_httpserver = HTTPServer::factoryNew(dm_httpparms);
@@ -48,8 +49,8 @@ void Site::wait(void)
   dm_httpserver->wait();
 }
 
-void Site::handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &reply)
+void Site::handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &rep)
 {
-  reply.output() << "Hello, from Site";
+  dm_filehandler.handleRequest(req, rep);
 }
 

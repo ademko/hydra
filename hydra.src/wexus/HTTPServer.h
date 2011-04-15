@@ -8,12 +8,17 @@
 #ifndef __INCLUDED_WEXUS_HTTPSERVER_H__
 #define __INCLUDED_WEXUS_HTTPSERVER_H__
 
+#include <exception>
+
+#include <QString>
+
 #include <hydra/TR1.h>
 
 namespace wexus
 {
   class HTTPParams;
   class HTTPServer;
+  class HTTPException;
 
   class HTTPHandler;  //fwd
 }
@@ -48,6 +53,37 @@ class wexus::HTTPParams
   private:
     int dm_port;
     HTTPHandler *dm_handler;
+};
+
+/**
+ * wexus::HTTPException are exceptions that are caught
+ * by an HTTPServer.
+ *
+ * @author Aleksander Demko
+ */ 
+class wexus::HTTPException : public std::exception
+{
+  public:
+    virtual ~HTTPException() throw ();
+
+    virtual const char* what() const throw ()
+      { return "HTTPException::NodePath::error"; }
+
+    /**
+     * The user-visable error message string.
+     *
+     * @author Aleksander Demko
+     */ 
+    const QString & userMessage(void) const { return dm_usermsg; }
+
+  protected:
+    /// no usermessage constructor
+    HTTPException(void);
+    /// usermessage constructor
+    HTTPException(const QString &usermsg);
+
+  protected:
+    QString dm_usermsg;
 };
 
 /**

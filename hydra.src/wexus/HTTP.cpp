@@ -110,6 +110,10 @@ void HTTPReply::commitHeader(void)
     "Content-type: " << dm_contenttype << "\r\n"
     "Server: wexus/1.9.0\r\n"
     "\r\n";   // end of header, now the body
+
+  // helpful incase the caller is calling device() and other
+  // such magic
+  dm_outs.flush();
 }
 
 //
@@ -128,8 +132,20 @@ HTTPHandler::~HTTPHandler()
 //
 //
 
+ErrorHTTPHandler::ErrorHTTPHandler(void)
+{
+}
+
+ErrorHTTPHandler::ErrorHTTPHandler(const QString &usermsg)
+  : dm_usermsg(usermsg)
+{
+}
+
 void ErrorHTTPHandler::handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &reply)
 {
-  reply.output() << "Error 432: ErrorHTTPHandler called.";
+  if (dm_usermsg.isEmpty())
+    reply.output() << "Error 432: ErrorHTTPHandler called.";
+  else
+    reply.output() << "Error: " << dm_usermsg;
 }
 

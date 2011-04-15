@@ -12,6 +12,7 @@
 
 #include <wexus/HTTP.h>
 #include <wexus/HTTPServer.h>
+#include <wexus/FileHTTPHandler.h>
 
 namespace wexus
 {
@@ -56,12 +57,15 @@ class wexus::Site : public wexus::HTTPHandler
     void wait(void);
 
     // implemented for HTTPHandler
-    virtual void handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &reply);
+    virtual void handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &rep);
 
   private:
     QString dm_siteDir;
     wexus::HTTPParams dm_httpparms;
     std::shared_ptr<wexus::HTTPServer> dm_httpserver;
+
+    // helper handlers
+    wexus::FileHTTPHandler dm_filehandler;
 };
 
 #endif
