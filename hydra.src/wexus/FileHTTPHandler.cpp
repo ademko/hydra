@@ -7,7 +7,10 @@
 
 #include <wexus/FileHTTPHandler.h>
 
+#include <wexus/MimeTypes.h>
+
 #include <QFile>
+#include <QFileInfo>
 #include <QDebug>
 
 using namespace wexus;
@@ -41,16 +44,16 @@ void FileHTTPHandler::handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &r
   }
 
   QString fullpath(dm_docdir + relpath);
+  QString fileext(QFileInfo(fullpath).suffix().toLower());
 
 qDebug() << "FileHTTPHandler serveing " << fullpath;
 
-  // TODO check extension
-  // and only service up approved files (security feature)
-
   // check mime type
-  // TODO
+  reply.setContentType(MimeTypes::instanceCreate()->mimeType(fileext));
+
+  //TODO for not listed types, either do octet-stream
+  //or throw a security exception?
   //reply.setContentType("application/octet-stream");
-  reply.setContentType("text/plain");
 
   // open and send the file
   {
