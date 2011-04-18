@@ -80,7 +80,7 @@ int Engine::addFile(const QString &fullfilename, const QString *precalchash)
   QUuid old_path_itemid;   // if new_path
 
   if (!statFile(fullfilename, disk_time, disk_size))
-    return Add_Error;
+    return Add_Error; // perhaps throw an exception instead?
 
   // check if PATH exists
   if (dm_filepathdb->get(fullfilename, path) && !precalchash) {
@@ -110,7 +110,7 @@ int Engine::addFile(const QString &fullfilename, const QString *precalchash)
   else
     path.hash = calcFileHash(fullfilename);
   if (path.hash.isEmpty())
-    return Add_Error;
+    return Add_Error; // perhaps throw an exception instead?
   path.file_time = disk_time;
   path.file_size = disk_size;
 
@@ -119,7 +119,8 @@ int Engine::addFile(const QString &fullfilename, const QString *precalchash)
   // check if HASH exists
   if (dm_filehashdb->get(path.hash, hash)) {
     // exists, just save the new path
-    dm_filepathdb->put(fullfilename, path);
+    if (!dm_filepathdb->put(fullfilename, path))
+      return Add_Error; // perhaps throw an exception instead?
     if (new_path)
       return Add_NewPath;
     else
@@ -133,8 +134,10 @@ int Engine::addFile(const QString &fullfilename, const QString *precalchash)
   else
     hash.id = old_path_itemid;    // linking to the old item
 
-  dm_filepathdb->put(fullfilename, path);
-  dm_filehashdb->put(path.hash, hash);
+  if (!dm_filepathdb->put(fullfilename, path))
+    return Add_Error; // perhaps throw an exception instead?
+  if (!dm_filehashdb->put(path.hash, hash))
+    return Add_Error; // perhaps throw an exception instead?
 
   if (!old_path_itemid.isNull())
     return Add_UpdatedPath;
@@ -150,7 +153,8 @@ int Engine::addFile(const QString &fullfilename, const QString *precalchash)
   else
     item.filetype = 1;
 
-  dm_fileitemdb->put(item.id, item);
+  if (!dm_fileitemdb->put(item.id, item))
+    return Add_Error; // perhaps throw an exception instead?
 
   return Add_New;
 }
