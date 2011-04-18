@@ -174,7 +174,7 @@ qDebug() << "MongooseServer::callback handling: " << req.request();
       here->dm_opt.handler()->handleRequest(req, rep);
 
     if (!rep.hasReply())
-      ErrorHTTPHandler().handleRequest(req, rep);
+      ErrorHTTPHandler("Object not found: " + req.request()).handleRequest(req, rep);
   }
   catch (wexus::HTTPException &e) {
     ErrorHTTPHandler(e.userMessage()).handleRequest(req, rep);

@@ -17,7 +17,7 @@ using namespace wexus;
 
 Site::Site(const QString &siteDir, const wexus::HTTPParams &params)
   : dm_siteDir(siteDir), dm_httpparms(params),
-    dm_filehandler(siteDir)
+    dm_filehandler(siteDir, FileHTTPHandler::IndexHtml|FileHTTPHandler::AutoDirIndex)
 {
   dm_httpparms.setHandler(this);
   dm_httpserver = HTTPServer::factoryNew(dm_httpparms);

@@ -24,6 +24,17 @@ namespace wexus
 class wexus::FileHTTPHandler : public wexus::HTTPHandler
 {
   public:
+    enum FileHTTPHandlerFlags {
+      /// shows the index.html or index.htm file if given a directory
+      /// takes precedance over FileHTTPHandlerFlags::AutoDirIndex
+      IndexHtml = 0x1,
+      /// auto generates an index if given a directory
+      AutoDirIndex = 0x2,
+      /// only handle files for which there is a mime type (you usually don't want this)
+      /// otherwise unkown types will be sent as application/octet-stream
+      AllowAllMimeTypes = 0x4,
+    };
+  public:
     class FileException : public wexus::HTTPException
     {
       public:
@@ -36,13 +47,18 @@ class wexus::FileHTTPHandler : public wexus::HTTPHandler
      *
      * @author Aleksander Demko
      */ 
-    FileHTTPHandler(const QString &docdir);
+    FileHTTPHandler(const QString &docdir, int flags = 0);
 
     /// handler
     void handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &reply);
 
   private:
+    void generateDirIndex(wexus::HTTPRequest &req, wexus::HTTPReply &reply,
+        const QString &fullpath, const QString &relpath);
+
+  private:
     QString dm_docdir;
+    int dm_flags;
 };
 
 #endif
