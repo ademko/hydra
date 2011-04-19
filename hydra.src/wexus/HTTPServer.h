@@ -94,6 +94,12 @@ class wexus::HTTPException : public std::exception
 class wexus::HTTPServer
 {
   public:
+    class HTTPServerException : public std::exception
+    {
+      virtual const char* what() const throw() { return "HTTPServerException"; }
+    };
+
+  public:
     /// destructor - will stop the server is needed
     virtual ~HTTPServer();
 

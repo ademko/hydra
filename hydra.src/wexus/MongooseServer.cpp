@@ -54,6 +54,8 @@ qDebug() << "MongooseServer::start";
     0
   };
   dm_ctx = mg_start(callback, this, mgopts);
+  if (dm_ctx == 0)
+    throw HTTPServerException();
 }
 
 void MongooseServer::quit(void)
