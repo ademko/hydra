@@ -11,7 +11,7 @@
 #include <map>
 
 #include <hydra/TR1.h>
-#include <wexus/HTTP.h>
+#include <wexus/HTTPHandler.h>
 
 namespace wexus
 {

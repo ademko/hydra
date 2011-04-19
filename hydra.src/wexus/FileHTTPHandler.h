@@ -8,7 +8,7 @@
 #ifndef __INCLUDED_WEXUS_FILEHTTPHANDLER_H__
 #define __INCLUDED_WEXUS_FILEHTTPHANDLER_H__
 
-#include <wexus/HTTP.h>
+#include <wexus/HTTPHandler.h>
 #include <wexus/HTTPServer.h>
 
 namespace wexus

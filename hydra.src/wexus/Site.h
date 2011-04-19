@@ -10,7 +10,7 @@
 
 #include <QString>
 
-#include <wexus/HTTP.h>
+#include <wexus/HTTPHandler.h>
 #include <wexus/HTTPServer.h>
 #include <wexus/FileHTTPHandler.h>
 
