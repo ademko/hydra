@@ -7,6 +7,8 @@
 
 #include <wexus/Site.h>
 
+#include <wexus/MimeTypes.h>
+
 using namespace wexus;
 
 //
@@ -19,6 +21,10 @@ Site::Site(const QString &siteDir, const wexus::HTTPParams &params)
   : dm_siteDir(siteDir), dm_httpparms(params),
     dm_filehandler(siteDir, FileHTTPHandler::IndexHtml|FileHTTPHandler::AutoDirIndex)
 {
+  dm_madeMimeTypes = MimeTypes::instance() == 0;
+  if (dm_madeMimeTypes)
+    new MimeTypes();    // instance not lost, its a singlton!
+
   dm_httpparms.setHandler(this);
   dm_httpserver = HTTPServer::factoryNew(dm_httpparms);
 }
@@ -27,6 +33,9 @@ Site::~Site()
 {
   // shutdown the server explicitly, just to be verbose
   dm_httpserver.reset();
+
+  if (dm_madeMimeTypes)
+    delete MimeTypes::instance();
 }
 
 bool Site::isRunning(void) const

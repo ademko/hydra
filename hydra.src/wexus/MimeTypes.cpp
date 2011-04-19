@@ -39,23 +39,18 @@ MimeTypes * MimeTypes::instance(void)
   return dm_instance;
 }
 
-MimeTypes * MimeTypes::instanceCreate(void)
-{
-  if (!dm_instance)
-    dm_instance = new MimeTypes;
-  return dm_instance;
-}
-
 bool MimeTypes::hasMimeType(const QString &ext)
 {
-  return dm_ext.find(ext) != dm_ext.end();
+  assert(dm_instance && "[MimeTypes is not instantiated]");
+  return dm_instance->dm_ext.find(ext) != dm_instance->dm_ext.end();
 }
 
 const QString & MimeTypes::mimeType(const QString &ext)
 {
-  map_t::const_iterator ii = dm_ext.find(ext);
+  assert(dm_instance && "[MimeTypes is not instantiated]");
+  map_t::const_iterator ii = dm_instance->dm_ext.find(ext);
 
-  if (ii == dm_ext.end())
+  if (ii == dm_instance->dm_ext.end())
     throw MimeTypesException(ext);
   else
     return *(ii->second);

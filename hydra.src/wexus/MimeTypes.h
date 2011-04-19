@@ -32,23 +32,22 @@ class wexus::MimeTypes
     };
 
   public:
+    /**
+     * Constructor.
+     *
+     * @author Aleksander Demko
+     */ 
+    MimeTypes(void);
     /// destructor
     ~MimeTypes();
 
     /**
-     * Returns the singleton instance, if any.
+     * Returns the singleton instance. May return null
+     * if there is none.
      *
      * @author Aleksander Demko
      */ 
     static MimeTypes *instance(void);
-
-    /**
-     * Returns the singleton instance, and creates it
-     * if need be.
-     *
-     * @author Aleksander Demko
-     */ 
-    static MimeTypes *instanceCreate(void);
 
     /**
      * Is there a mime type of this extension?
@@ -57,7 +56,7 @@ class wexus::MimeTypes
      *
      * @author Aleksander Demko
      */
-    bool hasMimeType(const QString &ext);
+    static bool hasMimeType(const QString &ext);
 
     /**
      * Returns the mime type for the given extension.
@@ -67,17 +66,9 @@ class wexus::MimeTypes
      *
      * @author Aleksander Demko
      */ 
-    const QString & mimeType(const QString &ext);
+    static const QString & mimeType(const QString &ext);
 
     static QString binaryMimeType(void) { return "application/octet-stream"; }
-
-  protected:
-    /**
-     * Constructor.
-     *
-     * @author Aleksander Demko
-     */ 
-    MimeTypes(void);
 
   private:
     void addMimeType(const QString &type, const QString &ext);

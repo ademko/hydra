@@ -24,6 +24,9 @@ namespace wexus
  * A wexus::Site represents 1 or more running wexus::Application 
  * instanced groupped with a wexus::HTTPServer.
  *
+ * This will instante certain singltons too, if needed:
+ * MimeTypes.
+ *
  * @author Aleksander Demko
  */ 
 class wexus::Site : public wexus::HTTPHandler
@@ -60,6 +63,8 @@ class wexus::Site : public wexus::HTTPHandler
     virtual void handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &rep);
 
   private:
+    bool dm_madeMimeTypes;
+
     QString dm_siteDir;
     wexus::HTTPParams dm_httpparms;
     std::shared_ptr<wexus::HTTPServer> dm_httpserver;
