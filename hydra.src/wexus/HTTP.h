@@ -13,6 +13,8 @@
 
 namespace wexus
 {
+  QString escapeForXML(const QString &s);
+
   class HTTPRequest;
   class HTTPReply;
 

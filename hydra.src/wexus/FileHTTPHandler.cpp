@@ -103,34 +103,30 @@ void FileHTTPHandler::generateDirIndex(wexus::HTTPRequest &req, wexus::HTTPReply
   const QString &fullpath, const QString &relpath)
 {
   reply.output() << "<h2>Index of: " << relpath <<
-      "</h2><UL><LI><A HREF=\"../\">Parent Directory</A><P>\n";
+      "</h2>\n<UL>\n<LI><A HREF=\"../\">Parent Directory</A></LI><P>\n";
 
   QDir dir(fullpath);
   QStringList entries(dir.entryList(QDir::Dirs|QDir::Files|QDir::NoDotAndDotDot|QDir::Readable, QDir::DirsFirst|QDir::Name));
 
   for (QStringList::const_iterator ii=entries.begin(); ii != entries.end(); ++ii) {
-    QString escaped(*ii);
+    QString curfullpath(fullpath + "/" + *ii);
+    QFileInfo curinfo(curfullpath);
+    bool isdir = curinfo.isDir();
+    QString escaped(escapeForXML(*ii));
 
     reply.output() <<  "<LI><A HREF=\"" << escaped;
 
-    //if (ii->second == -1)
-      //reply.output() << '/';
+    if (isdir)
+      reply.output() << '/';
 
     reply.output() << "\">" << escaped << "</A>  ";
 
-    //if (ii->second == -1)
-      //reply.output() << "(DIRECTORY)";
-    //else
-      //reply.output() << ii->second << " kbytes";
-    reply.output() << '\n';
+    if (isdir)
+      reply.output() << "(DIRECTORY)";
+    else
+      reply.output() << (curinfo.size()/1024) << " kbytes";
+    reply.output() << "</LI>\n";
   }
-
-  //
-  // TODO finish this function
-  //  make sure relatives work
-  //  show (DIR) or file size for entries
-  //  do escape for html
-  //
 
   reply.output() << "</UL>\n";
 }
