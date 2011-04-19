@@ -157,6 +157,38 @@ class wexus::HTTPReply
 class wexus::HTTPHandler
 {
   public:
+    /**
+     * An Exception that handlers can throw. The
+     * serverw ill catch them and display them to the user.
+     *
+     * @author Aleksander Demko
+     */ 
+    class Exception : public std::exception
+    {
+      public:
+        /// no usermessage constructor
+        Exception(void);
+        /// usermessage constructor
+        Exception(const QString &usermsg);
+
+        virtual ~Exception() throw ();
+
+        virtual const char* what() const throw ()
+          { return "wexus::HTTPHandler::Exception"; }
+
+        /**
+         * The user-visable error message string.
+         *
+         * @author Aleksander Demko
+         */ 
+        const QString & userMessage(void) const { return dm_usermsg; }
+
+      protected:
+      protected:
+        QString dm_usermsg;
+    };
+
+  public:
     /// destructor
     virtual ~HTTPHandler();
 

@@ -17,7 +17,7 @@
 using namespace wexus;
 
 FileHTTPHandler::FileException::FileException(const QString &usermsg)
-  : HTTPException("FileException: " + usermsg)
+  : Exception("FileException: " + usermsg)
 {
 }
 

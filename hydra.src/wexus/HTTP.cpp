@@ -171,6 +171,23 @@ void HTTPReply::commitHeader(void)
 }
 
 //
+// HTTPHandler::Exception
+//
+
+HTTPHandler::Exception::Exception(void)
+{
+}
+
+HTTPHandler::Exception::Exception(const QString &usermsg)
+  : dm_usermsg(usermsg)
+{
+}
+
+HTTPHandler::Exception::~Exception() throw ()
+{
+}
+
+//
 //
 // HTTPHandler
 //

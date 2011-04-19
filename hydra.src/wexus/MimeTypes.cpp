@@ -14,7 +14,7 @@
 using namespace wexus;
 
 MimeTypes::MimeTypesException::MimeTypesException(const QString &usermsg)
-  : HTTPException("MimeTypesException: " + usermsg)
+  : HTTPHandler::Exception("MimeTypesException: " + usermsg)
 {
 }
 

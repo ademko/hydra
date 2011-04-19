@@ -37,23 +37,6 @@ void HTTPParams::setHandler(HTTPHandler *handler)
 }
 
 //
-// HTTPException
-//
-
-HTTPException::HTTPException(void)
-{
-}
-
-HTTPException::HTTPException(const QString &usermsg)
-  : dm_usermsg(usermsg)
-{
-}
-
-HTTPException::~HTTPException() throw ()
-{
-}
-
-//
 //
 // HTTPServer
 //

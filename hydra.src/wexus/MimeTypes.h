@@ -10,7 +10,8 @@
 
 #include <map>
 
-#include <wexus/HTTPServer.h>
+#include <hydra/TR1.h>
+#include <wexus/HTTP.h>
 
 namespace wexus
 {
@@ -25,7 +26,7 @@ namespace wexus
 class wexus::MimeTypes
 {
   public:
-    class MimeTypesException : public wexus::HTTPException
+    class MimeTypesException : public wexus::HTTPHandler::Exception   // TODO should this really decend from HTTPHandler::Exception?
     {
       public:
         MimeTypesException(const QString &usermsg);

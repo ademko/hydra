@@ -35,7 +35,7 @@ class wexus::FileHTTPHandler : public wexus::HTTPHandler
       AllowAllMimeTypes = 0x4,
     };
   public:
-    class FileException : public wexus::HTTPException
+    class FileException : public Exception
     {
       public:
         FileException(const QString &usermsg);
