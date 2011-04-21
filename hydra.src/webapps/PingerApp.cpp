@@ -9,8 +9,25 @@
 
 using namespace webapps;
 
+//
+//
+// PingerHome
+//
+//
+
+PingerHome::PingerHome(void)
+{
+}
+
+//
+//
+// PingerApp
+//
+//
+
 PingerApp::PingerApp(void)
 {
+  registerController<PingerHome>("home");
 }
 
 static hydra::Register<PingerApp> r1("webapps::PingerApp");

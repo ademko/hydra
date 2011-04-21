@@ -10,6 +10,8 @@
 
 #include <hydra/Registry.h>
 
+#include <wexus/Controller.h>
+
 namespace wexus
 {
   class Application;
@@ -42,7 +44,14 @@ class wexus::Application
     Application(void);
 
     /// controller regisistration function
-    //void registerController<>("shortname");
+    template <class T>
+      void registerController(const char *shortname)
+      { dm_registry.appendFunc(&hydra::loadfunc_impl<Controller,T>, shortname); }
+
+  private:
+    // TODO in the future, replace this registry with something that
+    // uses a map rather than vector?
+    hydra::Registry<Controller> dm_registry;
 };
 
 #endif

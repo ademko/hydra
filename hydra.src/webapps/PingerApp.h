@@ -12,8 +12,15 @@
 
 namespace webapps
 {
+  class PingerHome;
   class PingerApp;
 }
+
+class webapps::PingerHome : public wexus::Controller
+{
+  public:
+    PingerHome(void);
+};
 
 /**
  * The first wexus application - a uptime/ping monitor.
