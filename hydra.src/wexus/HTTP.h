@@ -217,7 +217,7 @@ class wexus::ErrorHTTPHandler : public wexus::HTTPHandler
     ErrorHTTPHandler(const QString &usermsg);
 
   public:
-    void handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &reply);
+    virtual void handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &reply);
 
   protected:
     QString dm_usermsg;

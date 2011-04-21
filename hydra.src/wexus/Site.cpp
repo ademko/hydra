@@ -18,8 +18,7 @@ using namespace wexus;
 //
 
 Site::Site(const QString &siteDir, const wexus::HTTPParams &params)
-  : dm_siteDir(siteDir), dm_httpparms(params),
-    dm_filehandler(siteDir, FileHTTPHandler::IndexHtml|FileHTTPHandler::AutoDirIndex)
+  : dm_siteDir(siteDir), dm_httpparms(params)
 {
   dm_madeMimeTypes = MimeTypes::instance() == 0;
   if (dm_madeMimeTypes)
@@ -27,6 +26,9 @@ Site::Site(const QString &siteDir, const wexus::HTTPParams &params)
 
   dm_httpparms.setHandler(this);
   dm_httpserver = HTTPServer::factoryNew(dm_httpparms);
+
+  dm_filehandler.reset(new FileHTTPHandler(siteDir, FileHTTPHandler::IndexHtml|FileHTTPHandler::AutoDirIndex));
+  addHandler(dm_filehandler, 100);
 }
 
 Site::~Site()
@@ -56,10 +58,5 @@ void Site::quit(void)
 void Site::wait(void)
 {
   dm_httpserver->wait();
-}
-
-void Site::handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &rep)
-{
-  dm_filehandler.handleRequest(req, rep);
 }
 

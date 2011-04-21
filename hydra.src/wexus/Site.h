@@ -10,7 +10,7 @@
 
 #include <QString>
 
-#include <wexus/HTTPHandler.h>
+#include <wexus/HTTPHandlerStack.h>
 #include <wexus/HTTPServer.h>
 #include <wexus/FileHTTPHandler.h>
 
@@ -29,7 +29,7 @@ namespace wexus
  *
  * @author Aleksander Demko
  */ 
-class wexus::Site : public wexus::HTTPHandler
+class wexus::Site : public wexus::HTTPHandlerStack
 {
   public:
     // exceptions
@@ -59,9 +59,6 @@ class wexus::Site : public wexus::HTTPHandler
     /// waits until the server finishes
     void wait(void);
 
-    // implemented for HTTPHandler
-    virtual void handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &rep);
-
   private:
     bool dm_madeMimeTypes;
 
@@ -70,7 +67,7 @@ class wexus::Site : public wexus::HTTPHandler
     std::shared_ptr<wexus::HTTPServer> dm_httpserver;
 
     // helper handlers
-    wexus::FileHTTPHandler dm_filehandler;
+    std::shared_ptr<wexus::FileHTTPHandler> dm_filehandler;
 };
 
 #endif
