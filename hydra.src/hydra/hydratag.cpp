@@ -768,7 +768,7 @@ int main(int argc, char **argv)
       commandDupe(out, parser);
     else if (cmd == "touch")
       commandTouch(out, parser);
-    else if (cmd == "touch")
+    else if (cmd == "forget")
       commandForget(out, parser);
     else
       throw ArgumentParser::ErrorException("Unknown command: " + cmd);
