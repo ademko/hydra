@@ -11,12 +11,18 @@ using namespace webapps;
 
 //
 //
-// PingerHome
+// PingerController
 //
 //
 
-PingerHome::PingerHome(void)
+PingerController::PingerController(void)
+{ 
+  registerAction<PingerController, &PingerController::index>("index");
+}
+
+void PingerController::index(void)
 {
+  qDebug() << "in the index";
 }
 
 //
@@ -27,7 +33,7 @@ PingerHome::PingerHome(void)
 
 PingerApp::PingerApp(void)
 {
-  registerController<PingerHome>("home");
+  registerController<PingerController>("home");
 }
 
 static hydra::Register<PingerApp> r1("webapps::PingerApp");

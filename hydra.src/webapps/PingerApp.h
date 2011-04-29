@@ -12,14 +12,16 @@
 
 namespace webapps
 {
-  class PingerHome;
+  class PingerController;
   class PingerApp;
 }
 
-class webapps::PingerHome : public wexus::Controller
+class webapps::PingerController : public wexus::Controller
 {
   public:
-    PingerHome(void);
+    PingerController(void);
+
+    void index(void);
 };
 
 /**

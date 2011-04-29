@@ -11,6 +11,8 @@
 #include <hydra/Registry.h>
 
 #include <wexus/Controller.h>
+#include <wexus/HTTPRequest.h>
+#include <wexus/HTTPReply.h>
 
 namespace wexus
 {
@@ -35,23 +37,46 @@ class wexus::Application
     typedef hydra::Registry<Application> registry_type;
     static registry_type registry;
 
+    class ControllerNotFoundException : public wexus::HTTPHandler::Exception
+    {
+      public:
+        ControllerNotFoundException(const QString &usermsg)
+          : wexus::HTTPHandler::Exception(usermsg) { }
+    };
+
   public:
     /// destructor
     virtual ~Application();
+
+    /**
+     * A enhanced handleApplicationRequest() call from the wexus::Site to wexus::Application.
+     * filteredRequest contains just the action call. It always starts with atleast a /
+     *
+     * This method is not typically overriden.
+     *
+     * @author Aleksander Demko
+     */ 
+    virtual void handleApplicationRequest(QString &filteredRequest, wexus::HTTPRequest &req, wexus::HTTPReply &reply);
 
   protected:
     /// inherited constructor
     Application(void);
 
-    /// controller regisistration function
+    /**
+     * Registers a controller.
+     *
+     * @param shortname the name of the controller, as seen in url. This should not have
+     * any slashes or other punctutation. Example "home" "users" etc
+     * @author Aleksander Demko
+     */ 
     template <class T>
       void registerController(const char *shortname)
-      { dm_registry.appendFunc(&hydra::loadfunc_impl<Controller,T>, shortname); }
+      { dm_controllers.appendFunc(&hydra::loadfunc_impl<Controller,T>, shortname); }
 
   private:
     // TODO in the future, replace this registry with something that
     // uses a map rather than vector?
-    hydra::Registry<Controller> dm_registry;
+    hydra::Registry<Controller> dm_controllers;
 };
 
 #endif

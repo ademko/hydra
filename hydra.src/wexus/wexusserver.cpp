@@ -7,35 +7,14 @@
 
 #include <wexus/MongooseServer.h>
 
-#include <wexus/HTTP.h>
 #include <wexus/Site.h>
-
-class TestHandler : public wexus::HTTPHandler
-{
-  public:
-    virtual void handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &reply);
-
-};
-
-void TestHandler::handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &reply)
-{
-  reply.setContentType("text/plain");
-  reply.output() << "hello, world!\n\n"
-    << "request = " << req.request() << "\n"
-    << "query = " << req.query() << "\n"
-    << "referer = " << req.referer() << "\n"
-    << "userAgent = " << req.userAgent() << "\n";
-}
+#include <webapps/PingerApp.h>
 
 int main(void)
 {
-  TestHandler h;
-
- /* wexus::HTTPParams params;
-  params.setHandler(&h);
-
-  wexus::MongooseServer server(params);*/
   wexus::Site s(".");
+
+  s.addApplication("/pinger/", std::shared_ptr<webapps::PingerApp>(new webapps::PingerApp));
 
   s.start();
   s.wait();

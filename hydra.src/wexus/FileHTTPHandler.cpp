@@ -47,7 +47,7 @@ void FileHTTPHandler::handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &r
   QString fullpath(dm_docdir + relpath);
   QFileInfo info(fullpath);
 
-qDebug() << "FileHTTPHandler serveing " << fullpath;
+qDebug() << "FileHTTPHandler serving " << fullpath;
 
   // check if its a dir
   if (info.isDir()) {

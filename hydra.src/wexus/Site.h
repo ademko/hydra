@@ -17,6 +17,8 @@
 namespace wexus
 {
   class Site;
+
+  class Application; //fwd
 }
 
 /**
@@ -59,6 +61,14 @@ class wexus::Site : public wexus::HTTPHandlerStack
     /// waits until the server finishes
     void wait(void);
 
+    /**
+     * Adds an already instantiated application to the given mount point.
+     * The mountpoint must end in a '/'. The root mountpoint, "/" is fine too.
+     *
+     * @author Aleksander Demko
+     */ 
+    void addApplication(const QString &mountpoint, std::shared_ptr<wexus::Application> app);
+
   private:
     bool dm_madeMimeTypes;
 
@@ -68,6 +78,8 @@ class wexus::Site : public wexus::HTTPHandlerStack
 
     // helper handlers
     std::shared_ptr<wexus::FileHTTPHandler> dm_filehandler;
+
+    class ApplicationHandler;
 };
 
 #endif

@@ -7,9 +7,49 @@
 
 #include <wexus/Site.h>
 
+#include <assert.h>
+
+#include <wexus/Application.h>
 #include <wexus/MimeTypes.h>
 
 using namespace wexus;
+
+//
+// Site::ApplicationHandler
+//
+
+class Site::ApplicationHandler : public HTTPHandler
+{
+  public:
+    ApplicationHandler(const QString &mountpoint, std::shared_ptr<Application> app);
+
+    virtual void handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &reply);
+
+  private:
+    QString dm_mountpoint;
+    QString dm_shorted; //dm_mountpoint but without the trail /, for speed :)
+    std::shared_ptr<Application> dm_app;
+};
+
+Site::ApplicationHandler::ApplicationHandler(const QString &mountpoint, std::shared_ptr<Application> app)
+  : dm_mountpoint(mountpoint), dm_app(app)
+{
+  assert(!dm_mountpoint.isEmpty());
+  assert(dm_mountpoint[dm_mountpoint.size()-1] == '/');
+
+  if (!dm_mountpoint.isEmpty())
+    dm_shorted = dm_mountpoint.left(dm_mountpoint.size()-1);
+}
+
+void Site::ApplicationHandler::handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &reply)
+{
+  if (req.request().startsWith(dm_mountpoint) || req.request() == dm_shorted) {
+    // clip off the mount point in the request
+    QString filteredReq = "/" + req.request().mid(dm_mountpoint.size());
+
+    dm_app->handleApplicationRequest(filteredReq, req, reply);
+  }
+}
 
 //
 //
@@ -58,5 +98,12 @@ void Site::quit(void)
 void Site::wait(void)
 {
   dm_httpserver->wait();
+}
+
+void Site::addApplication(const QString &mountpoint, std::shared_ptr<Application> app)
+{
+  assert(!mountpoint.isEmpty());
+  assert(mountpoint[mountpoint.size()-1] == '/');
+  addHandler(std::shared_ptr<ApplicationHandler>(new ApplicationHandler(mountpoint, app)));
 }
 

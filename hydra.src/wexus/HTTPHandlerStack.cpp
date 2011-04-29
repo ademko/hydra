@@ -9,6 +9,8 @@
 
 #include <algorithm>
 
+#include <QDebug>
+
 using namespace wexus;
 
 HTTPHandlerStack::HTTPHandlerStack(void)
@@ -29,6 +31,8 @@ void HTTPHandlerStack::handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &
 void HTTPHandlerStack::addHandler(std::shared_ptr<wexus::HTTPHandler> handler, int prio)
 {
   dm_handlers.push_back(priohandler_t(prio, handler));
-  std::stable_sort(dm_handlers.begin(), dm_handlers.end(), lessthan);
+  // BUG stable_sort (atleast under linux) seems to require this check:
+  if (dm_handlers.size() > 1)
+    std::stable_sort(dm_handlers.begin(), dm_handlers.end(), lessthan);
 }
 
