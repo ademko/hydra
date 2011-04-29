@@ -7,6 +7,9 @@
 
 #include <webapps/PingerApp.h>
 
+#include <wexus/Context.h>
+
+using namespace wexus;
 using namespace webapps;
 
 //
@@ -22,7 +25,7 @@ PingerController::PingerController(void)
 
 void PingerController::index(void)
 {
-  qDebug() << "in the index";
+  output() << "from within PingerController::index() via Context";
 }
 
 //

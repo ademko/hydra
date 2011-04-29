@@ -138,6 +138,7 @@ ADD_EXECUTABLE(wexusserver
     ${THIS_PATH}/wexus/HTTPHandlerStack.cpp
     ${THIS_PATH}/wexus/FileHTTPHandler.cpp ${THIS_PATH}/wexus/MimeTypes.cpp
     ${THIS_PATH}/wexus/Site.cpp ${THIS_PATH}/wexus/Application.cpp ${THIS_PATH}/wexus/Controller.cpp
+    ${THIS_PATH}/wexus/Context.cpp
     ${THIS_PATH}/wexus/MongooseServer.cpp ${THIS_PATH}/wexus/mongoose.c
     ${THIS_PATH}/webapps/PingerApp.cpp
     )

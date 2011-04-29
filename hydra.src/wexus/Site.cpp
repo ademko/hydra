@@ -11,6 +11,7 @@
 
 #include <wexus/Application.h>
 #include <wexus/MimeTypes.h>
+#include <wexus/Context.h>
 
 using namespace wexus;
 
@@ -45,6 +46,8 @@ void Site::ApplicationHandler::handleRequest(wexus::HTTPRequest &req, wexus::HTT
 {
   if (req.request().startsWith(dm_mountpoint) || req.request() == dm_shorted) {
     // clip off the mount point in the request
+    Context ctx(req, reply);
+
     QString filteredReq = "/" + req.request().mid(dm_mountpoint.size());
 
     dm_app->handleApplicationRequest(filteredReq, req, reply);
