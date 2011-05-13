@@ -143,6 +143,10 @@ ADD_EXECUTABLE(wexusserver
     ${THIS_PATH}/webapps/PingerApp.cpp
     )
 TARGET_LINK_LIBRARIES(wexusserver hydra)
+ADD_EXECUTABLE(wexusmake
+    ${THIS_PATH}/wexus/wexusmake.cpp
+    )
+TARGET_LINK_LIBRARIES(wexusmake hydra)
 
 CMAKE_POLICY(POP)
 

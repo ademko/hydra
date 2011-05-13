@@ -10,7 +10,7 @@
 #include <wexus/Site.h>
 #include <webapps/PingerApp.h>
 
-int main(void)
+int main(int argc, char **argv)
 {
   wexus::Site s(".");
 
