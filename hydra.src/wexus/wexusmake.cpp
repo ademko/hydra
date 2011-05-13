@@ -12,9 +12,14 @@
 #include <hydra/ArgumentParser.h>
 #include <hydra/Engine.h>   // for HYDRA_COPYRIGHT_STRING
 
+#include <wexus/TemplateTokenList.h>
+#include <wexus/HTMLTemplateParser.h>
+
+#include <QFile>
 #include <QDebug>
 
 using namespace hydra;
+using namespace wexus;
 
 static void showHelp(const QString &progname, QTextStream &out)
 {
@@ -146,6 +151,17 @@ static void commandCompile(QTextStream &out, hydra::ArgumentParser &args)
     throw ArgumentParser::ErrorException("Only html sub-types are supported (for now)");
 
 qDebug() << "infile" << infile << "subext" << subext << "ext" << ext << "parts" << parts << "outfile" << outfile;
+
+  TemplateTokenList toklist;
+
+  {
+    QFile in(infile);
+
+    if (!in.open(QIODevice::ReadOnly))
+      throw TemplateParser::Exception("Cannot open file: " + infile);
+
+    HTMLTemplateParser().parse(in, toklist);
+  }
 }
 
 int main(int argc, char **argv)
