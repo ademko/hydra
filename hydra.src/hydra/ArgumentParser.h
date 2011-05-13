@@ -17,7 +17,14 @@ namespace hydra
 }
 
 /**
- * Parses command line arguments in a QDirIterator-like manner.
+ * Parses command line arguments ("parameters") in a QDirIterator-like manner.
+ *
+ * The first parameter is always the program name itself. You can remove
+ * it by calling next() immediatly.
+ *
+ * Typically, you repeadedly call next() in a while(hasNext()) loop.
+ * You can also has* methods
+ * to forward-inspect the stream.
  *
  * @author Aleksander Demko
  */ 
@@ -65,8 +72,9 @@ class hydra::ArgumentParser
     bool hasNextParam(void) const;
 
     /**
-     * Returns the next switch or parameters.
-     * Examples "-s", "--switch", "blah".
+     * Returns the next switch or parameter.
+     * Examples "-s", "--switch", "blah". Switches are returned verbatem,
+     * hyphens and all.
      *
      * Throws ArgsEmptyException on error. You can pre-test via hasNext
      *
