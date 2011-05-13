@@ -11,19 +11,8 @@
 
 using namespace wexus;
 
-TemplateToken::~TemplateToken()
+TemplateToken::TemplateToken(int lineno, char typ, const QByteArray &cod)
+  : dm_lineno(lineno), dm_type(typ), dm_data(cod)
 {
-}
-
-LiteralToken::LiteralToken(const QByteArray &lit)
-  : dm_lit(lit)
-{
-  qDebug() << __FUNCTION__ << dm_lit;
-}
-
-CodeToken::CodeToken(char typ, const QByteArray &cod)
-  : dm_typ(typ), dm_code(cod)
-{
-  qDebug() << __FUNCTION__ << dm_typ << dm_code;
 }
 

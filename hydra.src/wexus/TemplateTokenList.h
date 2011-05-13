@@ -1,5 +1,4 @@
 
-
 /*
  * Copyright (c) 2011 Aleksander B. Demko
  * This source code is distributed under the MIT license.
@@ -18,6 +17,8 @@
 namespace wexus
 {
   typedef std::list<std::shared_ptr<wexus::TemplateToken> > TemplateTokenList;
+
+  void compressList(TemplateTokenList &list);
 }
 
 #endif

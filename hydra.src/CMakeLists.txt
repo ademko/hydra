@@ -145,7 +145,7 @@ ADD_EXECUTABLE(wexusserver
 TARGET_LINK_LIBRARIES(wexusserver hydra)
 ADD_EXECUTABLE(wexusmake
     ${THIS_PATH}/wexus/wexusmake.cpp
-    ${THIS_PATH}/wexus/TemplateToken.cpp
+    ${THIS_PATH}/wexus/TemplateToken.cpp ${THIS_PATH}/wexus/TemplateTokenList.cpp
     ${THIS_PATH}/wexus/TemplateParser.cpp ${THIS_PATH}/wexus/HTMLTemplateParser.cpp
     )
 TARGET_LINK_LIBRARIES(wexusmake hydra)

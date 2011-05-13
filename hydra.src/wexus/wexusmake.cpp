@@ -154,14 +154,19 @@ qDebug() << "infile" << infile << "subext" << subext << "ext" << ext << "parts" 
 
   TemplateTokenList toklist;
 
+  // parse the input stream
   {
     QFile in(infile);
 
     if (!in.open(QIODevice::ReadOnly))
-      throw TemplateParser::Exception("Cannot open file: " + infile);
+      throw ArgumentParser::ErrorException("Cannot open input file: " + infile);
 
     HTMLTemplateParser().parse(in, toklist);
+    compressList(toklist);
   }
+
+  for (TemplateTokenList::const_iterator ii=toklist.begin(); ii!=toklist.end(); ++ii)
+    qDebug() << "TOKEN" << (*ii)->type() << (*ii)->data();
 }
 
 int main(int argc, char **argv)

@@ -38,10 +38,13 @@ void HTMLTemplateParser::parse(QIODevice &input, TemplateTokenList &outlist)
   state_t state = IN_HTML;
   char c;
   char block_type = ' ';  // one of ' ' '=' '#' or '%'
+  int lineno = 1;
 
   buf.reserve(8*1024);
 
   while (input.getChar(&c)) {
+    if (c == '\n')
+      lineno++;
     switch (state) {
       case IN_HTML:
         if (c == '<')
@@ -62,7 +65,7 @@ void HTMLTemplateParser::parse(QIODevice &input, TemplateTokenList &outlist)
         break;
       case GOT_OPEN_PER:
         // flush the current IN_HTML
-        outlist.push_back(std::shared_ptr<LiteralToken>(new LiteralToken(buf)));
+        outlist.push_back(std::shared_ptr<TemplateToken>(new TemplateToken(lineno, 'L', buf)));
         buf.clear();
         // we'return in a code block, determine its type
         switch (c) {
@@ -93,10 +96,9 @@ void HTMLTemplateParser::parse(QIODevice &input, TemplateTokenList &outlist)
             ; // do nothing with comment blocks, just eat them
           else if (block_type == '%')
             // convert % to literal blocks
-            // TODO in the future, merge this new LiteralToken with the previous already on the stack LiteralToken?
-            outlist.push_back(std::shared_ptr<LiteralToken>(new LiteralToken("<%" + buf + ">")));
+            outlist.push_back(std::shared_ptr<TemplateToken>(new TemplateToken(lineno, 'L', "<%" + buf + ">")));
           else
-            outlist.push_back(std::shared_ptr<CodeToken>(new CodeToken(block_type, buf)));
+            outlist.push_back(std::shared_ptr<TemplateToken>(new TemplateToken(lineno, block_type, buf)));
           buf.clear();
           state = IN_HTML;
         } else {
@@ -110,6 +112,6 @@ void HTMLTemplateParser::parse(QIODevice &input, TemplateTokenList &outlist)
 
   // done, flush what is remaining, if any
   if (!buf.isEmpty())
-    outlist.push_back(std::shared_ptr<LiteralToken>(new LiteralToken(buf)));
+    outlist.push_back(std::shared_ptr<TemplateToken>(new TemplateToken(lineno, 'L', buf)));
 }
 

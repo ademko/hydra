@@ -13,8 +13,6 @@
 namespace wexus
 {
   class TemplateToken;
-  class LiteralToken;
-  class CodeToken;
 }
 
 /**
@@ -26,26 +24,18 @@ namespace wexus
 class wexus::TemplateToken
 {
   public:
-    virtual ~TemplateToken();
-};
+    TemplateToken(int lineno, char typ, const QByteArray &cod);
 
-class wexus::LiteralToken : public wexus::TemplateToken
-{
-  public:
-    LiteralToken(const QByteArray &lit);
-
-  private:
-    QByteArray dm_lit;
-};
-
-class wexus::CodeToken : public wexus::TemplateToken
-{
-  public:
-    CodeToken(char typ, const QByteArray &cod);
+    int lineno(void) const { return dm_lineno; }
+    char type(void) const { return dm_type; }
+    const QByteArray &data(void) const { return dm_data; }
+    QByteArray &data(void) { return dm_data; }
 
   private:
-    char dm_typ;    // one of ' ' '='
-    QByteArray dm_code;
+    int dm_lineno;
+    char dm_type;    // one of ' ' '=' 'L' (literal)
+    QByteArray dm_data;
 };
+
 #endif
 
