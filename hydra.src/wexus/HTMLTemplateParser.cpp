@@ -16,6 +16,8 @@ using namespace wexus;
   <% Ruby code -- inline with output %>
   <%= Ruby expression -- replace with result %>
   <%# comment -- ignored -- useful in testing %>
+    ^ this one is not supported
+    # is a ruby comment char, not C or C++ (and also, #include is valid code!
   <%% or %%> -- replace with <% or %> respectively
 
   maybe in the future:
@@ -37,7 +39,7 @@ void HTMLTemplateParser::parse(QIODevice &input, TemplateTokenList &outlist)
   QByteArray buf;
   state_t state = IN_HTML;
   char c;
-  char block_type = ' ';  // one of ' ' '=' '#' or '%'
+  char block_type = ' ';  // one of ' ' '=' or '%'
   int lineno = 1;
 
   buf.reserve(8*1024);
@@ -69,7 +71,6 @@ void HTMLTemplateParser::parse(QIODevice &input, TemplateTokenList &outlist)
         buf.clear();
         // we'return in a code block, determine its type
         switch (c) {
-          case '#':
           case '=':
           case '%':
             block_type = c;
@@ -92,9 +93,7 @@ void HTMLTemplateParser::parse(QIODevice &input, TemplateTokenList &outlist)
           buf.push_back('%'); // %% sequence
         else if (c == '>') {
           // done IN_BLOCK
-          if (block_type == '#')
-            ; // do nothing with comment blocks, just eat them
-          else if (block_type == '%')
+          if (block_type == '%')
             // convert % to literal blocks
             outlist.push_back(std::shared_ptr<TemplateToken>(new TemplateToken(lineno, 'L', "<%" + buf + ">")));
           else
