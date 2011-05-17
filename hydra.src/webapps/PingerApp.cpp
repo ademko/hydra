@@ -9,24 +9,10 @@
 
 #include <wexus/Context.h>
 
+#include <webapps/PingerController.h>
+
 using namespace wexus;
 using namespace webapps;
-
-//
-//
-// PingerController
-//
-//
-
-PingerController::PingerController(void)
-{ 
-  registerAction<PingerController, &PingerController::index>("index");
-}
-
-void PingerController::index(void)
-{
-  output() << "from within PingerController::index() via Context";
-}
 
 //
 //

@@ -12,17 +12,8 @@
 
 namespace webapps
 {
-  class PingerController;
   class PingerApp;
 }
-
-class webapps::PingerController : public wexus::Controller
-{
-  public:
-    PingerController(void);
-
-    void index(void);
-};
 
 /**
  * The first wexus application - a uptime/ping monitor.
