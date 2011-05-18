@@ -27,6 +27,6 @@ void PingerController::index(void)
 {
   output() << "from within PingerController::index() via Context";
 
-  renderHtml();
+  indexHtml();
 }
 

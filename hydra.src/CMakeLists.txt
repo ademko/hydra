@@ -141,7 +141,7 @@ ADD_EXECUTABLE(wexusserver
     ${THIS_PATH}/wexus/Context.cpp
     ${THIS_PATH}/wexus/MongooseServer.cpp ${THIS_PATH}/wexus/mongoose.c
     ${THIS_PATH}/webapps/PingerApp.cpp ${THIS_PATH}/webapps/PingerController.cpp
-    ${THIS_PATH}/webapps/webapps__PingerController__renderHtml.html.cpp
+    ${THIS_PATH}/views/webapps/PingerController/indexHtml.cpp
     )
 TARGET_LINK_LIBRARIES(wexusserver hydra)
 ADD_EXECUTABLE(wexusmake

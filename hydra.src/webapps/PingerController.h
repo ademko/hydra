@@ -22,7 +22,7 @@ class webapps::PingerController : public wexus::Controller
 
     void index(void);
 
-    void renderHtml(void);
+    void indexHtml(void);
 };
 
 #endif
