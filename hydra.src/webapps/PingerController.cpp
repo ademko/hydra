@@ -8,6 +8,7 @@
 #include <webapps/PingerController.h>
 
 #include <wexus/Context.h>
+#include <wexus/HTMLString.h>
 
 using namespace wexus;
 using namespace webapps;
@@ -25,7 +26,11 @@ PingerController::PingerController(void)
 
 void PingerController::index(void)
 {
-  output() << "from within PingerController::index() via Context";
+  output() << "from within PingerController::index() via Context<p>\n"
+    "and some encoded tags (viewsource): "
+    << HTMLString::encode("<encoded_tag>")
+    << HTMLString::raw("<raw_tag>")
+    << "<p>\n";
 
   indexHtml();
 }
