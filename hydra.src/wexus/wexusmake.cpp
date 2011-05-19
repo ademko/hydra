@@ -127,11 +127,12 @@ void parseFilePathParts(const QString &filename,
 
   int startmarker = 0;
 
+qDebug() << filename;
   for (int i=0; i<filename.size(); ++i) {
     if (filename[i] == '/') {
-      if (i - startmarker > 1)
-        outparts.push_back(filename.mid(startmarker+1, i-startmarker-1));
-      startmarker = i;
+      if (i - startmarker > 0)
+        outparts.push_back(filename.mid(startmarker, i-startmarker));
+      startmarker = i+1;
     }
   }//for
 }
@@ -198,7 +199,7 @@ void generateCPPOutput(const QString &infilename, QIODevice &outfile, const Temp
     outstream << "#line " << (*ii)->lineno() << " \"" << infilename << "\"\n";
     switch ((*ii)->type()) {
       case 'L'://literal
-        outstream << "wexus::output() << \"";
+        outstream << "output() << \"";
         bufferToCString((*ii)->data(), outstream);
         outstream << "\";\n";
         break;
@@ -334,7 +335,7 @@ static void commandViews(QTextStream &out, hydra::ArgumentParser &args)
     parts.push_back(baseName);
     outfilename = infilename.mid(0, infilename.size() - ext.size()) + "cpp";
 
-//qDebug() << "infilename" << infilename << "ext" << ext << "parts" << parts << "outfilename" << outfilename;
+qDebug() << "infilename" << infilename << "ext" << ext << "parts" << parts << "outfilename" << outfilename;
 
     // render the output
     QFile out(outfilename);

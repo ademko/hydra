@@ -17,8 +17,37 @@
 
 namespace wexus
 {
+  class ControllerContext;
   class Controller;
 }
+
+/**
+ * This contains useful input/output functions that are part of
+ * Controller.
+ *
+ * This class doesn't really need to exist seperatly, but in
+ * the future this concept might be merged with the TLS based
+ * Context concept.
+ *
+ * @author Aleksander Demko
+ */ 
+class wexus::ControllerContext
+{
+  public:
+    /// ctor
+    ControllerContext(void);
+
+  protected:
+    /// called by handleControllerRequest
+    virtual void setupContext(const QString &actionname, wexus::HTTPRequest &req, wexus::HTTPReply &reply);
+
+    QTextStream & output(void);
+
+  private:
+    QString dm_actionname;
+    wexus::HTTPRequest *dm_req;
+    wexus::HTTPReply *dm_reply;
+};
 
 /**
  * Base class for all user defined controllers.
@@ -27,7 +56,7 @@ namespace wexus
  *
  * @author Aleksander Demko
  */ 
-class wexus::Controller
+class wexus::Controller : public wexus::ControllerContext
 {
   public:
     class ActionNotFoundException : public wexus::HTTPHandler::Exception
@@ -40,7 +69,7 @@ class wexus::Controller
   public:
     virtual ~Controller();
 
-    virtual void handleControllerRequest(QString &actionname, wexus::HTTPRequest &req, wexus::HTTPReply &reply);
+    virtual void handleControllerRequest(const QString &actionname, wexus::HTTPRequest &req, wexus::HTTPReply &reply);
 
   protected:
     /// constructor
