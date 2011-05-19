@@ -32,7 +32,6 @@ void ControllerContext::setupContext(const QString &actionname, wexus::HTTPReque
 
 QTextStream & ControllerContext::output(void)
 {
-qDebug() << "ControllerContext::output()";
   assert(dm_reply);
 
   return dm_reply->output();

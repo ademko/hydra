@@ -7,8 +7,6 @@
 
 #include <webapps/PingerApp.h>
 
-#include <wexus/Context.h>
-
 #include <webapps/PingerController.h>
 
 using namespace wexus;
