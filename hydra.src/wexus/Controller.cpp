@@ -7,6 +7,8 @@
 
 #include <wexus/Controller.h>
 
+#include <wexus/HTMLString.h>
+
 #include <QDebug>
 
 using namespace wexus;
@@ -34,7 +36,25 @@ QTextStream & ControllerContext::output(void)
 {
   assert(dm_reply);
 
+  // flush the other textstreams
+  if (dm_htmloutput.get())
+    dm_htmloutput->flush();
+
   return dm_reply->output();
+}
+
+QTextStream & ControllerContext::htmlOutput(void)
+{
+  // flush the other textstreams
+  dm_reply->output().flush();
+
+  if (dm_htmloutput.get())
+    return *dm_htmloutput;
+
+  dm_htmldevice.reset(new HTMLEncoderDevice(dm_reply->output().device()));
+  dm_htmloutput.reset(new QTextStream(dm_htmldevice.get()));
+
+  return *dm_htmloutput;
 }
 
 //

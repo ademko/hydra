@@ -171,6 +171,8 @@ void generateCPPOutput(const QString &infilename, QIODevice &outfile, const Temp
   }
   outstream << ".h>\n\n";
 
+  outstream << "using namespace wexus;\n\n";
+
   // include the namespace, if any
   int namespace_parts = parts.size() - 2;
   sl = parts.begin();
@@ -199,16 +201,16 @@ void generateCPPOutput(const QString &infilename, QIODevice &outfile, const Temp
     outstream << "#line " << (*ii)->lineno() << " \"" << infilename << "\"\n";
     switch ((*ii)->type()) {
       case 'L'://literal
-        outstream << "output() << \"";
+        outstream << "  output() << \"";
         bufferToCString((*ii)->data(), outstream);
         outstream << "\";\n";
         break;
       case ' '://code
-      case '='://how to handle output? functions or streams?
-        {
-          outstream << "  " << (*ii)->data() << '\n';
-          break;
-        }
+        outstream << "  " << (*ii)->data() << '\n';
+        break;
+      case '='://return value code
+        outstream << "  htmlOutput() << " << (*ii)->data() << ";\n";
+        break;
     }//switch
   }//for
 

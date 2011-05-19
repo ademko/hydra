@@ -11,5 +11,7 @@
 // this file is automatically included by all
 // ecpp->cpp generated files
 
+#include <wexus/HTMLString.h>
+
 #endif
 

@@ -12,6 +12,8 @@
 
 #include <map>
 
+#include <hydra/TR1.h>
+
 #include <wexus/HTTPRequest.h>
 #include <wexus/HTTPReply.h>
 
@@ -41,12 +43,28 @@ class wexus::ControllerContext
     /// called by handleControllerRequest
     virtual void setupContext(const QString &actionname, wexus::HTTPRequest &req, wexus::HTTPReply &reply);
 
+    /**
+     * Returns the raw output stream.
+     *
+     * @author Aleksander Demko
+     */ 
     QTextStream & output(void);
+
+    /**
+     * Returns a stream that HTML escapes all output
+     * (except HTMLString).
+     *
+     * @author Aleksander Demko
+     */ 
+    QTextStream & htmlOutput(void);
 
   private:
     QString dm_actionname;
     wexus::HTTPRequest *dm_req;
     wexus::HTTPReply *dm_reply;
+
+    std::shared_ptr<QIODevice> dm_htmldevice;
+    std::shared_ptr<QTextStream> dm_htmloutput;
 };
 
 /**

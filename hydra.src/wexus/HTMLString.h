@@ -9,10 +9,13 @@
 #define __INCLUDED_WEXUS_HTMLSTRING_H__
 
 #include <QString>
+#include <QIODevice>
+#include <QTextStream>
 
 namespace wexus
 {
   class HTMLString;
+  class HTMLEncoderDevice;
 }
 
 /**
@@ -24,7 +27,15 @@ namespace wexus
 class wexus::HTMLString : public QString
 {
   public:
+    // empty constructor
     HTMLString(void);
+    /**
+     * Creates an HTMLString from the given s.
+     * This basically marks s as already encoded.
+     *
+     * @author Aleksander Demko
+     */ 
+    explicit HTMLString(const QString &s);
 
     /**
      * HTML encode the given string and return
@@ -33,19 +44,40 @@ class wexus::HTMLString : public QString
      * @author Aleksander Demko
      */ 
     static HTMLString encode(const QString &s);
+};
 
-    /**
-     * Return the current string, but as a HTMLString.
-     * It is assumed the string is already encoded
-     * for HTML rendering.
-     *
-     * @author Aleksander Demko
-     */ 
-    static HTMLString raw(const QString &s) { return HTMLString(s); }
+/**
+ * Encoded any bytes to html before sending them to the
+ * linked device.
+ *
+ * This is an output (write) device only.
+ *
+ * @author Aleksander Demko
+ */ 
+class wexus::HTMLEncoderDevice : public QIODevice
+{
+  public:
+    /// constructor
+    HTMLEncoderDevice(QIODevice *outputdev);
+
+    void setEnabled(bool e) { dm_enabled = e; } // this is used in the operator<< HTMLString
 
   protected:
-    explicit HTMLString(const QString &s);
+    // just fails
+    virtual qint64 readData(char * data, qint64 maxSize);
+    /// implemented here
+    virtual qint64 writeData(const char * data, qint64 maxSize);
+
+  private:
+    bool dm_enabled;
+
+    QIODevice *dm_dev;
+    // a temporary buffer used to prep data before sending it
+    // to the linked QIODevice
+    QByteArray dm_buf;
 };
+
+QTextStream & operator << (QTextStream &o, const wexus::HTMLString &htmlString);
 
 #endif
 
