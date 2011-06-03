@@ -4,5 +4,16 @@ Hello, world (from within the template) <br/>
 "a string literal" << 123 = <%= "a string literal" << 123 %> <br/>
 "&lt;inline_coded&gt" = <%= "<inline_coded>" %> <br/>
 HTMLString("&lt;html_string&gt;") = <%= HTMLString("<html_string>") %> <br/>
+
+<form action="" metho="get">
+Enter a city:<input type="text" name="city" />
+<input type="submit" />
+</form>
+
+<% if (params.has("city")) { %>
+  City = <%=params["city"]%>
+<% } else { %>
+  city not set
+<% } %>
 </p>
 

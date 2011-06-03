@@ -30,6 +30,8 @@ void ControllerContext::setupContext(const QString &actionname, wexus::HTTPReque
   dm_actionname = actionname;
   dm_req = &req;
   dm_reply = &reply;
+
+  params.setupRequest(dm_req);
 }
 
 QTextStream & ControllerContext::output(void)

@@ -12,16 +12,23 @@
 
 #include <map>
 
+#include <QTextStream>
+#include <QVariant>
+
 #include <hydra/TR1.h>
 
 #include <wexus/HTTPRequest.h>
 #include <wexus/HTTPReply.h>
+#include <wexus/FormParams.h>
 
 namespace wexus
 {
   class ControllerContext;
   class Controller;
 }
+
+// helper operator for QTextStream ouput of variants
+inline QTextStream & operator <<(QTextStream &o, const QVariant &v) { return o << v.toString(); }
 
 /**
  * This contains useful input/output functions that are part of
@@ -57,6 +64,15 @@ class wexus::ControllerContext
      * @author Aleksander Demko
      */ 
     QTextStream & htmlOutput(void);
+
+    /**
+     * The form parameters.
+     * Object directly accessible so operator[]
+     * works.
+     *
+     * @author Aleksander Demko
+     */ 
+    FormParams params;
 
   private:
     QString dm_actionname;

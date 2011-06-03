@@ -25,12 +25,12 @@ PingerController::PingerController(void)
 
 void PingerController::index(void)
 {
-  output() << "from within PingerController::index() via Context<p>\n"
+  /*output() << "from within PingerController::index() via Context<p>\n"
     "and some encoded tags (viewsource): "
     << "<inline_encoded_tag>"
     << HTMLString::encode("<encoded_tag>")
     << HTMLString("<raw_tag>")
-    << "<p>\n";
+    << "<p>\n";*/
 
   indexHtml();
 }
