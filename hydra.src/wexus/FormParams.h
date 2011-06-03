@@ -83,7 +83,8 @@ class wexus::FormParams
     /// parse the linked HTTPRequest, if it hasnt already
     void parseRequest(void);
 
-    void decodeAndParse(QString::const_iterator encodedBegin, QString::const_iterator encodedEnd);
+    template <class ITER>
+      void decodeAndParse(ITER encodedBegin, ITER encodedEnd);
 
   private:
     wexus::HTTPRequest *dm_req;

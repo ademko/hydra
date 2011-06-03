@@ -13,6 +13,47 @@
 
 using namespace wexus;
 
+/**
+ * Utility class that allows input iteration
+ * over a QIODevice.
+ * This is a candinate for promotion for more general/wide-spread use.
+ *
+ * @author Aleksander Demko
+ */ 
+/*class IODeviceIterator
+{
+  public:
+    IODeviceIterator(QIODevice *dev = 0);
+
+    QChar operator *(void) const { return dm_c; }
+
+    char operator ++(void) { assert(dm_dev); dm_dev->getChar(&dm_c); return dm_c; }
+
+    bool operator ==(const IODeviceIterator &rhs) const {
+      if (dm_dev && rhs.dm_dev)
+        return dm_dev == rhs.dm_dev;
+      if (!dm_dev && !rhs.dm_dev)
+        return false;
+      // otherwise, one of the devs is empty, so do an end check
+      QIODevice *tocheck = dm_dev ? dm_dev : rhs.dm_dev;
+
+      return !tocheck->atEnd();
+    }
+
+    inline bool operator !=(const IODeviceIterator &rhs) const {
+      return !(*this == rhs);
+    }
+
+  private:
+    QIODevice *dm_dev;
+    char dm_c;
+};
+
+IODeviceIterator::IODeviceIterator(QIODevice *dev)
+  : dm_dev(dev), dm_c(0)
+{
+}*/
+
 FormParams::ParamNotFoundException::ParamNotFoundException(const QString &fieldname)
   : wexus::HTTPHandler::Exception("field not found: " + fieldname)
 {
@@ -78,14 +119,32 @@ void FormParams::parseRequest(void)
 
   assert(dm_req);
 
-  if (!dm_req->query().isEmpty()) {
+  if (!dm_req->query().isEmpty())
     decodeAndParse(dm_req->query().begin(), dm_req->query().end());
+
+  // parse the post data
+  if (dm_req->contentLength() > 0) {
+    // read the content length into a string and then process that
+    // TODO optimizes this in the future to iterate over the Device
+    // santify check this resize operation???
+    QByteArray ary = dm_req->input()->read(dm_req->contentLength());
+
+    decodeAndParse(ary.begin(), ary.end());
   }
 
-  // parse the POST stuff?
+  /*IODeviceIterator ii(dm_req->input());
+  IODeviceIterator endii;
+
+  decodeAndParse(ii, endii);*/
 }
 
-void FormParams::decodeAndParse(QString::const_iterator encodedBegin, QString::const_iterator encodedEnd)
+template <class C>
+  inline char toChar(C c) { return c; }
+template <>
+  inline char toChar<QChar>(QChar c) { return c.toAscii(); }
+
+template <class ITER>
+  void FormParams::decodeAndParse(ITER encodedBegin, ITER encodedEnd)
 {
   // currently iterating over the name?
   bool is_name = true;
@@ -96,9 +155,9 @@ void FormParams::decodeAndParse(QString::const_iterator encodedBegin, QString::c
   value.reserve(64);
   hexstr.resize(2);
 
-  QString::const_iterator ii;
-  for (ii = encodedBegin; ii != encodedEnd; ii++) {
-    switch (ii->toAscii()) {
+  ITER ii;
+  for (ii = encodedBegin; ii != encodedEnd; ++ii) {
+    switch (toChar(*ii)) {
       // convert all + chars to space chars
       case '+':
         (is_name ? name : value) += ' ';
@@ -106,15 +165,15 @@ void FormParams::decodeAndParse(QString::const_iterator encodedBegin, QString::c
       // convert all %xy hex codes into ASCII chars
       case '%':
         {
-          if (ii+1 == encodedEnd || ii+2 == encodedEnd)
+          ++ii;
+          if (ii == encodedEnd)
             throw FormDecodeException(); // fail as we've reached the end of the string before decoding this hex
+          hexstr[0] = *ii;
 
-          // copy the two bytes following the %
-          hexstr[0] = *(ii+1);
-          hexstr[1] = *(ii+2);
-
-          // skip over the hex (next iteration will advance enc one more position)
-          ii += 2;
+          ++ii;
+          if (ii == encodedEnd)
+            throw FormDecodeException(); // fail as we've reached the end of the string before decoding this hex
+          hexstr[1] = *ii;
 
           bool ok;
           int uni = hexstr.toInt(&ok, 16);

@@ -75,6 +75,8 @@ QString wexus::escapeForXML(const QString &s)
 
 HTTPRequest::HTTPRequest(void)
 {
+  dm_contentlength = 0;
+  dm_inputdev = 0;
 }
 
 //

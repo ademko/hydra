@@ -89,7 +89,7 @@ qDebug() << "MongooseServer::wait";
 class MongooseRequest : public HTTPRequest
 {
   public:
-    MongooseRequest(const mg_request_info *request_info);
+    MongooseRequest(const mg_request_info *request_info, QIODevice *inputdev);
 };
 
 // Return HTTP header value, or NULL if not found.
@@ -103,7 +103,7 @@ static const char *get_header(const struct mg_request_info *ri,
   return NULL;
 }
 
-MongooseRequest::MongooseRequest(const mg_request_info *request_info)
+MongooseRequest::MongooseRequest(const mg_request_info *request_info, QIODevice *inputdev)
 {
   dm_request = request_info->uri;
   dm_query = request_info->query_string;
@@ -113,19 +113,33 @@ MongooseRequest::MongooseRequest(const mg_request_info *request_info)
   c = get_header(request_info, "Referer");
   if (c)
     dm_referer = c;
+  else
+    dm_referer.clear();
   c = get_header(request_info, "User-Agent");
   if (c)
     dm_useragent = c;
+  else
+    dm_useragent.clear();
+  c = get_header(request_info, "Content-Length");
+  if (c) {
+    bool ok = false;
+    dm_contentlength = QString(c).toLongLong(&ok);
+    if (!ok)
+      dm_contentlength = 0;
+  } else
+    dm_contentlength = 0;
+
+  dm_inputdev = inputdev;
 }
 
 //
-// MongooseIODevice
+// OutputMongooseIODevice
 //
 
-class MongooseIODevice : public QIODevice
+class OutputMongooseIODevice : public QIODevice
 {
   public:
-    MongooseIODevice(mg_connection *conn);
+    OutputMongooseIODevice(mg_connection *conn);
 
     virtual qint64 readData(char * data, qint64 maxSize);
     virtual qint64 writeData(const char * data, qint64 maxSize);
@@ -134,21 +148,57 @@ class MongooseIODevice : public QIODevice
     mg_connection *dm_conn;
 };
 
-MongooseIODevice::MongooseIODevice(mg_connection *conn)
+OutputMongooseIODevice::OutputMongooseIODevice(mg_connection *conn)
   : dm_conn(conn)
 {
   setOpenMode(QIODevice::WriteOnly);
 }
 
-qint64 MongooseIODevice::readData(char * data, qint64 maxSize)
+qint64 OutputMongooseIODevice::readData(char * data, qint64 maxSize)
 {
   assert(false);
   return 0;
 }
 
-qint64 MongooseIODevice::writeData(const char * data, qint64 maxSize)
+qint64 OutputMongooseIODevice::writeData(const char * data, qint64 maxSize)
 {
   return mg_write(dm_conn, data, maxSize);
+}
+
+//
+// InputMongooseIODevice
+//
+
+// i didnt want to merge these to because I dont
+// want users thinkin they can read from output()
+// and write to input(), etc
+class InputMongooseIODevice : public QIODevice
+{
+  public:
+    InputMongooseIODevice(mg_connection *conn);
+
+    virtual qint64 readData(char * data, qint64 maxSize);
+    virtual qint64 writeData(const char * data, qint64 maxSize);
+
+  private:
+    mg_connection *dm_conn;
+};
+
+InputMongooseIODevice::InputMongooseIODevice(mg_connection *conn)
+  : dm_conn(conn)
+{
+  setOpenMode(QIODevice::ReadOnly);
+}
+
+qint64 InputMongooseIODevice::readData(char * data, qint64 maxSize)
+{
+  return mg_read(dm_conn, data, maxSize);
+}
+
+qint64 InputMongooseIODevice::writeData(const char * data, qint64 maxSize)
+{
+  assert(false);
+  return 0;
 }
 
 void * MongooseServer::callback(enum mg_event event, struct mg_connection *conn,
@@ -160,10 +210,11 @@ void * MongooseServer::callback(enum mg_event event, struct mg_connection *conn,
   MongooseServer *here = reinterpret_cast<MongooseServer*>(request_info->user_data);
 
   // build the request object
-  MongooseRequest req(request_info);
+  InputMongooseIODevice input_device(conn);
+  MongooseRequest req(request_info, &input_device);
 
   // build the reply object
-  MongooseIODevice output_device(conn);
+  OutputMongooseIODevice output_device(conn);
   QTextStream output_stream(&output_device);
   HTTPReply rep(output_stream);
 

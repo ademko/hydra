@@ -38,8 +38,31 @@ class wexus::HTTPRequest
     const QString & referer(void) const { return dm_referer; }
     const QString & userAgent(void) const { return dm_useragent; }
 
+    /**
+     * The value of the content length field.
+     * Always will be >=0, even if it wasn't set in the
+     * headers.
+     *
+     * @author Aleksander Demko
+     */ 
+    qint64 contentLength(void) const { return dm_contentlength; }
+
+    /**
+     * Returns the input device that contains any
+     * data sent after the headers.
+     *
+     * Note that some classes will already process this
+     * stream (like wexus::FormParams)
+     * QIODevice seem to always be passed by ptr.
+     *
+     * @author Aleksander Demko
+     */ 
+    QIODevice* input(void) const { return dm_inputdev; }
+
   protected:
     QString dm_request, dm_query, dm_referer, dm_useragent;
+    qint64 dm_contentlength;
+    QIODevice *dm_inputdev;
 };
 
 /**

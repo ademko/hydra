@@ -5,7 +5,7 @@ Hello, world (from within the template) <br/>
 "&lt;inline_coded&gt" = <%= "<inline_coded>" %> <br/>
 HTMLString("&lt;html_string&gt;") = <%= HTMLString("<html_string>") %> <br/>
 
-<form action="" metho="get">
+<form action="" method="post">
 Enter a city:<input type="text" name="city" />
 <input type="submit" />
 </form>
