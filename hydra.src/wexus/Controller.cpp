@@ -32,6 +32,7 @@ void ControllerContext::setupContext(const QString &actionname, wexus::HTTPReque
   dm_reply = &reply;
 
   params.setupRequest(dm_req);
+  cookies.setupRequest(dm_req, dm_reply);
 }
 
 QTextStream & ControllerContext::output(void)

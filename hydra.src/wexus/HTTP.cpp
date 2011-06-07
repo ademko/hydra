@@ -79,6 +79,68 @@ HTTPRequest::HTTPRequest(void)
   dm_inputdev = 0;
 }
 
+int HTTPRequest::parseCookies(const QString &raw_cookie_str)
+{
+  int count = 0;
+  QString::const_iterator ii, endii;
+  QString name, value;
+  enum {
+    building_name,
+    building_value,
+    starting_name,
+  } state = starting_name;
+
+  ii = raw_cookie_str.begin();
+  endii = raw_cookie_str.end();
+
+//qDebug() << "WORKING ON" << raw_cookie_str;
+  while (true) {
+    switch (ii == endii ? '\0' : ii->toAscii()) {
+      case '\0': // end of string case
+      case ';':
+        if (state == building_value) {
+          // done a pair
+//qDebug() << "DECODE COOKIE" << name << value;
+          dm_clientcookies[name] = value;   // TODO decode
+          name.clear();
+          value.clear();
+          state = starting_name;
+        } else if (state == building_name) {
+          // weird case, no value
+          // so its a "" name and the value
+//qDebug() << "DECODE COOKIE (valueonly)" << name;
+          dm_clientcookies[""] = name;   // TODO decode
+          name.clear();
+          state = starting_name;
+        } else
+          return count; // fail case
+        break;
+      case '=':
+        if (state == building_name) {
+          state = building_value;
+          break;
+        } //else, fall through?
+      default:
+        if (state == starting_name) {
+          if (*ii != ' ') // skip a leading space if need be
+            name += *ii;
+          state = building_name;
+        } else if (state == building_name)
+          name += *ii;
+        else if (state == building_value)
+          value += *ii;
+        break;
+    }//switch
+
+    if (ii == endii)
+      break;
+    else
+      ++ii;
+  }//while true
+
+  return count;
+}
+
 //
 //
 // HTTPReply
@@ -142,6 +204,22 @@ QTextStream & HTTPReply::output(void)
   return dm_outs;
 }
 
+/*void HTTPReply::setServerCookie(const QString &name, const QString &value,
+        const QString &expires, const QString &domain, const QString &path)
+{
+  assert(!dm_calledcommit && "[cannot call setServerCookie after commitHeader]");
+
+  cookie_t c;
+
+  c.name = name;
+  c.value = value;
+  c.expires = expires;
+  c.domain = domain;
+  c.path = path;
+
+  dm_servercookies.push_back(c);
+}*/
+
 void HTTPReply::commitHeader(void)
 {
   assert(dm_status>0);
@@ -164,12 +242,45 @@ void HTTPReply::commitHeader(void)
 
   dm_outs <<
     "Content-type: " << dm_contenttype << "\r\n"
-    "Server: wexus/1.9.0\r\n"
+    "Server: wexus/1.9.0\r\n";
+
+  commitCookieHeader();
+
+  dm_outs <<
     "\r\n";   // end of header, now the body
 
   // helpful incase the caller is calling device() and other
   // such magic
   dm_outs.flush();
+}
+
+void HTTPReply::commitCookieHeader(void)
+{
+  ServerCookies::const_iterator ii, endii;
+
+  ii = dm_servercookies.begin();
+  endii = dm_servercookies.end();
+  QString cookie_hdr;
+
+  cookie_hdr.reserve(128);
+
+  for (; ii != endii; ++ii) {
+//qDebug() << "SETTING COOKIE: " << ii.key() << ii->value;
+    cookie_hdr = "Set-Cookie: ";
+    cookie_hdr += ii.key() + "=" + ii->value.toString() + "; path=" + ii->path;
+
+    if (!ii->domain.isEmpty())
+      cookie_hdr += "; domain=" + ii->domain;
+
+    if (!ii->expires.isEmpty())
+      cookie_hdr += "; expires=" + ii->expires;
+
+    cookie_hdr += "\r\n";
+
+    // finally, send it out over the socket
+    dm_outs << cookie_hdr;
+  }
+
 }
 
 //

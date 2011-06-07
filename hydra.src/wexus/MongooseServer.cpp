@@ -120,6 +120,10 @@ MongooseRequest::MongooseRequest(const mg_request_info *request_info, QIODevice 
     dm_useragent = c;
   else
     dm_useragent.clear();
+  dm_clientcookies.clear();
+  c = get_header(request_info, "Cookie");
+  if (c)
+    parseCookies(c);
   c = get_header(request_info, "Content-Length");
   if (c) {
     bool ok = false;

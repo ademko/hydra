@@ -20,6 +20,7 @@
 #include <wexus/HTTPRequest.h>
 #include <wexus/HTTPReply.h>
 #include <wexus/FormParams.h>
+#include <wexus/Cookies.h>
 
 namespace wexus
 {
@@ -43,7 +44,14 @@ inline QTextStream & operator <<(QTextStream &o, const QVariant &v) { return o <
 class wexus::ControllerContext
 {
   public:
-    /// ctor
+    /**
+     * Constructor.
+     * TODO remove the setupContext system and replace it with one
+     * struct passed to the ctor, so that ctor stuff is valid?
+     * or via TLS. or via Site.
+     *
+     * @author Aleksander Demko
+     */ 
     ControllerContext(void);
 
   protected:
@@ -67,12 +75,22 @@ class wexus::ControllerContext
 
     /**
      * The form parameters.
-     * Object directly accessible so operator[]
-     * works.
+     * Object directly accessible so operator[] works.
      *
      * @author Aleksander Demko
      */ 
     FormParams params;
+
+    /**
+     * The cookies.
+     *
+     * @author Aleksander Demko
+     */ 
+    Cookies cookies;
+
+    // used during some testing... maybe worth making this public?
+    //wexus::HTTPReply *reply(void) const { return dm_reply; }
+    //wexus::HTTPRequest *request(void) const { return dm_req; }
 
   private:
     QString dm_actionname;

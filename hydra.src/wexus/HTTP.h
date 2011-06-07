@@ -8,6 +8,10 @@
 #ifndef __INCLUDED_WEXUS_HTTP_H__
 #define __INCLUDED_WEXUS_HTTP_H__
 
+#include <map>
+
+#include <QMap>
+#include <QVariant>
 #include <QString>
 #include <QTextStream>
 
@@ -30,6 +34,9 @@ namespace wexus
  */ 
 class wexus::HTTPRequest
 {
+  public:
+    typedef QMap<QString, QVariant> ClientCookies;
+
   public:
     HTTPRequest(void);
 
@@ -59,10 +66,36 @@ class wexus::HTTPRequest
      */ 
     QIODevice* input(void) const { return dm_inputdev; }
 
+    /**
+     * Returns the cookies sent by the client.
+     *
+     * @author Aleksander Demko
+     */ 
+    const ClientCookies & cookies(void) const { return dm_clientcookies; }
+
+    /**
+     * Returns the cookies sent by the client.
+     * non-const version. Callers can fiddle with the cookie
+     * map for convience.
+     *
+     * @author Aleksander Demko
+     */ 
+    ClientCookies & cookies(void) { return dm_clientcookies; }
+
+  protected:
+    /// helper function that decendants can use.
+    /// parse out the cookies from raw_cookie_str and fill dm_clientcookies
+    /// with the found cookies
+    /// never fails (well, never reports failure
+    /// returns the number of cookies parsed
+    int parseCookies(const QString &raw_cookie_str);
+
   protected:
     QString dm_request, dm_query, dm_referer, dm_useragent;
     qint64 dm_contentlength;
     QIODevice *dm_inputdev;
+
+    ClientCookies dm_clientcookies;
 };
 
 /**
@@ -77,6 +110,15 @@ class wexus::HTTPRequest
  */ 
 class wexus::HTTPReply
 {
+  public:
+    // the cookies that will be sent back to the client
+    struct ServerCookie
+    {
+      // there is no name field, name is the key in the QMap structure
+      QString expires, domain, path;
+      QVariant value;
+    };
+    typedef QMap<QString, ServerCookie> ServerCookies;
   public:
     /**
      * Constructs an http reply, using the given stream
@@ -153,6 +195,42 @@ class wexus::HTTPReply
      */ 
     QTextStream & output(void);
 
+    /**
+     * Returns the cookies sent by the client.
+     *
+     * @author Aleksander Demko
+     */ 
+    const ServerCookies & cookies(void) const { return dm_servercookies; }
+
+    /**
+     * Returns the cookies sent by the client.
+     * non-const version. Callers can fiddle with the cookie
+     * map for convience.
+     *
+     * @author Aleksander Demko
+     */ 
+    ServerCookies & cookies(void) { return dm_servercookies; }
+
+    /**
+     * Sets a cookie that will be sent to the client. There can
+     * be many of these.
+     *
+     * This cannot be called after commitHeader() has been called.
+     *
+     * @param name the name of the cookie
+     * @param value the value of the cookie
+     * @param expires the expiry of the cookie, in
+     * "Wdy, DD-Mon-YYYY HH:MM:SS GMT" format. If empty, a "session cookie"
+     * will be created. Negative time values aparently delete cookies.
+     * @param domain the domain name of servers that this cookie will
+     * be sent to. May be empty ("same as caller"), and may also be a suffix
+     * (".example.com") I guess to specify a collection of servers
+     * @param path The path prefix this cookie is good for. examples:
+     * "/" and "/accounts"
+     * @author Aleksander Demko
+     */ 
+    //void setServerCookie(const QString &name, const QString &value, const QString &expires, const QString &domain, const QString &path);
+
   private:
     /**
      * Commits and flushes any data to the output stream.
@@ -164,12 +242,16 @@ class wexus::HTTPReply
      */ 
     void commitHeader(void);
 
+    /// called by commitHeader
+    void commitCookieHeader(void);
+
   protected:
     QTextStream &dm_outs;
     int dm_status;
     bool dm_calledcommit;
     QString dm_contenttype;
 
+    ServerCookies dm_servercookies;
 };
 
 /**

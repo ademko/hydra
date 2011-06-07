@@ -17,3 +17,5 @@ Enter a city:<input type="text" name="city" />
 <% } %>
 </p>
 
+The cookie counter is currently: <%= dm_counter %>
+

@@ -23,6 +23,9 @@ class webapps::PingerController : public wexus::Controller
     void index(void);
 
     void indexHtml(void);
+
+  protected:
+    QVariant dm_counter;
 };
 
 #endif
