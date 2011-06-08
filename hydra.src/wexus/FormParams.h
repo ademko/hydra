@@ -83,7 +83,6 @@ class wexus::FormParams
     bool dm_processedreq;
     typedef std::map<QString, QVariant> params_t;
     params_t dm_params;
-    QVariant dm_emptyvariant;
 };
 
 #endif

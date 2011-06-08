@@ -10,6 +10,7 @@
 #include <assert.h>
 
 #include <wexus/HTMLString.h>
+#include <wexus/Application.h>
 
 #include <QThreadStorage>
 
@@ -32,7 +33,9 @@ Context::Context(wexus::Application *application, const QString &actionname, wex
   : dm_application(application),
     dm_actionname(actionname),
     dm_req(req), dm_reply(reply),
-    params(&dm_req), cookies(&dm_req, &dm_reply)
+    params(&dm_req),
+    cookies(&dm_req, &dm_reply),
+    session(dm_application->sessionManager().getDataByCookie(cookies))
 {
   // we need to store a dynamically allocated ptr-to-ptr
   // becase QThreadStorage insists on being able to call delete

@@ -19,3 +19,14 @@ Enter a city:<input type="text" name="city" />
 
 The cookie counter is currently: <%= dm_counter %>
 
+<p>
+
+<%
+if (!session.has("clicks"))
+  session["clicks"] = 1000;
+
+session["clicks"] = session["clicks"].toInt() + 3;
+%>
+
+clicks = <%=session["clicks"]%>
+

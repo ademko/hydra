@@ -16,6 +16,7 @@
 #include <wexus/HTTPReply.h>
 #include <wexus/FormParams.h>
 #include <wexus/Cookies.h>
+#include <wexus/Session.h>
 
 namespace wexus
 {
@@ -46,7 +47,10 @@ class wexus::Context
     /// destructor
     ~Context();
 
+    /// returns the static instance
     static Context *instance(void);
+
+    // might remove these in the future, maybe, not sure
 
     wexus::Application * application(void) const { return dm_application; }
     const QString actionName(void) const { return dm_actionname; }
@@ -80,6 +84,7 @@ class wexus::Context
     std::shared_ptr<QTextStream> dm_htmloutput;
 
   public:
+    // public things
     // placed her to maintain a proper initialization order
 
     /**
@@ -97,6 +102,12 @@ class wexus::Context
      */ 
     Cookies cookies;
 
+    /**
+     * The session, if any
+     *
+     * @author Aleksander Demko
+     */ 
+    Session session;
 };
 
 #endif

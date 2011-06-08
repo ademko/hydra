@@ -78,6 +78,13 @@ class wexus::ControllerContext
      * @author Aleksander Demko
      */ 
     Cookies &cookies;
+
+    /**
+     * The session, if any.
+     *
+     * @author Aleksander Demko
+     */ 
+    Session &session;
 };
 
 /**

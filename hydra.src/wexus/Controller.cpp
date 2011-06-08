@@ -23,7 +23,8 @@ using namespace wexus;
 ControllerContext::ControllerContext(void)
   : dm_context(*Context::instance()),
   params(dm_context.params),
-  cookies(dm_context.cookies)
+  cookies(dm_context.cookies),
+  session(dm_context.session)
 {
   assert(Context::instance());
 }

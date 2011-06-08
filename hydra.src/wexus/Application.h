@@ -58,6 +58,8 @@ class wexus::Application
      */ 
     virtual void handleApplicationRequest(QString &filteredRequest, wexus::HTTPRequest &req, wexus::HTTPReply &reply);
 
+    SessionManager & sessionManager(void) { return dm_sessionmanager; }
+
   protected:
     /// inherited constructor
     Application(void);
@@ -77,6 +79,8 @@ class wexus::Application
     // TODO in the future, replace this registry with something that
     // uses a map rather than vector?
     hydra::Registry<Controller> dm_controllers;
+
+    SessionManager dm_sessionmanager;
 };
 
 #endif

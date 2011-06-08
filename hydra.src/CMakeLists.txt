@@ -140,6 +140,7 @@ ADD_EXECUTABLE(wexusserver
     ${THIS_PATH}/wexus/Site.cpp ${THIS_PATH}/wexus/Application.cpp ${THIS_PATH}/wexus/Controller.cpp
     ${THIS_PATH}/wexus/HTMLString.cpp ${THIS_PATH}/wexus/FormParams.cpp
     ${THIS_PATH}/wexus/Cookies.cpp ${THIS_PATH}/wexus/Context.cpp
+    ${THIS_PATH}/wexus/Session.cpp
     ${THIS_PATH}/wexus/MongooseServer.cpp ${THIS_PATH}/wexus/mongoose.c
     ${THIS_PATH}/webapps/PingerApp.cpp ${THIS_PATH}/webapps/PingerController.cpp
     ${THIS_PATH}/views/webapps/PingerController/indexHtml.cpp
