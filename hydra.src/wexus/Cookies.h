@@ -33,18 +33,14 @@ class wexus::Cookies
     };
 
   public:
-    /// constructor
-    Cookies(void);
-
     /**
-     * Sets the classes that wexus::Cookies needs to function.
-     * This is done by the controller.
+     * Constructor
      * TODO future, add Site so the domain/expires/path
      * can be set.
      *
      * @author Aleksander Demko
      */ 
-    void setupRequest(wexus::HTTPRequest *req, wexus::HTTPReply *rep);
+    Cookies(wexus::HTTPRequest *req, wexus::HTTPReply *rep);
 
     /**
      * Does this have a cookie with the given name?

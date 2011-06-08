@@ -36,11 +36,13 @@ qDebug() << "Application::handleApplicationRequest" << filteredRequest << "contr
   // see if we a have controller for this request
   for (int i=0; i<dm_controllers.size(); ++i)
     if (controllername == dm_controllers.name(i)) {
+      Context ctx(this, action, req, reply);
+
       std::shared_ptr<Controller> C = dm_controllers.create(i);
 
       assert(C.get());
 
-      C->handleControllerRequest(action, req, reply);
+      C->handleControllerRequest(action);
 
       return;
     }

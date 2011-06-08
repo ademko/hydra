@@ -64,20 +64,12 @@ FormParams::FormDecodeException::FormDecodeException(void)
 {
 }
 
-FormParams::FormParams(void)
-{
-  dm_req = 0;
-  dm_processedreq = false;
-}
-
-void FormParams::setupRequest(wexus::HTTPRequest *req)
+FormParams::FormParams(wexus::HTTPRequest *req)
 {
   dm_req = req;
   assert(req);
 
   dm_processedreq = false;
-
-  dm_params.clear();
 }
 
 bool FormParams::has(const QString &paramName)

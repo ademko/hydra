@@ -43,15 +43,7 @@ class wexus::FormParams
 
   public:
     /// constructor
-    FormParams(void);
-
-    /**
-     * Sets the wexus::HTTPRequest that will be used
-     * if any params are requested.
-     *
-     * @author Aleksander Demko
-     */ 
-    void setupRequest(wexus::HTTPRequest *req);
+    FormParams(wexus::HTTPRequest *req);
 
     /**
      * Does this form set have a particular field?

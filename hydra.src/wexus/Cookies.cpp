@@ -24,13 +24,7 @@ Cookies::CookieNotFoundException::CookieNotFoundException(const QString &cookieN
 //
 //
 
-Cookies::Cookies(void)
-{
-  dm_req = 0;
-  dm_reply = 0;
-}
-
-void Cookies::setupRequest(wexus::HTTPRequest *req, wexus::HTTPReply *rep)
+Cookies::Cookies(wexus::HTTPRequest *req, wexus::HTTPReply *rep)
 {
   dm_req = req;
   dm_reply = rep;

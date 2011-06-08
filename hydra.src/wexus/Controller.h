@@ -12,15 +12,11 @@
 
 #include <map>
 
-#include <QTextStream>
 #include <QVariant>
-
-#include <hydra/TR1.h>
 
 #include <wexus/HTTPRequest.h>
 #include <wexus/HTTPReply.h>
-#include <wexus/FormParams.h>
-#include <wexus/Cookies.h>
+#include <wexus/Context.h>
 
 namespace wexus
 {
@@ -35,35 +31,30 @@ inline QTextStream & operator <<(QTextStream &o, const QVariant &v) { return o <
  * This contains useful input/output functions that are part of
  * Controller.
  *
- * This class doesn't really need to exist seperatly, but in
- * the future this concept might be merged with the TLS based
- * Context concept.
+ * It basically reflects a lot of the methods of the Context TLS global
+ * into the Controller itself.
  *
  * @author Aleksander Demko
  */ 
 class wexus::ControllerContext
 {
+  private:
+    wexus::Context &dm_context;   // at the top as this should be initialized before cookies, etc
+
   public:
     /**
      * Constructor.
-     * TODO remove the setupContext system and replace it with one
-     * struct passed to the ctor, so that ctor stuff is valid?
-     * or via TLS. or via Site.
      *
      * @author Aleksander Demko
      */ 
     ControllerContext(void);
-
-  protected:
-    /// called by handleControllerRequest
-    virtual void setupContext(const QString &actionname, wexus::HTTPRequest &req, wexus::HTTPReply &reply);
 
     /**
      * Returns the raw output stream.
      *
      * @author Aleksander Demko
      */ 
-    QTextStream & output(void);
+    QTextStream & output(void) { return dm_context.output(); }
 
     /**
      * Returns a stream that HTML escapes all output
@@ -71,7 +62,7 @@ class wexus::ControllerContext
      *
      * @author Aleksander Demko
      */ 
-    QTextStream & htmlOutput(void);
+    QTextStream & htmlOutput(void) { return dm_context.htmlOutput(); }
 
     /**
      * The form parameters.
@@ -79,26 +70,14 @@ class wexus::ControllerContext
      *
      * @author Aleksander Demko
      */ 
-    FormParams params;
+    FormParams &params;
 
     /**
      * The cookies.
      *
      * @author Aleksander Demko
      */ 
-    Cookies cookies;
-
-    // used during some testing... maybe worth making this public?
-    //wexus::HTTPReply *reply(void) const { return dm_reply; }
-    //wexus::HTTPRequest *request(void) const { return dm_req; }
-
-  private:
-    QString dm_actionname;
-    wexus::HTTPRequest *dm_req;
-    wexus::HTTPReply *dm_reply;
-
-    std::shared_ptr<QIODevice> dm_htmldevice;
-    std::shared_ptr<QTextStream> dm_htmloutput;
+    Cookies &cookies;
 };
 
 /**
@@ -121,7 +100,7 @@ class wexus::Controller : public wexus::ControllerContext
   public:
     virtual ~Controller();
 
-    virtual void handleControllerRequest(const QString &actionname, wexus::HTTPRequest &req, wexus::HTTPReply &reply);
+    virtual void handleControllerRequest(const QString &actionname);
 
   protected:
     /// constructor
