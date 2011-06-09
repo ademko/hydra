@@ -72,7 +72,7 @@ FormParams::FormParams(wexus::HTTPRequest *req)
   dm_processedreq = false;
 }
 
-bool FormParams::has(const QString &paramName)
+bool FormParams::contains(const QString &paramName)
 {
   parseRequest();
 

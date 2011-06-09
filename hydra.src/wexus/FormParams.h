@@ -50,7 +50,7 @@ class wexus::FormParams
      *
      * @author Aleksander Demko
      */ 
-    bool has(const QString &paramName);
+    bool contains(const QString &paramName);
 
     /**
      * Gets a field.

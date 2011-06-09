@@ -58,7 +58,7 @@ void ThumbsDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option
   QString tags;
   bool needsBigRead = false;
 
-  entry.hasRecord(&needsBigRead);
+  entry.containsRecord(&needsBigRead);
 
   if (needsBigRead) {
     dm_filelist->enqueueLoad(entry.fullfilename(), index.row());

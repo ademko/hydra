@@ -30,7 +30,7 @@ Session::~Session()
   dm_data->mutex.unlock();
 }
 
-bool Session::has(const QString &fieldName)
+bool Session::contains(const QString &fieldName)
 {
   return dm_data->fieldValues.contains(fieldName);
 }
@@ -76,7 +76,7 @@ std::shared_ptr<Session::Data> SessionManager::getDataByCookie(Cookies &cookies)
   QUuid id;
 
   // get the cookie
-  if (cookies.has("WEXUS_SESSION_UUID"))
+  if (cookies.contains("WEXUS_SESSION_UUID"))
     id = QUuid(cookies["WEXUS_SESSION_UUID"].toString());
 
   // make a new id if needed

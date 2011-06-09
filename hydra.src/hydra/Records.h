@@ -148,7 +148,7 @@ class hydra::Tags : public std::set<QString>
      *
      * @author Aleksander Demko
      */ 
-    bool hasKey(const QString &key) const;
+    bool containsKey(const QString &key) const;
 
     /**
      * Sets the current value for the given key.

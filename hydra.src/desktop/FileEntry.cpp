@@ -32,7 +32,7 @@ FileEntry::FileEntry(const QString &_fullfilename)
   dm_rotateCode = -1;
 }
 
-bool FileEntry::hasRecord(bool *needsBigRead) const
+bool FileEntry::containsRecord(bool *needsBigRead) const
 {
   if (needsBigRead)
     *needsBigRead = false;    // assume false

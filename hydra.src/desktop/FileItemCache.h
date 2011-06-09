@@ -35,7 +35,7 @@ class desktop::FileItemCache
 
     static FileItemCache * instance(void) { return dm_instance; }
 
-    //bool hasItem(const QString &fullfilename);
+    //bool containsItem(const QString &fullfilename);
 
     // returns true on success
     bool getItem(const QString &fullfilename, desktop::cache_ptr<hydra::FileItemRecord,QUuid> &outitem, 

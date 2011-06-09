@@ -27,7 +27,7 @@ PingerController::PingerController(void)
 
 void PingerController::index(void)
 {
-  if (cookies.has("counter"))
+  if (cookies.contains("counter"))
     cookies["counter"] = cookies["counter"].toInt() + 1;
   else
     cookies["counter"] = 100;

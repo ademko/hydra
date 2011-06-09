@@ -30,7 +30,7 @@ Cookies::Cookies(wexus::HTTPRequest *req, wexus::HTTPReply *rep)
   dm_reply = rep;
 }
 
-bool Cookies::has(const QString &cookieName)
+bool Cookies::contains(const QString &cookieName)
 {
   assert(dm_req);
 

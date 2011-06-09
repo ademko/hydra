@@ -23,8 +23,8 @@ class desktop::FlowLayout : public QLayout
     FlowLayout(bool horizorder);
     virtual ~FlowLayout();
 
-    virtual bool hasHeightForWidth () const;
-    virtual int heightForWidth (int w) const;
+    virtual bool hasHeightForWidth(void) const;
+    virtual int heightForWidth(int w) const;
 
     virtual int count(void) const { return static_cast<int>(dm_items.size()); }
     virtual void addItem(QLayoutItem *item);

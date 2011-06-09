@@ -45,7 +45,7 @@ class desktop::ThreadedThumbCache
 
     /// check if this pixmap is in the cache
     /// done need the fullfilename (for now) as its all hash/rotateCode based
-    bool hasPixmap(/*const QString &fullfilename,*/ const QString &hash, int rotateCode, int windoww, int windowh);
+    bool containsPixmap(/*const QString &fullfilename,*/ const QString &hash, int rotateCode, int windoww, int windowh);
 
     /// returns a cached pixmap
     /// if one needs to be generated, it does so via a background thread while immediatly returning a null ptr

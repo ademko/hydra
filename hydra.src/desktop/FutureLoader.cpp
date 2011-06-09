@@ -106,7 +106,7 @@ void FutureLoader::mainFunc(void)
       FileEntry &entry = (*dm_flist).fileAt(dm_lastdoneindex);
       
 //qDebug() << "FutureLoader.record" << entry.fullfilename() << "@" << dm_lastdoneindex;
-      entry.hasRecord(&needsBigRead);
+      entry.containsRecord(&needsBigRead);
       if (needsBigRead) {
         totest = 0;
 //qDebug() << "FutureLoader" << "enqueue_background_hash" << entry.fullfilename();
@@ -138,7 +138,7 @@ void FutureLoader::mainFunc(void)
 
 //qDebug() << "FutureLoader.thumb" << entry.fullfilename() << "@" << dm_lastdoneindex;
       // check thumb info
-      if (!dm_thumbcache->hasPixmap(/*entry.fullfilename(),*/ entry.recordHash(), entry.rotateCode(), hydra::Thumb::DEFAULT_THUMB_W, hydra::Thumb::DEFAULT_THUMB_H)) {
+      if (!dm_thumbcache->containsPixmap(/*entry.fullfilename(),*/ entry.recordHash(), entry.rotateCode(), hydra::Thumb::DEFAULT_THUMB_W, hydra::Thumb::DEFAULT_THUMB_H)) {
         totest = 0;
 
 //qDebug() << "FutureLoader" << "enqueue_backgroud_thumb" << entry.fullfilename();

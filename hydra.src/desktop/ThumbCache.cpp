@@ -46,16 +46,16 @@ void ThreadedThumbCache::flushJobs(void)
   dm_pendingjobs.clear();
 }
 
-bool ThreadedThumbCache::hasPixmap(/*const QString &fullfilename,*/ const QString &hash, int rotateCode, int windoww, int windowh)
+bool ThreadedThumbCache::containsPixmap(/*const QString &fullfilename,*/ const QString &hash, int rotateCode, int windoww, int windowh)
 {
-  return dm_cache.hasItem(hydra::Thumb::fileName(hash,rotateCode,windoww,windowh));
+  return dm_cache.containsItem(hydra::Thumb::fileName(hash,rotateCode,windoww,windowh));
 }
 
 desktop::cache_ptr<QPixmap> ThreadedThumbCache::getPixmap(const QString &fullfilename, const QString &hash, int rotateCode, int windoww, int windowh, FileList *fileList, int indexOfFile)
 {
   QString thumbName(hydra::Thumb::fileName(hash,rotateCode,windoww,windowh));
 
-  if (dm_cache.hasItem(thumbName))
+  if (dm_cache.containsItem(thumbName))
     return dm_cache.getItem(thumbName);
 
   // always enqueue a new task for this, so that its the higest priority
@@ -106,7 +106,7 @@ void ThreadedThumbCache::mainFunc(QString fullfilename, QString thumbName, QImag
       dm_pendingjobs.erase(thumbName);
   }
 
-  dm_cache.putItem(thumbName, std::shared_ptr<QPixmap>(new QPixmap(QPixmap::fromImage(img))));
+  dm_cache.insertItem(thumbName, std::shared_ptr<QPixmap>(new QPixmap(QPixmap::fromImage(img))));
 
   if (fileList) {
     if (indexOfFile == -1)

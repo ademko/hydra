@@ -47,7 +47,7 @@ class wexus::Cookies
      *
      * @author Aleksander Demko
      */ 
-    bool has(const QString &cookieName);
+    bool contains(const QString &cookieName);
 
     /**
      * Gets a cookie.

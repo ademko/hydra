@@ -57,7 +57,7 @@ class wexus::MimeTypes
      *
      * @author Aleksander Demko
      */
-    static bool hasMimeType(const QString &ext);
+    static bool containsMimeType(const QString &ext);
 
     /**
      * Returns the mime type for the given extension.

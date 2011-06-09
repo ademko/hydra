@@ -77,7 +77,7 @@ qDebug() << "FileHTTPHandler serving " << fullpath;
   QString fileext(info.suffix().toLower());
 
   // check mime type
-  if ((dm_flags & AllowAllMimeTypes) && !MimeTypes::hasMimeType(fileext))
+  if ((dm_flags & AllowAllMimeTypes) && !MimeTypes::containsMimeType(fileext))
     reply.setContentType(MimeTypes::binaryMimeType());  // send binary if I can and don't have a type
   else
     reply.setContentType(MimeTypes::mimeType(fileext));

@@ -39,7 +39,7 @@ class desktop::ImageCache
      *
      * @author Aleksander Demko
      */
-    bool hasImage(const QString &fullfilename) const { return dm_cache.hasItem(fullfilename); }
+    bool containsImage(const QString &fullfilename) const { return dm_cache.containsItem(fullfilename); }
 
     /**
      * Loads the given file as an image, from cache if possible.

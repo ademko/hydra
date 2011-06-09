@@ -39,7 +39,7 @@ MimeTypes * MimeTypes::instance(void)
   return dm_instance;
 }
 
-bool MimeTypes::hasMimeType(const QString &ext)
+bool MimeTypes::containsMimeType(const QString &ext)
 {
   assert(dm_instance && "[MimeTypes is not instantiated]");
   return dm_instance->dm_ext.find(ext) != dm_instance->dm_ext.end();

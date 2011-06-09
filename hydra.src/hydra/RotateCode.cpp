@@ -44,7 +44,7 @@ int hydra::rotateCodeAdd(int rotateCode, int deltaCode)
 
 short hydra::detectTagRotate(const hydra::FileItemRecord::tags_t &tags)
 {
-  if (tags.hasKey("rotate")) {
+  if (tags.containsKey("rotate")) {
     QString r = tags.keyValue("rotate");
     bool ok = false;
     int i = r.toInt(&ok);

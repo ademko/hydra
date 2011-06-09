@@ -58,7 +58,7 @@ class wexus::Session
      *
      * @author Aleksander Demko
      */ 
-    bool has(const QString &fieldName);
+    bool contains(const QString &fieldName);
 
     /**
      * Gets a field, const-version
