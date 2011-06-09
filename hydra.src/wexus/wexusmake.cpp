@@ -151,6 +151,25 @@ static void bufferToCString(const QByteArray &ary, QTextStream &out)
   }
 }
 
+static void codeBufferToStream(const QByteArray &ary, QTextStream &out,
+    int lineno, const QString &infilename)
+{
+  QByteArray::const_iterator ii = ary.begin(), endii = ary.end();
+  while (ii != endii) {
+    out << "#line " << lineno << " \"" << infilename << "\"\n";
+
+    while (ii != endii) {
+      bool wasnewline = *ii == '\n';
+      out << static_cast<char>(*ii);
+      ++ii;
+      if (wasnewline)
+        break;
+    }
+
+    ++lineno;
+  }
+}
+
 void generateCPPOutput(const QString &infilename, QIODevice &outfile, const TemplateTokenList &toklist, const QStringList &parts)
 {
   QTextStream outstream(&outfile);
@@ -198,18 +217,21 @@ void generateCPPOutput(const QString &infilename, QIODevice &outfile, const Temp
 
   // go through all the tokens
   for (TemplateTokenList::const_iterator ii=toklist.begin(); ii != toklist.end(); ++ii) {
-    outstream << "#line " << (*ii)->lineno() << " \"" << infilename << "\"\n";
     switch ((*ii)->type()) {
       case 'L'://literal
+        outstream << "#line " << (*ii)->lineno() << " \"" << infilename << "\"\n";
         outstream << "  output() << \"";
         bufferToCString((*ii)->data(), outstream);
         outstream << "\";\n";
         break;
       case ' '://code
-        outstream << "  " << (*ii)->data() << '\n';
+        codeBufferToStream((*ii)->data(), outstream, (*ii)->lineno(), infilename);
+        outstream << '\n';
         break;
       case '='://return value code
-        outstream << "  htmlOutput() << " << (*ii)->data() << ";\n";
+        outstream << "  htmlOutput() <<\n";
+        codeBufferToStream((*ii)->data(), outstream, (*ii)->lineno(), infilename);
+        outstream << ";\n";
         break;
     }//switch
   }//for
