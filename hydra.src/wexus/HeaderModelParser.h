@@ -5,22 +5,22 @@
  * See the accompanying file LICENSE.MIT.txt for details.
  */
 
-#ifndef __INCLUDED_WEXUS_TEMPLATEPARSER_H__
-#define __INCLUDED_WEXUS_TEMPLATEPARSER_H__
+#ifndef __INCLUDED_WEXUSHEADERMODELPARSER_H__
+#define __INCLUDED_WEXUSHEADERMODELPARSER_H__
 
 #include <exception>
 
 #include <QString>
 #include <QIODevice>
 
-#include <wexus/TemplateTokenList.h>
+#include <wexus/ModelTokenList.h>
 
 namespace wexus
 {
-  class TemplateParser;
+  class HeaderModelParser;
 }
 
-class wexus::TemplateParser
+class wexus::HeaderModelParser
 {
   public:
     class Exception : public std::exception
@@ -38,14 +38,19 @@ class wexus::TemplateParser
     };
 
   public:
-    virtual ~TemplateParser();
+    /// ctor
+    HeaderModelParser(void);
+    
     /**
-     * Parses the given input stream and append found TemplateTokens
-     * to the TemplateTokenList
+     * Parsers the given input stream.
      *
      * @author Aleksander Demko
      */ 
-    virtual void parse(QIODevice &input, wexus::TemplateTokenList &outlist) = 0;
+    virtual void parse(QIODevice &input, wexus::ModelTokenList &outlist);
+
+  private:
+    static void tokenize(const QByteArray &ary, wexus::ModelTokenList &outlist);
 };
 
 #endif
+

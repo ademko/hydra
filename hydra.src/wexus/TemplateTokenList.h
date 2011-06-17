@@ -8,7 +8,7 @@
 #ifndef __INCLUDED_WEXUS_TEMPLATETOKENLIST_H__
 #define __INCLUDED_WEXUS_TEMPLATETOKENLIST_H__
 
-#include <list>
+#include <QList>
 
 #include <hydra/TR1.h>
 
@@ -16,7 +16,7 @@
 
 namespace wexus
 {
-  typedef std::list<std::shared_ptr<wexus::TemplateToken> > TemplateTokenList;
+  typedef QList<std::shared_ptr<wexus::TemplateToken> > TemplateTokenList;
 
   void compressList(TemplateTokenList &list);
 }

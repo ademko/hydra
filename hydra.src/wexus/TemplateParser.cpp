@@ -10,7 +10,7 @@
 using namespace wexus;
 
 TemplateParser::Exception::Exception(const QString &_what) throw()
-  : dm_what(_what)
+  : dm_what(_what.toUtf8())
 {
 }
 

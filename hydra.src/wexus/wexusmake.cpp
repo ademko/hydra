@@ -14,6 +14,9 @@
 
 #include <wexus/TemplateTokenList.h>
 #include <wexus/HTMLTemplateParser.h>
+#include <wexus/ModelTokenList.h>
+#include <wexus/HeaderModelParser.h>
+#include <wexus/CPPScanner.h>
 
 #include <QFile>
 #include <QDirIterator>
@@ -40,6 +43,9 @@ static void showHelp(const QString &progname, QTextStream &out)
     "\n"
     "  views directory\n"
     "             convert all the .ecpp in the given directory (and all\n"
+    "             its sub-directories\n"
+    "  models directory\n"
+    "             convert all the .eh in the given directory (and all\n"
     "             its sub-directories\n"
     << endl;
 }
@@ -373,6 +379,89 @@ qDebug() << "infilename" << infilename << "ext" << ext << "parts" << parts << "o
   }
 }
 
+static void commandModels(QTextStream &out, hydra::ArgumentParser &args)
+{
+  QString modeldir;
+
+  while (args.hasNext()) {
+    QString a;
+    bool isswitch;
+
+    a = args.next(&isswitch);
+
+    if (!isswitch && modeldir.isEmpty())
+      modeldir = a;
+  }
+
+  if (modeldir.isEmpty())
+    throw ArgumentParser::ErrorException("Missing model directory");
+
+  QDirIterator dd(modeldir, QDirIterator::Subdirectories);
+
+  while (dd.hasNext()) {
+    QString infilename(dd.next());
+    QFileInfo info(infilename);
+    QString baseName(info.baseName());
+    QString ext("eh");
+
+    if (!info.isFile() || info.suffix() != ext)
+      continue;
+
+    // parse the file
+
+    ModelTokenList toklist;
+    QFile in(infilename);
+
+    if (!in.open(QIODevice::ReadOnly))
+      throw ArgumentParser::ErrorException("Cannot open input file: " + infilename);
+
+    try {
+      HeaderModelParser().parse(in, toklist);
+    }
+    catch (std::exception &e){
+      showError(out, e);
+      return;
+    }
+
+    for (ModelTokenList::const_iterator mm=toklist.begin(); mm != toklist.end(); ++mm) {
+      qDebug() << "type" << (*mm)->type();
+      if ((*mm)->type() == 'L') {
+        LiteralModelToken *lm = dynamic_cast<LiteralModelToken*>(mm->get());
+        assert(lm);
+        qDebug() << "  " << lm->data();
+      }
+
+      if ((*mm)->type() == 'F') {
+        FieldModelToken *fm = dynamic_cast<FieldModelToken*>(mm->get());
+        assert(fm);
+        qDebug() << "  " << fm->fieldType() << fm->fieldName();
+      }
+    }
+
+    //compressList(toklist);
+
+    /*QStringList parts;
+    QString outfilename;
+
+    parseFilePathParts(infilename.mid(modeldir.size()), parts);
+
+    parts.push_back(baseName);
+    outfilename = infilename.mid(0, infilename.size() - ext.size()) + "cpp";
+
+qDebug() << "infilename" << infilename << "ext" << ext << "parts" << parts << "outfilename" << outfilename;
+
+    // render the output
+    QFile out(outfilename);
+
+    if (!out.open(QIODevice::WriteOnly))
+      throw ArgumentParser::ErrorException("Cannot open output file: " + outfilename);
+
+    generateCPPOutput(infilename, out, toklist, parts);
+
+    qDebug() << "wrote" << outfilename;*/
+  }
+}
+
 int main(int argc, char **argv)
 {
   QCoreApplication app(argc, argv);
@@ -392,6 +481,8 @@ int main(int argc, char **argv)
       commandCompile(out, args);
     else if (cmd == "views")
       commandViews(out, args);
+    else if (cmd == "models")
+      commandModels(out, args);
     else
       throw ArgumentParser::ErrorException("Unknown command: " + cmd);
   }

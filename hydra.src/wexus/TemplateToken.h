@@ -16,14 +16,22 @@ namespace wexus
 }
 
 /**
- * The base class of all the elements in a parsed
- * render node.
+ * A Parsed token from a template.
  *
  * @author Aleksander Demko
  */ 
 class wexus::TemplateToken
 {
   public:
+    /**
+     * Constructor.
+     *
+     * @param lineno the line numbers this token was found
+     * @param typ the type of token, one of ' ' '=' or 'L' (literal)
+     * @param cod the literal code/byte stream
+     *
+     * @author Aleksander Demko
+     */ 
     TemplateToken(int lineno, char typ, const QByteArray &cod);
 
     int lineno(void) const { return dm_lineno; }
