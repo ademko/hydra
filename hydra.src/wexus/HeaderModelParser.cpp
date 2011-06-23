@@ -56,7 +56,7 @@ void HeaderModelParser::parse(QIODevice &input, ModelTokenList &outlist)
 
     for (; p != pe; ++p) {
       if (lit_start == ary.end())
-        lit_start = p->te;
+        lit_start = p->ts;
 
       switch (state) {
         case looking_for_field:
@@ -99,6 +99,7 @@ void HeaderModelParser::parse(QIODevice &input, ModelTokenList &outlist)
           if (p->id == ';') {
             outlist.push_back(std::shared_ptr<ModelToken>(new FieldModelToken('F', fieldName, fieldType)));
             state = in_fields_want_type;
+            lit_start = ary.end();
           } else
             throw Exception("Can't find a ; to terminate the field");
           break;
