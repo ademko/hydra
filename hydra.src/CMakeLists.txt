@@ -100,6 +100,9 @@ QT4_WRAP_CPP(DESKTOP_MOC ${THIS_PATH}/desktop/FileList.h ${THIS_PATH}/desktop/Ma
 
 INCLUDE_DIRECTORIES(${THIS_PATH})
 
+# required for model stuff
+INCLUDE_DIRECTORIES(models)
+
 ADD_LIBRARY(hydra ${ALWAYS_WIN32_STATIC} ${HEADERS_MOC} ${SOURCES})
 TARGET_LINK_LIBRARIES(hydra ${QT_LIBRARIES})
 IF(NOT SQLITE3_LIBRARY STREQUAL "SQLITE3_LIBRARY-NOTFOUND")
@@ -140,10 +143,14 @@ ADD_EXECUTABLE(wexusserver
     ${THIS_PATH}/wexus/Site.cpp ${THIS_PATH}/wexus/Application.cpp ${THIS_PATH}/wexus/Controller.cpp
     ${THIS_PATH}/wexus/HTMLString.cpp ${THIS_PATH}/wexus/FormParams.cpp
     ${THIS_PATH}/wexus/Cookies.cpp ${THIS_PATH}/wexus/Context.cpp
+    ${THIS_PATH}/wexus/ActiveRecord.cpp
     ${THIS_PATH}/wexus/Session.cpp
     ${THIS_PATH}/wexus/MongooseServer.cpp ${THIS_PATH}/wexus/mongoose.c
-    ${THIS_PATH}/webapps/PingerApp.cpp ${THIS_PATH}/webapps/PingerController.cpp
+
+    ${THIS_PATH}/webapps/PingerApp.cpp
+    ${THIS_PATH}/webapps/PingerController.cpp
     ${THIS_PATH}/views/webapps/PingerController/indexHtml.cpp
+    ${THIS_PATH}/models/webapps/PingHost.cpp
     )
 TARGET_LINK_LIBRARIES(wexusserver hydra)
 ADD_EXECUTABLE(wexusmake

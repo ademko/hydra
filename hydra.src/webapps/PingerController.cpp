@@ -9,6 +9,8 @@
 
 #include <wexus/HTMLString.h>
 
+#include <webapps/PingHost.h>
+
 #include <QDebug>
 
 using namespace wexus;
@@ -42,6 +44,10 @@ void PingerController::index(void)
     << HTMLString::encode("<encoded_tag>")
     << HTMLString("<raw_tag>")
     << "<p>\n";*/
+
+  PingHost hosts;
+
+  hosts.activeClass();
 
   indexHtml();
 }
