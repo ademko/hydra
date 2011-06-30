@@ -89,29 +89,33 @@ void ModelGenerator::emitModelCPPSection(QTextStream &output, const QStringList 
 
   output << "using namespace wexus;\n\n";
 
-  // calc thisname
-  QString thisname;
+  // calc klassname
+  QString klassname;
 
   sl = parts.begin();
-  thisname = *sl;
+  klassname = *sl;
   for (sl++; sl != parts.end(); ++sl) {
-    thisname += "::";
-    thisname += *sl;
+    klassname += "::";
+    klassname += *sl;
   }
 
   // generate ctor
 
-  output << "void " << thisname << "::initClass(void)\n";
+  output << "void " << klassname << "::initClass(void)\n";
   output << "{\n"
     "  bool hadToCreate;\n"
     "\n"
-    "  setActiveClass(\"" << thisname << "\", hadToCreate);\n"
+    "  setActiveClass(\"" << klassname << "\", hadToCreate);\n"
     "\n"
     "  if (hadToCreate) {\n";
     
-  for (x=0; x<dm_fields.size(); ++x)
-      output << "    activeClass()->addField(\"" << dm_fields[x].first
-        << "\", \"" << dm_fields[x].second << "\");\n";
+  for (x=0; x<dm_fields.size(); ++x) {
+      output << "    activeClass()->addField<" << klassname << ","
+        << dm_fields[x].second << ">(\"" << dm_fields[x].first
+        << "\", \"" << dm_fields[x].second << "\", &"
+        << klassname << "::" << dm_fields[x].first
+        << ");\n";
+  }
   output <<
     "  }\n"
     "}\n";

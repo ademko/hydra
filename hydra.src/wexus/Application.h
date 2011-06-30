@@ -14,6 +14,8 @@
 #include <wexus/HTTPRequest.h>
 #include <wexus/HTTPReply.h>
 
+#include <QSqlDatabase>
+
 namespace wexus
 {
   class Application;
@@ -60,6 +62,8 @@ class wexus::Application
 
     SessionManager & sessionManager(void) { return dm_sessionmanager; }
 
+    QSqlDatabase & database(void) { return dm_db; }
+
   protected:
     /// inherited constructor
     Application(void);
@@ -81,6 +85,7 @@ class wexus::Application
     hydra::Registry<Controller> dm_controllers;
 
     SessionManager dm_sessionmanager;
+    QSqlDatabase dm_db;
 };
 
 #endif

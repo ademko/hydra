@@ -10,50 +10,38 @@
 
 #include <hydra/TR1.h>
 
-#include <QString>
-#include <QMap>
-#include <QVector>
+
+#include <wexus/ActiveClass.h>
 
 namespace wexus
 {
-  class ActiveClass;
-
   class ActiveRecord;
 }
 
-class wexus::ActiveClass
+class wexus::ActiveRecord
 {
   public:
-
-    class ActiveField
+    class Exception : public std::exception
     {
       public:
-        ActiveField(const QString &fieldName, const QString &fieldType);
+        /// constructor
+        Exception(const QString &_what) throw();
+        virtual ~Exception() throw();
 
-        const QString & fieldName(void) const { return dm_fieldName; }
-        const QString & fieldType(void) const { return dm_fieldType; }
+        virtual const char* what() const throw() { return dm_what; }
 
       private:
-        QString dm_fieldName, dm_fieldType;
+        // cant be a QString as then what() will return a * to a temporary
+        QByteArray dm_what;
     };
 
   public:
+    // helper functions
+    // retutrns the DB, throwing an exception on failure
+    static QSqlDatabase & database(void);
+    // throws an assert is qy.lastError().isValid()
+    static void check(const QSqlQuery &qy);
 
-    ActiveClass(const QString &_className);
-    void addField(const QString &fieldName, const QString &fieldType);
-
-  private:
-    QString dm_classname;
-
-    typedef QVector<std::shared_ptr<ActiveField> > FieldVec;
-    typedef QMap<QString, std::shared_ptr<ActiveField> > FieldMap;
-
-    FieldVec dm_vec;
-    FieldMap dm_map;
-};
-
-class wexus::ActiveRecord
-{
   public:
     /**
      * Returns the active class for this
@@ -63,6 +51,13 @@ class wexus::ActiveRecord
      * @author Aleksander Demko
      */ 
     std::shared_ptr<ActiveClass> activeClass(void);
+
+  public:
+    // stock queryies
+    void all(void);
+
+    // insert the current values into the database
+    void insert(void);
 
   protected:
     /// ctor, protected. this class is meanted to be inherited from.

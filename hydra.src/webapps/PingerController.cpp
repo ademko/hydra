@@ -47,7 +47,13 @@ void PingerController::index(void)
 
   PingHost hosts;
 
-  hosts.activeClass();
+  //hosts.activeClass();
+
+  //hosts.all();
+
+  hosts.id = 501;
+  hosts.host = "google501.com";
+  hosts.insert();
 
   indexHtml();
 }

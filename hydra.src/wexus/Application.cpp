@@ -15,10 +15,24 @@ Application::registry_type Application::registry;
 
 Application::Application(void)
 {
+  // setup DB
+  dm_db = QSqlDatabase::addDatabase("QSQLITE", "C1");
+  assert(dm_db.isValid());
+
+  dm_db.setDatabaseName("/tmp/one.sqlite");
+  bool good = dm_db.open();
+  assert(good);
+//qDebug() << "creating DB";
 }
 
 Application::~Application()
 {
+  // tear down DB
+  if (dm_db.isOpen()) {
+    QSqlDatabase::removeDatabase("C1");
+
+    dm_db.close();
+  }
 }
 
 void Application::handleApplicationRequest(QString &filteredRequest, wexus::HTTPRequest &req, wexus::HTTPReply &reply)

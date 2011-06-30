@@ -48,6 +48,7 @@ ENDIF(WIN32)
 
 FIND_PACKAGE(Qt4)
 SET(QT_USE_QTXML 1)
+SET(QT_USE_QTSQL 1)    # for wexus ORM
 SET(QT_USE_QTMAIN 1)   # dont forget to add WIN32 to ADD_EXECUTABLE
 
 INCLUDE(${QT_USE_FILE})
@@ -143,7 +144,7 @@ ADD_EXECUTABLE(wexusserver
     ${THIS_PATH}/wexus/Site.cpp ${THIS_PATH}/wexus/Application.cpp ${THIS_PATH}/wexus/Controller.cpp
     ${THIS_PATH}/wexus/HTMLString.cpp ${THIS_PATH}/wexus/FormParams.cpp
     ${THIS_PATH}/wexus/Cookies.cpp ${THIS_PATH}/wexus/Context.cpp
-    ${THIS_PATH}/wexus/ActiveRecord.cpp
+    ${THIS_PATH}/wexus/ActiveRecord.cpp ${THIS_PATH}/wexus/ActiveClass.cpp
     ${THIS_PATH}/wexus/Session.cpp
     ${THIS_PATH}/wexus/MongooseServer.cpp ${THIS_PATH}/wexus/mongoose.c
 
