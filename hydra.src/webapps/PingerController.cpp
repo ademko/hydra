@@ -49,11 +49,15 @@ void PingerController::index(void)
 
   //hosts.activeClass();
 
-  //hosts.all();
-
-  hosts.id = 501;
+  /*hosts.id = 501;
   hosts.host = "google501.com";
-  hosts.insert();
+  hosts.insert();*/
+
+  hosts.all();
+
+  while (hosts.next()) {
+    qDebug() << "FOUND RECRD" << hosts.id << hosts.host;
+  }
 
   indexHtml();
 }

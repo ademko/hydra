@@ -59,16 +59,29 @@ class wexus::ActiveRecord
     // insert the current values into the database
     void insert(void);
 
+    /**
+     * After running a query function, this will move the current row
+     * to the first row in the result set. Subsequent calls will move
+     * the current row to the next one. true is returns if the current
+     * row is valid.
+     *
+     * @author Aleksander Demko
+     */ 
+    bool next(void);
+
   protected:
     /// ctor, protected. this class is meanted to be inherited from.
     ActiveRecord(void);
 
     void setActiveClass(const QString &className, bool &hadToCreate);
 
+    void setQuery(std::shared_ptr<QSqlQuery> qry);
+
     virtual void initClass(void) = 0;
 
   private:
     std::shared_ptr<ActiveClass> dm_class;
+    std::shared_ptr<QSqlQuery> dm_query;
 
     typedef QMap<QString, std::shared_ptr<ActiveClass> > ActiveClassMap;
 

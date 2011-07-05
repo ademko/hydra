@@ -91,29 +91,25 @@ void ActiveRecord::setActiveClass(const QString &className, bool &hadToCreate)
   assert(dm_class.get());
 }
 
+void ActiveRecord::setQuery(std::shared_ptr<QSqlQuery> qry)
+{
+  dm_query = qry;
+}
+
 void ActiveRecord::all(void)
 {
-  /*qDebug() << "RUNNING QUERY, drivers: " << QSqlDatabase::drivers();
+  std::shared_ptr<QSqlQuery> q(new QSqlQuery(database()));
+  std::shared_ptr<ActiveClass> klass = activeClass();
+  QString s;
 
-  {
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "C1");
+  s = "SELECT " + klass->fieldsAsList() + " FROM " + klass->tableName();
 
-    assert(db.isValid());
+  //qDebug() << "RUNNING QUERY, drivers: " << QSqlDatabase::drivers() << s;
 
-    db.setDatabaseName("/tmp/one.sqlite");
+  q->exec(s);
+  check(*q);
 
-    bool good = db.open();
-
-    assert(good);
-
-    db.close();
-  }
-
-  qDebug() << "STILL open dbs: " << QSqlDatabase::connectionNames();
-
-  QSqlDatabase::removeDatabase("C1");
-
-  qDebug() << "STILL open dbs (after close): " << QSqlDatabase::connectionNames();*/
+  setQuery(q);
 }
 
 void ActiveRecord::insert(void)
@@ -135,5 +131,23 @@ void ActiveRecord::insert(void)
 
   q.exec();
   check(q);
+}
+
+bool ActiveRecord::next(void)
+{
+  if (!dm_query.get())
+    return false;
+
+  if (!dm_query->next()) {
+    dm_query.reset();
+    return false;
+  }
+
+  std::shared_ptr<ActiveClass> klass = activeClass();
+  for (int i=0; i<klass->fieldsVec().size(); ++i) {
+    klass->fieldsVec()[i]->setVariant(this, dm_query->value(i));
+  }
+
+  return true;
 }
 
