@@ -10,11 +10,15 @@
 
 #include <hydra/TR1.h>
 
+#include <QVariant>
+#include <QSqlQuery>
+
 namespace wexus
 {
   class ActiveExpr;
 
   class ActiveClass;//fwd
+  class ActiveRecord;//fwd
 }
 
 class wexus::ActiveExpr
@@ -28,6 +32,7 @@ class wexus::ActiveExpr
     bool isNull(void) const;
 
     void buildString(ActiveClass &klass, QString &out) const;
+    void buildBinds(ActiveClass &klass, ActiveRecord &recinst, QSqlQuery &out) const;
 
     // explicit "ctors"
 
@@ -35,9 +40,16 @@ class wexus::ActiveExpr
 
     static ActiveExpr fromColumn(int index);
 
+    // operators
+
+    ActiveExpr operator == (const ActiveExpr &rhs);
+    ActiveExpr operator == (QVariant v);
+
   private:
     class Imp;  // internal class
     class ColumnIndex;
+    class EqualOp;
+    class Var;
 
     std::shared_ptr<Imp> dm_imp;
 

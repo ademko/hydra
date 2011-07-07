@@ -53,8 +53,20 @@ class wexus::ActiveRecord
     std::shared_ptr<ActiveClass> activeClass(void);
 
   public:
-    // stock queryies
-    void all(const ActiveExpr & orderByExpre = ActiveExpr());
+    /**
+     * Returns all the records.
+     *
+     * @author Aleksander Demko
+     */ 
+    void all(const ActiveExpr & orderByExpr = ActiveExpr());
+
+    /**
+     * Returns all the records that match the given whereExpr
+     * expression.
+     *
+     * @author Aleksander Demko
+     */ 
+    void find(const ActiveExpr & whereExpr, const ActiveExpr & orderByExpr = ActiveExpr());
 
     // insert the current values into the database
     void insert(void);

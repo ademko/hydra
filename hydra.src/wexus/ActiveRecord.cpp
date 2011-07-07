@@ -101,7 +101,12 @@ void ActiveRecord::setQuery(std::shared_ptr<QSqlQuery> qry)
   dm_query = qry;
 }
 
-void ActiveRecord::all(const ActiveExpr & orderByExpre)
+void ActiveRecord::all(const ActiveExpr & orderByExpr)
+{
+  find(ActiveExpr());
+}
+
+void ActiveRecord::find(const ActiveExpr & whereExpr, const ActiveExpr & orderByExpr)
 {
   resetQuery();
 
@@ -111,14 +116,24 @@ void ActiveRecord::all(const ActiveExpr & orderByExpre)
 
   s = "SELECT " + klass->fieldsAsList() + " FROM " + klass->tableName();
 
-  if (!orderByExpre.isNull()) {
+  if (!whereExpr.isNull()) {
+    s += " WHERE ";
+    whereExpr.buildString(*klass, s);
+  }
+
+  if (!orderByExpr.isNull()) {
     s += " ORDER BY ";
-    orderByExpre.buildString(*klass, s);
+    orderByExpr.buildString(*klass, s);
   }
 
   //qDebug() << "RUNNING QUERY, drivers: " << QSqlDatabase::drivers() << s;
 
-  q->exec(s);
+  q->prepare(s);
+
+  if (!whereExpr.isNull())
+    whereExpr.buildBinds(*klass, *this, *q);
+
+  q->exec();
   check(*q);
 
   setQuery(q);
