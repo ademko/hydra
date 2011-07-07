@@ -89,6 +89,8 @@ void HeaderModelParser::parse(QIODevice &input, ModelTokenList &outlist)
         case in_fields_want_name:
           if (p->id == CPPToken::TK_Id) {
             fieldName = p->value();
+            if (!fieldName[0].isLower())
+              throw Exception("Field names must start with a lower case letter: " + fieldName);
             state = in_fields_want_semi;
           } else if (p->id == ':') {
             state = looking_for_field;  // done via protected: etc

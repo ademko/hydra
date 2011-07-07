@@ -96,7 +96,7 @@ void ActiveRecord::setQuery(std::shared_ptr<QSqlQuery> qry)
   dm_query = qry;
 }
 
-void ActiveRecord::all(void)
+void ActiveRecord::all(const ActiveExpr & orderByExpre)
 {
   std::shared_ptr<QSqlQuery> q(new QSqlQuery(database()));
   std::shared_ptr<ActiveClass> klass = activeClass();
@@ -104,7 +104,12 @@ void ActiveRecord::all(void)
 
   s = "SELECT " + klass->fieldsAsList() + " FROM " + klass->tableName();
 
-  //qDebug() << "RUNNING QUERY, drivers: " << QSqlDatabase::drivers() << s;
+  if (!orderByExpre.isNull()) {
+    s += " ORDER BY ";
+    orderByExpre.buildString(*klass, s);
+  }
+
+  qDebug() << "RUNNING QUERY, drivers: " << QSqlDatabase::drivers() << s;
 
   q->exec(s);
   check(*q);

@@ -10,7 +10,7 @@
 
 #include <hydra/TR1.h>
 
-
+#include <wexus/ActiveExpr.h>
 #include <wexus/ActiveClass.h>
 
 namespace wexus
@@ -54,7 +54,7 @@ class wexus::ActiveRecord
 
   public:
     // stock queryies
-    void all(void);
+    void all(const ActiveExpr & orderByExpre = ActiveExpr());
 
     // insert the current values into the database
     void insert(void);

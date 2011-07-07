@@ -25,6 +25,17 @@
 using namespace hydra;
 using namespace wexus;
 
+static QString upperFirstChar(const QString &s)
+{
+  assert(!s.isEmpty());
+
+  QString r(s);
+
+  r[0] = r[0].toUpper();
+
+  return r;
+}
+
 class ModelGenerator
 {
   public:
@@ -66,6 +77,11 @@ void ModelGenerator::emitFieldsHeaderSection(QTextStream &output, const QString 
   for (x=0; x<dm_fields.size(); ++x)
     output << "    " << dm_fields[x].second << " " << dm_fields[x].first << ";\n";
 
+  output << "\n";
+  for (x=0; x<dm_fields.size(); ++x)
+    output << "    static wexus::ActiveExpr " << upperFirstChar(dm_fields[x].first) << ";\n";
+  output << "\n";
+
   //output << "  private:\n";
   //output << "    " << className << "(void); // generated ctor\n";
   output << "  protected:\n"
@@ -99,7 +115,14 @@ void ModelGenerator::emitModelCPPSection(QTextStream &output, const QStringList 
     klassname += *sl;
   }
 
-  // generate ctor
+  // generate ActiveExpr static inits
+
+  for (x=0; x<dm_fields.size(); ++x)
+    output << "ActiveExpr " << klassname << "::" << upperFirstChar(dm_fields[x].first)
+      << "(ActiveExpr::fromColumn(" << x << "));\n";
+  output << "\n";
+
+  // generate initClass
 
   output << "void " << klassname << "::initClass(void)\n";
   output << "{\n"
