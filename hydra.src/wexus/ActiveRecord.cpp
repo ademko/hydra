@@ -71,6 +71,11 @@ std::shared_ptr<ActiveClass> ActiveRecord::activeClass(void)
   return dm_class;
 }
 
+void ActiveRecord::order(const ActiveExpr & orderByExpr)
+{
+  dm_orderByExpr = orderByExpr;
+}
+
 void ActiveRecord::setActiveClass(const QString &className, bool &hadToCreate)
 {
   assert(!dm_class.get());
@@ -101,45 +106,29 @@ void ActiveRecord::setQuery(std::shared_ptr<QSqlQuery> qry)
   dm_query = qry;
 }
 
-void ActiveRecord::all(const ActiveExpr & orderByExpr)
+void ActiveRecord::all(void)
 {
-  find(ActiveExpr());
+  where(ActiveExpr());
 }
 
-void ActiveRecord::find(const ActiveExpr & whereExpr, const ActiveExpr & orderByExpr)
+void ActiveRecord::where(const ActiveExpr & whereExpr)
 {
-  resetQuery();
-
-  std::shared_ptr<QSqlQuery> q(new QSqlQuery(database()));
-  std::shared_ptr<ActiveClass> klass = activeClass();
-  QString s;
-
-  s = "SELECT " + klass->fieldsAsList() + " FROM " + klass->tableName();
-
-  if (!whereExpr.isNull()) {
-    s += " WHERE ";
-    whereExpr.buildString(*klass, s);
-  }
-
-  if (!orderByExpr.isNull()) {
-    s += " ORDER BY ";
-    orderByExpr.buildString(*klass, s);
-  }
-
-  //qDebug() << "RUNNING QUERY, drivers: " << QSqlDatabase::drivers() << s;
-
-  q->prepare(s);
-
-  if (!whereExpr.isNull())
-    whereExpr.buildBinds(*klass, *this, *q);
-
-  q->exec();
-  check(*q);
-
-  setQuery(q);
+  internalWhere(whereExpr, 0);
 }
 
-void ActiveRecord::insert(void)
+bool ActiveRecord::first(const ActiveExpr & whereExpr)
+{
+  internalWhere(whereExpr, 1);
+  return next();
+}
+
+bool ActiveRecord::last(const ActiveExpr & whereExpr)
+{
+  internalWhere(whereExpr, -1);
+  return next();
+}
+
+void ActiveRecord::create(void)
 {
   resetQuery();
 
@@ -208,5 +197,45 @@ bool ActiveRecord::next(void)
   }
 
   return true;
+}
+
+void ActiveRecord::internalWhere(const ActiveExpr & whereExpr, int limit)
+{
+  resetQuery();
+
+  std::shared_ptr<QSqlQuery> q(new QSqlQuery(database()));
+  std::shared_ptr<ActiveClass> klass = activeClass();
+  QString s;
+
+  s = "SELECT " + klass->fieldsAsList() + " FROM " + klass->tableName();
+
+  if (!whereExpr.isNull()) {
+    s += " WHERE ";
+    whereExpr.buildString(*klass, s);
+  }
+
+  assert((limit == 0 || !dm_orderByExpr.isNull()) && "[first() and last() require an order to be set]");
+
+  if (!dm_orderByExpr.isNull()) {
+    s += " ORDER BY ";
+    dm_orderByExpr.buildString(*klass, s);
+
+    if (limit == 1)
+      s += " LIMIT 1";
+    else if (limit == -1)
+      s += " DESC LIMIT 1";
+  }
+
+  qDebug() << "RUNNING QUERY, drivers: " << QSqlDatabase::drivers() << s;
+
+  q->prepare(s);
+
+  if (!whereExpr.isNull())
+    whereExpr.buildBinds(*klass, *this, *q);
+
+  q->exec();
+  check(*q);
+
+  setQuery(q);
 }
 

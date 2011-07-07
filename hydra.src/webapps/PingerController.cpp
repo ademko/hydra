@@ -54,7 +54,9 @@ void PingerController::index(void)
   hosts.insert();*/
 
   //hosts.all(PingHost::Id);
-  hosts.find(PingHost::Id == 3);
+  hosts.order(PingHost::Host);
+  if (hosts.last())
+    qDebug() << "last RECORD" << hosts.id << hosts.host;
 
   /*if (hosts.next()) {
     hosts.host = "first one";

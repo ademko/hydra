@@ -54,11 +54,20 @@ class wexus::ActiveRecord
 
   public:
     /**
+     * Sets the default ordering.
+     * If not called, the default is no ordering
+     * at all.
+     *
+     * @author Aleksander Demko
+     */ 
+    void order(const ActiveExpr & orderByExpr);
+
+    /**
      * Returns all the records.
      *
      * @author Aleksander Demko
      */ 
-    void all(const ActiveExpr & orderByExpr = ActiveExpr());
+    void all(void);
 
     /**
      * Returns all the records that match the given whereExpr
@@ -66,10 +75,31 @@ class wexus::ActiveRecord
      *
      * @author Aleksander Demko
      */ 
-    void find(const ActiveExpr & whereExpr, const ActiveExpr & orderByExpr = ActiveExpr());
+    void where(const ActiveExpr & whereExpr);
 
-    // insert the current values into the database
-    void insert(void);
+    /**
+     * Finds the loads the first record that matches the
+     * given whereExpr expression.
+     * This calls next() for, and returns true if that
+     * succeeded.
+     *
+     * @author Aleksander Demko
+     */
+    bool first(const ActiveExpr & whereExpr = ActiveExpr());
+
+    /**
+     * Finds the loads the last record matches the
+     * given whereExpr expression.
+     * This calls next() for, and returns true if that
+     * succeeded.
+     *
+     * @author Aleksander Demko
+     */
+    bool last(const ActiveExpr & whereExpr = ActiveExpr());
+
+    /// insert the current values into the database
+    void create(void);
+
     /**
      * Saves the current values back into the database.
      * You must not have changed the primary key value :)
@@ -102,8 +132,12 @@ class wexus::ActiveRecord
 
     virtual void initClass(void) = 0;
 
+    // core query function
+    void internalWhere(const ActiveExpr & whereExpr, int limit);
+
   private:
     std::shared_ptr<ActiveClass> dm_class;
+    ActiveExpr dm_orderByExpr;
     std::shared_ptr<QSqlQuery> dm_query;
 
     typedef QMap<QString, std::shared_ptr<ActiveClass> > ActiveClassMap;
