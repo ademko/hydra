@@ -91,6 +91,11 @@ void ActiveRecord::setActiveClass(const QString &className, bool &hadToCreate)
   assert(dm_class.get());
 }
 
+void ActiveRecord::resetQuery(void)
+{
+  dm_query.reset();
+}
+
 void ActiveRecord::setQuery(std::shared_ptr<QSqlQuery> qry)
 {
   dm_query = qry;
@@ -98,6 +103,8 @@ void ActiveRecord::setQuery(std::shared_ptr<QSqlQuery> qry)
 
 void ActiveRecord::all(const ActiveExpr & orderByExpre)
 {
+  resetQuery();
+
   std::shared_ptr<QSqlQuery> q(new QSqlQuery(database()));
   std::shared_ptr<ActiveClass> klass = activeClass();
   QString s;
@@ -109,7 +116,7 @@ void ActiveRecord::all(const ActiveExpr & orderByExpre)
     orderByExpre.buildString(*klass, s);
   }
 
-  qDebug() << "RUNNING QUERY, drivers: " << QSqlDatabase::drivers() << s;
+  //qDebug() << "RUNNING QUERY, drivers: " << QSqlDatabase::drivers() << s;
 
   q->exec(s);
   check(*q);
@@ -119,6 +126,8 @@ void ActiveRecord::all(const ActiveExpr & orderByExpre)
 
 void ActiveRecord::insert(void)
 {
+  resetQuery();
+
   QSqlQuery q(database());
   std::shared_ptr<ActiveClass> klass = activeClass();
   QString s;
@@ -133,6 +142,36 @@ void ActiveRecord::insert(void)
   for (int i=0; i<klass->fieldsVec().size(); ++i) {
     q.bindValue(i, klass->fieldsVec()[i]->toVariant(this));
   }
+
+  q.exec();
+  check(q);
+}
+
+void ActiveRecord::save(void)
+{
+  //resetQuery();
+
+  QSqlQuery q(database());
+  std::shared_ptr<ActiveClass> klass = activeClass();
+  QString s;
+
+  s = "UPDATE " + klass->tableName() + " SET ";
+
+  for (int i=1; i<klass->fieldsVec().size(); ++i) {
+    if (i>1)
+      s += ", ";
+    s += klass->fieldsVec()[i]->fieldName() + " = ?";
+  }
+
+  s += " WHERE " + klass->fieldsVec()[0]->fieldName() + " = ?";
+
+  //qDebug() << s;
+  q.prepare(s);
+
+  for (int i=1; i<klass->fieldsVec().size(); ++i) {
+    q.bindValue(i-1, klass->fieldsVec()[i]->toVariant(this));
+  }
+  q.bindValue(klass->fieldsVec().size()-1, klass->fieldsVec()[0]->toVariant(this));
 
   q.exec();
   check(q);

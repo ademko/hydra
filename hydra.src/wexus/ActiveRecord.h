@@ -58,6 +58,16 @@ class wexus::ActiveRecord
 
     // insert the current values into the database
     void insert(void);
+    /**
+     * Saves the current values back into the database.
+     * You must not have changed the primary key value :)
+     *
+     * The current query is unaffected, so you can continue
+     * iteration (with next()), for example.
+     *
+     * @author Aleksander Demko
+     */ 
+    void save(void);
 
     /**
      * After running a query function, this will move the current row
@@ -75,6 +85,7 @@ class wexus::ActiveRecord
 
     void setActiveClass(const QString &className, bool &hadToCreate);
 
+    void resetQuery(void);
     void setQuery(std::shared_ptr<QSqlQuery> qry);
 
     virtual void initClass(void) = 0;
