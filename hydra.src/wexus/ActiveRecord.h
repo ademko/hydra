@@ -178,6 +178,14 @@ class wexus::ActiveRecord
     void deleteRows(const ActiveExpr & whereExpr = ActiveExpr());
 
     /**
+     * Returns the number of rows that match the given where query,
+     * or all the rows if no query is upplied.
+     *
+     * @author Aleksander Demko
+     */ 
+    int count(const ActiveExpr & whereExpr = ActiveExpr());
+
+    /**
      * After running a query function, this will move the current row
      * to the first row in the result set. Subsequent calls will move
      * the current row to the next one. true is returns if the current

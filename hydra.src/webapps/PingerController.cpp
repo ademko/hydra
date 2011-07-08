@@ -67,11 +67,14 @@ void PingerController::index(void)
   hosts.destroy();
 
   hosts.order(PingHost::Id);
-  hosts.all();
+  hosts.where(PingHost::Id >= 1000);
 
   while (hosts.next()) {
     qDebug() << "FOUND RECORD" << hosts.id << hosts.host;
   }
+
+  qDebug() << "Total records in DB: " << hosts.count();
+  qDebug() << "Total records in DB (index <1000: " << hosts.count(PingHost::Id < 1000);
 
   indexHtml();
 }

@@ -214,6 +214,34 @@ qDebug() << s;
   check(q);
 }
 
+int ActiveRecord::count(const ActiveExpr & whereExpr)
+{
+  QSqlQuery q(database());
+  ActiveClass * klass = activeClass();
+  QString s;
+
+  s = "SELECT COUNT(*) FROM " + klass->tableName();
+  
+  if (!whereExpr.isNull()) {
+    s += " WHERE  ";
+    whereExpr.buildString(*klass, s);
+  }
+
+qDebug() << s;
+  q.prepare(s);
+
+  if (!whereExpr.isNull())
+    whereExpr.buildBinds(*klass, *this, q);
+
+  q.exec();
+  check(q);
+
+  if (!q.next())
+    throw Exception("ActiveRecord::count next() called failed");
+
+  return q.value(0).toInt();
+}
+
 bool ActiveRecord::next(void)
 {
   if (!dm_query.get())
