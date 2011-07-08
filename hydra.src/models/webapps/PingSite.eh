@@ -5,21 +5,21 @@
  * See the accompanying file LICENSE.MIT.txt for details.
  */
 
-#ifndef __INCLUDED_WEBAPPS_PINGHOST_H__
-#define __INCLUDED_WEBAPPS_PINGHOST_H__
+#ifndef __INCLUDED_WEBAPPS_PINGSITE_H__
+#define __INCLUDED_WEBAPPS_PINGSITE_H__
 
 #include <wexus/ActiveRecord.h>
 
 namespace webapps
 {
-  class PingHost;
+  class PingSite;
 }
 
-class webapps::PingHost : public wexus::ActiveRecord
+class webapps::PingSite : public wexus::ActiveRecord
 {
   fields:   // begin parsing of fields, will do all replacement here too
     int id; //comment
-    QString hostname;
+    QString sitename;
 };
 
 

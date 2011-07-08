@@ -61,8 +61,10 @@ class wexus::ActiveRecord
     // helper functions
     // retutrns the DB, throwing an exception on failure
     static QSqlDatabase & database(void);
-    // throws an assert is qy.lastError().isValid()
+    // throws an exception is qy.lastError().isValid()
     static void check(const QSqlQuery &qy);
+    // throws an exception on false
+    static void check(bool b, const QString &exceptionMsg = "ActiveRecord::check(bool) failed");
 
   public:
     /**

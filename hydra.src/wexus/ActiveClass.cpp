@@ -47,7 +47,7 @@ ActiveClass::ActiveClass(const QString &_className)
       *ii = '_';
 }
 
-void ActiveClass::createTable(void)
+void ActiveClass::createTable(void) const
 {
   QSqlDatabase &db = ActiveRecord::database();
 

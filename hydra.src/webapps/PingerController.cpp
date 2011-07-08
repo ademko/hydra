@@ -10,6 +10,7 @@
 #include <wexus/HTMLString.h>
 
 #include <webapps/PingHost.h>
+#include <webapps/PingSite.h>
 
 #include <QDebug>
 
@@ -47,6 +48,10 @@ void PingerController::index(void)
 
   // ActiveRecord test code:
 
+  // this stuff should be moved into "migrations" or something
+  PingHost().activeClass()->createTable();
+  PingSite().activeClass()->createTable();
+
   PingHost hosts;
 
   if (hosts.exists(501))
@@ -54,13 +59,13 @@ void PingerController::index(void)
   hosts.destroy(502);
 
   hosts.id = 501;
-  hosts.host = "test record";
+  hosts.hostname = "test record";
   hosts.create();
   hosts.id = 502;
   hosts.create();
 
   hosts.find(501);
-  hosts.host = "updated string";
+  hosts.hostname = "updated string";
   hosts.save();
 
   hosts.find(502);
@@ -70,11 +75,17 @@ void PingerController::index(void)
   hosts.where(PingHost::Id >= 1000);
 
   while (hosts.next()) {
-    qDebug() << "FOUND RECORD" << hosts.id << hosts.host;
+    qDebug() << "FOUND RECORD" << hosts.id << hosts.hostname;
   }
 
   qDebug() << "Total records in DB: " << hosts.count();
   qDebug() << "Total records in DB (index <1000: " << hosts.count(PingHost::Id < 1000);
+
+  PingSite sites;
+
+  sites.id = 100;
+  sites.sitename = "home network";
+  sites.create();
 
   indexHtml();
 }

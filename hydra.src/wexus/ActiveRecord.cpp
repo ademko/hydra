@@ -76,6 +76,13 @@ void ActiveRecord::check(const QSqlQuery &qy)
   }
 }
 
+void ActiveRecord::check(bool b, const QString &exceptionMsg)
+{
+  if (!b) {
+    throw Exception(exceptionMsg);
+  }
+}
+
 void ActiveRecord::order(const ActiveExpr & orderByExpr)
 {
   dm_orderByExpr = orderByExpr;
@@ -139,7 +146,7 @@ void ActiveRecord::create(void)
     + klass->questionsAsList() + ")";
 
 qDebug() << s;
-  q.prepare(s);
+  check( q.prepare(s) , "ActiveRecord::create() prepare() failed");
 
   for (int i=0; i<klass->fieldsVec().size(); ++i) {
     q.bindValue(i, klass->fieldsVec()[i]->toVariant(this));
@@ -168,7 +175,7 @@ void ActiveRecord::save(void)
   s += " WHERE " + klass->fieldsVec()[0]->fieldName() + " = ?";
 
 qDebug() << s;
-  q.prepare(s);
+  check( q.prepare(s) , "ActiveRecord::save() prepare() failed");
 
   for (int i=1; i<klass->fieldsVec().size(); ++i) {
     q.bindValue(i-1, klass->fieldsVec()[i]->toVariant(this));
@@ -205,7 +212,7 @@ void ActiveRecord::deleteRows(const ActiveExpr & whereExpr)
   }
 
 qDebug() << s;
-  q.prepare(s);
+  check( q.prepare(s) , "ActiveRecord::deleteRows() prepare() failed");
 
   if (!whereExpr.isNull())
     whereExpr.buildBinds(*klass, *this, q);
@@ -228,7 +235,7 @@ int ActiveRecord::count(const ActiveExpr & whereExpr)
   }
 
 qDebug() << s;
-  q.prepare(s);
+  check( q.prepare(s) , "ActiveRecord::count() prepare() failed");
 
   if (!whereExpr.isNull())
     whereExpr.buildBinds(*klass, *this, q);
@@ -289,7 +296,7 @@ void ActiveRecord::internalWhere(const ActiveExpr & whereExpr, int limit)
 
 qDebug() << s;
 
-  q->prepare(s);
+  check( q->prepare(s) , "ActiveRecord::internalWhere() prepare() failed");
 
   if (!whereExpr.isNull())
     whereExpr.buildBinds(*klass, *this, *q);

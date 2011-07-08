@@ -104,7 +104,7 @@ class wexus::ActiveClass
     const QString & questionsAsList(void) const { return dm_questionsaslist; }
 
     /// creates the table in the database
-    void createTable(void);
+    void createTable(void) const;
 
   public:
     typedef QVector<std::shared_ptr<ActiveField> > FieldVec;
