@@ -138,6 +138,8 @@ void ModelGenerator::emitModelCPPSection(QTextStream &output, const QStringList 
         << ");\n";
   }
   output <<
+    "\n"
+    "      doneConstruction();\n"
     "    }\n"
     "};\n\n"
     "static webapps::PingHost::ActiveClassType thisClassType;\n\n";

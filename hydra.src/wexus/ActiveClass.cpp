@@ -47,39 +47,6 @@ ActiveClass::ActiveClass(const QString &_className)
       *ii = '_';
 }
 
-const QString & ActiveClass::fieldsAsList(void)
-{
-  if (dm_fieldsaslist.isEmpty()) {
-    int num = dm_vec.size();
-
-    if (num == 0)
-      throw ActiveRecord::Exception("fieldsAsList: no fields?");
-
-    dm_fieldsaslist = dm_vec[0]->fieldName();
-    for (int i=1; i<num; ++i)
-      dm_fieldsaslist += ", " + dm_vec[i]->fieldName();
-  }
-
-  return dm_fieldsaslist;
-}
-
-const QString & ActiveClass::questionsAsList(void)
-{
-  if (dm_questionsaslist.isEmpty()) {
-    int num = dm_vec.size();
-
-    if (num == 0)
-      throw ActiveRecord::Exception("questionsAsList: no fields?");
-
-    dm_questionsaslist = "?";
-
-    for (int i=1; i<num; ++i)
-      dm_questionsaslist += ", ?";
-  }
-  
-  return dm_questionsaslist;
-}
-
 void ActiveClass::createTable(void)
 {
   QSqlDatabase &db = ActiveRecord::database();
@@ -104,5 +71,27 @@ void ActiveClass::createTable(void)
   // we don't check the results of this as it usual fails
   // (as the table often already exists)
   db.exec(q);
+}
+
+void ActiveClass::doneConstruction(void)
+{
+  int num = dm_vec.size();
+
+  if (num == 0)
+    throw ActiveRecord::Exception("ActiveClass::doneConstruction: no fields?");
+
+  for (int i=0; i<num; ++i) {
+    if (i>0) {
+      dm_fieldsaslist += ", ";
+      dm_fieldsaslistsanstable += ", ";
+      dm_questionsaslist += ", ";
+    }
+
+    dm_fieldsaslist += tableName() + ".";
+
+    dm_fieldsaslist += dm_vec[i]->fieldName();
+    dm_fieldsaslistsanstable += dm_vec[i]->fieldName();
+    dm_questionsaslist += "?";
+  }
 }
 

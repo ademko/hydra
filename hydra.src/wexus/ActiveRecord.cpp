@@ -70,8 +70,10 @@ QSqlDatabase & ActiveRecord::database(void)
 
 void ActiveRecord::check(const QSqlQuery &qy)
 {
-  if (qy.lastError().isValid())
+  if (qy.lastError().isValid()) {
+//assert(false);
     throw Exception("query error: " + qy.lastError().text());
+  }
 }
 
 void ActiveRecord::order(const ActiveExpr & orderByExpr)
@@ -106,6 +108,12 @@ void ActiveRecord::find(const QVariant &keyVal)
     throw RecordNotFound();
 }
 
+bool ActiveRecord::exists(const QVariant &keyVal)
+{
+  internalWhere(ActiveExpr::fromColumn(0) == keyVal, 1);
+  return next();
+}
+
 bool ActiveRecord::first(const ActiveExpr & whereExpr)
 {
   internalWhere(whereExpr, 1);
@@ -127,10 +135,10 @@ void ActiveRecord::create(void)
   QString s;
 
   s = "INSERT INTO " + klass->tableName() + " ("
-    + klass->fieldsAsList() + ") VALUES ("
+    + klass->fieldsAsListSansTable() + ") VALUES ("
     + klass->questionsAsList() + ")";
 
-  //qDebug() << s;
+qDebug() << s;
   q.prepare(s);
 
   for (int i=0; i<klass->fieldsVec().size(); ++i) {
@@ -159,7 +167,7 @@ void ActiveRecord::save(void)
 
   s += " WHERE " + klass->fieldsVec()[0]->fieldName() + " = ?";
 
-  //qDebug() << s;
+qDebug() << s;
   q.prepare(s);
 
   for (int i=1; i<klass->fieldsVec().size(); ++i) {
@@ -222,7 +230,7 @@ void ActiveRecord::internalWhere(const ActiveExpr & whereExpr, int limit)
     whereExpr.buildString(*klass, s);
   }
 
-  assert((limit == 0 || !dm_orderByExpr.isNull()) && "[first() and last() require an order to be set]");
+  assert((limit >= 0 || !dm_orderByExpr.isNull()) && "[first() and last() require an order to be set]");
 
   if (!dm_orderByExpr.isNull()) {
     s += " ORDER BY ";
@@ -234,7 +242,7 @@ void ActiveRecord::internalWhere(const ActiveExpr & whereExpr, int limit)
       s += " DESC LIMIT 1";
   }
 
-  //qDebug() << "RUNNING QUERY, drivers: " << QSqlDatabase::drivers() << s;
+qDebug() << s;
 
   q->prepare(s);
 

@@ -99,18 +99,9 @@ class wexus::ActiveClass
 
     const QString & tableName(void) const { return dm_tablename; }
 
-    const QString & fieldsAsList(void);
-    const QString & questionsAsList(void);
-
-    /// field adder
-    template <class RECT, class DATT>
-      void addField(const QString &fieldName, const QString &fieldType,
-          typename ActiveFieldType<RECT,DATT>::MemberPtr memberptr) {
-        std::shared_ptr<ActiveField> f(new ActiveFieldType<RECT,DATT>(fieldName, fieldType, memberptr));
-
-        dm_vec.push_back(f);
-        dm_map[fieldName] = f;
-      }
+    const QString & fieldsAsList(void) const { return dm_fieldsaslist; }
+    const QString & fieldsAsListSansTable(void) const { return dm_fieldsaslistsanstable; }
+    const QString & questionsAsList(void) const { return dm_questionsaslist; }
 
     /// creates the table in the database
     void createTable(void);
@@ -124,10 +115,23 @@ class wexus::ActiveClass
     FieldMap & fieldsMap(void) { return dm_map; }
     const FieldMap & fieldsMap(void) const { return dm_map; }
 
+  protected:
+    /// field adder
+    template <class RECT, class DATT>
+      void addField(const QString &fieldName, const QString &fieldType,
+          typename ActiveFieldType<RECT,DATT>::MemberPtr memberptr) {
+        std::shared_ptr<ActiveField> f(new ActiveFieldType<RECT,DATT>(fieldName, fieldType, memberptr));
+
+        dm_vec.push_back(f);
+        dm_map[fieldName] = f;
+      }
+    /// called by descendants construtors
+    void doneConstruction(void);
+
   private:
     QString dm_classname;
     QString dm_tablename;
-    QString dm_fieldsaslist, dm_questionsaslist;
+    QString dm_fieldsaslist, dm_fieldsaslistsanstable, dm_questionsaslist;
 
     FieldVec dm_vec;
     FieldMap dm_map;

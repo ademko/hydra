@@ -45,43 +45,33 @@ void PingerController::index(void)
     << HTMLString("<raw_tag>")
     << "<p>\n";*/
 
+  // ActiveRecord test code:
+
   PingHost hosts;
 
-  //hosts.activeClass();
+  if (hosts.exists(501))
+    hosts.destroy();
+  if (hosts.exists(502))
+    hosts.destroy();
 
-  /*hosts.id = 501;
-  hosts.host = "google501.com";
-  hosts.insert();*/
-
-  hosts.order(PingHost::Id);
-  if (hosts.last())
-    hosts.id++;
-  else
-    hosts.id = 1;
-  hosts.host = "newly appended";
+  hosts.id = 501;
+  hosts.host = "test record";
+  hosts.create();
+  hosts.id = 502;
   hosts.create();
 
-  //hosts.all(PingHost::Id);
-  /*hosts.order(PingHost::Host);
-  if (hosts.last()) {
-    qDebug() << "last RECORD" << hosts.id << hosts.host;
-    //hosts.destroy();
-  }*/
+  hosts.find(501);
+  hosts.host = "updated string";
+  hosts.save();
+
+  hosts.find(502);
+  hosts.destroy();
 
   hosts.order(PingHost::Id);
   hosts.all();
 
-  /*if (hosts.next()) {
-    hosts.host = "first one";
-    hosts.save();
-  }*/
-
-  //int x = 100;
   while (hosts.next()) {
     qDebug() << "FOUND RECORD" << hosts.id << hosts.host;
-    //hosts.host = "index " + QString::number(x);
-    //hosts.save();
-    //++x;
   }
 
   indexHtml();

@@ -56,7 +56,7 @@ ActiveExpr::ColumnIndex::ColumnIndex(int index)
 
 void ActiveExpr::ColumnIndex::buildString(ActiveClass &klass, QString &out) const
 {
-  out += klass.fieldsVec()[dm_index]->fieldName();
+  out += klass.tableName() + "." + klass.fieldsVec()[dm_index]->fieldName();
 }
 
 //

@@ -109,6 +109,14 @@ class wexus::ActiveRecord
     void find(const QVariant &keyVal);
 
     /**
+     * Same as find(), except returns false on failure.
+     * find() raises an exception.
+     *
+     * @author Aleksander Demko
+     */
+    bool exists(const QVariant &keyVal);
+
+    /**
      * Finds the loads the first record that matches the
      * given whereExpr expression.
      * This calls next() for, and returns true if that
