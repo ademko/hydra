@@ -60,36 +60,38 @@ void ActiveExpr::ColumnIndex::buildString(ActiveClass &klass, QString &out) cons
 }
 
 //
-// ActiveExpr::EqualOp
+// ActiveExpr::BinOp
 //
 
-class ActiveExpr::EqualOp : public ActiveExpr::Imp
+class ActiveExpr::BinOp : public ActiveExpr::Imp
 {
   public:
-    EqualOp(const std::shared_ptr<ActiveExpr::Imp> &lhs,
+    BinOp(const QString &op, const std::shared_ptr<ActiveExpr::Imp> &lhs,
             const std::shared_ptr<ActiveExpr::Imp> &rhs);
 
     virtual void buildString(ActiveClass &klass, QString &out) const;
     virtual void buildBinds(ActiveClass &klass, ActiveRecord &recinst, QSqlQuery &out) const;
 
   private:
+    QString dm_op;
     std::shared_ptr<ActiveExpr::Imp> dm_left, dm_right;
 };
 
-ActiveExpr::EqualOp::EqualOp(const std::shared_ptr<ActiveExpr::Imp> &lhs,
-            const std::shared_ptr<ActiveExpr::Imp> &rhs)
-  : dm_left(lhs), dm_right(rhs)
+ActiveExpr::BinOp::BinOp(const QString &op,
+    const std::shared_ptr<ActiveExpr::Imp> &lhs,
+    const std::shared_ptr<ActiveExpr::Imp> &rhs)
+  : dm_op(op), dm_left(lhs), dm_right(rhs)
 {
 }
 
-void ActiveExpr::EqualOp::buildString(ActiveClass &klass, QString &out) const
+void ActiveExpr::BinOp::buildString(ActiveClass &klass, QString &out) const
 {
   dm_left->buildString(klass, out);
-  out += " = ";
+  out += " " + dm_op + " ";
   dm_right->buildString(klass, out);
 }
 
-void ActiveExpr::EqualOp::buildBinds(ActiveClass &klass, ActiveRecord &recinst, QSqlQuery &out) const
+void ActiveExpr::BinOp::buildBinds(ActiveClass &klass, ActiveRecord &recinst, QSqlQuery &out) const
 {
   dm_left->buildBinds(klass, recinst, out);
   dm_right->buildBinds(klass, recinst, out);
@@ -146,6 +148,16 @@ ActiveExpr::ActiveExpr(const std::shared_ptr<Imp> &imp)
 {
 }
 
+ActiveExpr::ActiveExpr(const QVariant &v)
+  : dm_imp(new Var(v))
+{
+}
+
+ActiveExpr::ActiveExpr(int i) : dm_imp(new Var(i)) { }
+ActiveExpr::ActiveExpr(double d) : dm_imp(new Var(d)) { }
+ActiveExpr::ActiveExpr(const char *c) : dm_imp(new Var(c)) { }
+ActiveExpr::ActiveExpr(const QString &s) : dm_imp(new Var(s)) { }
+
 bool ActiveExpr::isNull(void) const
 {
   return dm_imp.get() == 0;
@@ -170,14 +182,12 @@ ActiveExpr ActiveExpr::fromColumn(int index)
   return ActiveExpr(std::shared_ptr<Imp>(new ColumnIndex(index)));
 }
 
-ActiveExpr ActiveExpr::operator == (const ActiveExpr &rhs)
-{
-  return ActiveExpr(std::shared_ptr<Imp>(new EqualOp(dm_imp, rhs.dm_imp)));
-}
-
-ActiveExpr ActiveExpr::operator == (QVariant v)
-{
-  return ActiveExpr(std::shared_ptr<Imp>(new EqualOp(dm_imp,
-          std::shared_ptr<Imp>(new Var(v)))));
-}
+ActiveExpr ActiveExpr::operator == (const ActiveExpr &rhs) { return ActiveExpr(std::shared_ptr<Imp>(new BinOp("=",   dm_imp, rhs.dm_imp))); }
+ActiveExpr ActiveExpr::operator != (const ActiveExpr &rhs) { return ActiveExpr(std::shared_ptr<Imp>(new BinOp("<>",  dm_imp, rhs.dm_imp))); }
+ActiveExpr ActiveExpr::operator <  (const ActiveExpr &rhs) { return ActiveExpr(std::shared_ptr<Imp>(new BinOp("<",   dm_imp, rhs.dm_imp))); }
+ActiveExpr ActiveExpr::operator <= (const ActiveExpr &rhs) { return ActiveExpr(std::shared_ptr<Imp>(new BinOp("<=",  dm_imp, rhs.dm_imp))); }
+ActiveExpr ActiveExpr::operator >  (const ActiveExpr &rhs) { return ActiveExpr(std::shared_ptr<Imp>(new BinOp(">",   dm_imp, rhs.dm_imp))); }
+ActiveExpr ActiveExpr::operator >= (const ActiveExpr &rhs) { return ActiveExpr(std::shared_ptr<Imp>(new BinOp(">=",  dm_imp, rhs.dm_imp))); }
+ActiveExpr ActiveExpr::operator && (const ActiveExpr &rhs) { return ActiveExpr(std::shared_ptr<Imp>(new BinOp("AND", dm_imp, rhs.dm_imp))); }
+ActiveExpr ActiveExpr::operator || (const ActiveExpr &rhs) { return ActiveExpr(std::shared_ptr<Imp>(new BinOp("OR",  dm_imp, rhs.dm_imp))); }
 

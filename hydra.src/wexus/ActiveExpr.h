@@ -28,6 +28,14 @@ class wexus::ActiveExpr
     ActiveExpr(void);
     /// shallow copy ctor
     ActiveExpr(const ActiveExpr &rhs);
+    /// Variable initer
+    ActiveExpr(const QVariant &v);
+
+    // we have these rather than having operators that take QVariant... good idea?
+    ActiveExpr(int i);
+    ActiveExpr(double d);
+    ActiveExpr(const char *c);
+    ActiveExpr(const QString &s);
 
     bool isNull(void) const;
 
@@ -43,12 +51,18 @@ class wexus::ActiveExpr
     // operators
 
     ActiveExpr operator == (const ActiveExpr &rhs);
-    ActiveExpr operator == (QVariant v);
+    ActiveExpr operator != (const ActiveExpr &rhs);
+    ActiveExpr operator <  (const ActiveExpr &rhs);
+    ActiveExpr operator <= (const ActiveExpr &rhs);
+    ActiveExpr operator >  (const ActiveExpr &rhs);
+    ActiveExpr operator >= (const ActiveExpr &rhs);
+    ActiveExpr operator && (const ActiveExpr &rhs);
+    ActiveExpr operator || (const ActiveExpr &rhs);
 
   private:
     class Imp;  // internal class
     class ColumnIndex;
-    class EqualOp;
+    class BinOp;
     class Var;
 
     std::shared_ptr<Imp> dm_imp;
