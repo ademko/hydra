@@ -72,7 +72,7 @@ class wexus::ActiveRecord
      *
      * @author Aleksander Demko
      */ 
-    std::shared_ptr<ActiveClass> activeClass(void);
+    ActiveClass * activeClass(void) const { return dm_class; }
 
   public:
     /**
@@ -162,26 +162,20 @@ class wexus::ActiveRecord
 
   protected:
     /// ctor, protected. this class is meanted to be inherited from.
-    ActiveRecord(void);
-
-    void setActiveClass(const QString &className, bool &hadToCreate);
+    ActiveRecord(ActiveClass *klass);
+    // virtual dtor required
+    virtual ~ActiveRecord();
 
     void resetQuery(void);
     void setQuery(std::shared_ptr<QSqlQuery> qry);
-
-    virtual void initClass(void) = 0;
 
     // core query function
     void internalWhere(const ActiveExpr & whereExpr, int limit);
 
   private:
-    std::shared_ptr<ActiveClass> dm_class;
+    ActiveClass *dm_class;
     ActiveExpr dm_orderByExpr;
     std::shared_ptr<QSqlQuery> dm_query;
-
-    typedef QMap<QString, std::shared_ptr<ActiveClass> > ActiveClassMap;
-
-    static ActiveClassMap *dm_manager;
 };
 
 #endif

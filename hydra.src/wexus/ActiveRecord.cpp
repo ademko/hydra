@@ -48,9 +48,13 @@ ActiveRecord::RecordNotFound::RecordNotFound(void)
 //
 //
 
-ActiveRecord::ActiveClassMap * ActiveRecord::dm_manager;
+ActiveRecord::ActiveRecord(ActiveClass *klass)
+  : dm_class(klass)
+{
+  assert(dm_class);
+}
 
-ActiveRecord::ActiveRecord(void)
+ActiveRecord::~ActiveRecord()
 {
 }
 
@@ -70,39 +74,9 @@ void ActiveRecord::check(const QSqlQuery &qy)
     throw Exception("query error: " + qy.lastError().text());
 }
 
-std::shared_ptr<ActiveClass> ActiveRecord::activeClass(void)
-{
-  if (!dm_class.get())
-    initClass();
-
-  assert(dm_class.get());
-
-  return dm_class;
-}
-
 void ActiveRecord::order(const ActiveExpr & orderByExpr)
 {
   dm_orderByExpr = orderByExpr;
-}
-
-void ActiveRecord::setActiveClass(const QString &className, bool &hadToCreate)
-{
-  assert(!dm_class.get());
-
-  if (!dm_manager)
-    dm_manager = new ActiveClassMap;
-  assert(dm_manager);
-
-  ActiveClassMap::iterator ii = dm_manager->find(className);
-
-  hadToCreate = ii == dm_manager->end();
-
-  if (hadToCreate)
-    ii = dm_manager->insert(className, std::shared_ptr<ActiveClass>(new ActiveClass(className)));
-
-  dm_class = *ii;
-
-  assert(dm_class.get());
 }
 
 void ActiveRecord::resetQuery(void)
@@ -149,7 +123,7 @@ void ActiveRecord::create(void)
   resetQuery();
 
   QSqlQuery q(database());
-  std::shared_ptr<ActiveClass> klass = activeClass();
+  ActiveClass * klass = activeClass();
   QString s;
 
   s = "INSERT INTO " + klass->tableName() + " ("
@@ -172,7 +146,7 @@ void ActiveRecord::save(void)
   //resetQuery();
 
   QSqlQuery q(database());
-  std::shared_ptr<ActiveClass> klass = activeClass();
+  ActiveClass * klass = activeClass();
   QString s;
 
   s = "UPDATE " + klass->tableName() + " SET ";
@@ -200,7 +174,7 @@ void ActiveRecord::save(void)
 void ActiveRecord::destroy(void)
 {
   QSqlQuery q(database());
-  std::shared_ptr<ActiveClass> klass = activeClass();
+  ActiveClass * klass = activeClass();
   QString s;
 
   s = "DELETE FROM " + klass->tableName() + " WHERE  "
@@ -225,7 +199,7 @@ bool ActiveRecord::next(void)
     return false;
   }
 
-  std::shared_ptr<ActiveClass> klass = activeClass();
+  ActiveClass * klass = activeClass();
   for (int i=0; i<klass->fieldsVec().size(); ++i) {
     klass->fieldsVec()[i]->setVariant(this, dm_query->value(i));
   }
@@ -238,7 +212,7 @@ void ActiveRecord::internalWhere(const ActiveExpr & whereExpr, int limit)
   resetQuery();
 
   std::shared_ptr<QSqlQuery> q(new QSqlQuery(database()));
-  std::shared_ptr<ActiveClass> klass = activeClass();
+  ActiveClass * klass = activeClass();
   QString s;
 
   s = "SELECT " + klass->fieldsAsList() + " FROM " + klass->tableName();

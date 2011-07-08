@@ -82,10 +82,9 @@ void ModelGenerator::emitFieldsHeaderSection(QTextStream &output, const QString 
     output << "    static wexus::ActiveExpr " << upperFirstChar(dm_fields[x].first) << ";\n";
   output << "\n";
 
-  //output << "  private:\n";
-  //output << "    " << className << "(void); // generated ctor\n";
-  output << "  protected:\n"
-    "    virtual void initClass(void);\n";
+  output << "  public:\n";
+  output << "    class ActiveClassType;\n";
+  output << "    " << className << "(void);\n";
   output << "  // end of generated code:\n";
 }
 
@@ -122,26 +121,32 @@ void ModelGenerator::emitModelCPPSection(QTextStream &output, const QStringList 
       << "(ActiveExpr::fromColumn(" << x << "));\n";
   output << "\n";
 
-  // generate initClass
+  // generate ActiveClassType
 
-  output << "void " << klassname << "::initClass(void)\n";
-  output << "{\n"
-    "  bool hadToCreate;\n"
-    "\n"
-    "  setActiveClass(\"" << klassname << "\", hadToCreate);\n"
-    "\n"
-    "  if (hadToCreate) {\n";
+  output << "class " << klassname << "::ActiveClassType : public wexus::ActiveClass\n"
+    "{\n"
+    "  public:\n"
+    "    ActiveClassType(void)\n"
+    "      : ActiveClass(\"" << klassname << "\")\n"
+    "    {\n";
     
   for (x=0; x<dm_fields.size(); ++x) {
-      output << "    activeClass()->addField<" << klassname << ","
+      output << "      addField<" << klassname << ","
         << dm_fields[x].second << ">(\"" << dm_fields[x].first
         << "\", \"" << dm_fields[x].second << "\", &"
         << klassname << "::" << dm_fields[x].first
         << ");\n";
   }
   output <<
-    "  }\n"
-    "}\n";
+    "    }\n"
+    "};\n\n"
+    "static webapps::PingHost::ActiveClassType thisClassType;\n\n";
+
+  // generate ctor
+  output << klassname << "::" << parts[parts.size()-1] << "(void)\n"
+    "  : ActiveRecord(&thisClassType)\n"
+    "{\n"
+    "}\n\n";
 }
 
 static void showHelp(const QString &progname, QTextStream &out)
