@@ -34,6 +34,15 @@ ActiveRecord::Exception::~Exception() throw()
 }
 
 //
+// ActiveRecord::RecordNotFound
+//
+
+ActiveRecord::RecordNotFound::RecordNotFound(void)
+  : Exception("Record not found")
+{
+}
+
+//
 //
 // ActiveRecord
 //
@@ -116,6 +125,13 @@ void ActiveRecord::where(const ActiveExpr & whereExpr)
   internalWhere(whereExpr, 0);
 }
 
+void ActiveRecord::find(const QVariant &keyVal)
+{
+  internalWhere(ActiveExpr::fromColumn(0) == keyVal, 1);
+  if (!next())
+    throw RecordNotFound();
+}
+
 bool ActiveRecord::first(const ActiveExpr & whereExpr)
 {
   internalWhere(whereExpr, 1);
@@ -181,6 +197,24 @@ void ActiveRecord::save(void)
   check(q);
 }
 
+void ActiveRecord::destroy(void)
+{
+  QSqlQuery q(database());
+  std::shared_ptr<ActiveClass> klass = activeClass();
+  QString s;
+
+  s = "DELETE FROM " + klass->tableName() + " WHERE  "
+      + klass->fieldsVec()[0]->fieldName() + " = ?";
+
+  qDebug() << s;
+  q.prepare(s);
+
+  q.bindValue(0, klass->fieldsVec()[0]->toVariant(this));
+
+  q.exec();
+  check(q);
+}
+
 bool ActiveRecord::next(void)
 {
   if (!dm_query.get())
@@ -226,7 +260,7 @@ void ActiveRecord::internalWhere(const ActiveExpr & whereExpr, int limit)
       s += " DESC LIMIT 1";
   }
 
-  qDebug() << "RUNNING QUERY, drivers: " << QSqlDatabase::drivers() << s;
+  //qDebug() << "RUNNING QUERY, drivers: " << QSqlDatabase::drivers() << s;
 
   q->prepare(s);
 

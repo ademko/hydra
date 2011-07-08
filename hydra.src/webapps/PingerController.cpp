@@ -53,10 +53,23 @@ void PingerController::index(void)
   hosts.host = "google501.com";
   hosts.insert();*/
 
-  //hosts.all(PingHost::Id);
-  hosts.order(PingHost::Host);
+  hosts.order(PingHost::Id);
   if (hosts.last())
+    hosts.id++;
+  else
+    hosts.id = 1;
+  hosts.host = "newly appended";
+  hosts.create();
+
+  //hosts.all(PingHost::Id);
+  /*hosts.order(PingHost::Host);
+  if (hosts.last()) {
     qDebug() << "last RECORD" << hosts.id << hosts.host;
+    //hosts.destroy();
+  }*/
+
+  hosts.order(PingHost::Id);
+  hosts.all();
 
   /*if (hosts.next()) {
     hosts.host = "first one";

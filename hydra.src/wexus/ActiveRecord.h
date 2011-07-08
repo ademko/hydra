@@ -18,9 +18,20 @@ namespace wexus
   class ActiveRecord;
 }
 
+/**
+ * The base class for all Wexus-generated
+ * user records. This is a type of ORM.
+ *
+ * @author Aleksander Demko
+ */ 
 class wexus::ActiveRecord
 {
   public:
+    /**
+     * General wexus::ActiveRecord exception.
+     *
+     * @author Aleksander Demko
+     */ 
     class Exception : public std::exception
     {
       public:
@@ -33,6 +44,17 @@ class wexus::ActiveRecord
       private:
         // cant be a QString as then what() will return a * to a temporary
         QByteArray dm_what;
+    };
+    /**
+     * A record that was expected to exist does not.
+     *
+     * @author Aleksander Demko
+     */ 
+    class RecordNotFound : public Exception
+    {
+      public:
+        /// constructor
+        RecordNotFound(void);
     };
 
   public:
@@ -78,6 +100,15 @@ class wexus::ActiveRecord
     void where(const ActiveExpr & whereExpr);
 
     /**
+     * Finds the record that that has the given
+     * value as its primary key.
+     * Throws an exception on not-found.
+     *
+     * @author Aleksander Demko
+     */
+    void find(const QVariant &keyVal);
+
+    /**
      * Finds the loads the first record that matches the
      * given whereExpr expression.
      * This calls next() for, and returns true if that
@@ -110,6 +141,14 @@ class wexus::ActiveRecord
      * @author Aleksander Demko
      */ 
     void save(void);
+
+    /**
+     * Removes the current record from the DB.
+     * Does nothing on failure.
+     *
+     * @author Aleksander Demko
+     */ 
+    void destroy(void);
 
     /**
      * After running a query function, this will move the current row
