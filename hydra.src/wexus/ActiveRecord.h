@@ -159,6 +159,25 @@ class wexus::ActiveRecord
     void destroy(void);
 
     /**
+     * Removes the record with the given primary key from the DB.
+     * Does nothing on failure.
+     *
+     * @author Aleksander Demko
+     */ 
+    void destroy(const QVariant &keyVal);
+
+    /**
+     * Deletes all the records that match the given query.
+     * A null query (the default), deletes all the rows.
+     * Does nothing on failure.
+     *
+     * Can't be called just delete due to a C++ keyword conflict :)
+     *
+     * @author Aleksander Demko
+     */ 
+    void deleteRows(const ActiveExpr & whereExpr = ActiveExpr());
+
+    /**
      * After running a query function, this will move the current row
      * to the first row in the result set. Subsequent calls will move
      * the current row to the next one. true is returns if the current

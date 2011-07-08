@@ -51,8 +51,7 @@ void PingerController::index(void)
 
   if (hosts.exists(501))
     hosts.destroy();
-  if (hosts.exists(502))
-    hosts.destroy();
+  hosts.destroy(502);
 
   hosts.id = 501;
   hosts.host = "test record";

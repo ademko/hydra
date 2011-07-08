@@ -181,17 +181,34 @@ qDebug() << s;
 
 void ActiveRecord::destroy(void)
 {
+  ActiveClass * klass = activeClass();
+
+  deleteRows(ActiveExpr::fromColumn(0) == klass->fieldsVec()[0]->toVariant(this));
+}
+
+void ActiveRecord::destroy(const QVariant &keyVal)
+{
+  deleteRows(ActiveExpr::fromColumn(0) == keyVal);
+}
+
+void ActiveRecord::deleteRows(const ActiveExpr & whereExpr)
+{
   QSqlQuery q(database());
   ActiveClass * klass = activeClass();
   QString s;
 
-  s = "DELETE FROM " + klass->tableName() + " WHERE  "
-      + klass->fieldsVec()[0]->fieldName() + " = ?";
+  s = "DELETE FROM " + klass->tableName();
+  
+  if (!whereExpr.isNull()) {
+    s += " WHERE  ";
+    whereExpr.buildString(*klass, s);
+  }
 
-  qDebug() << s;
+qDebug() << s;
   q.prepare(s);
 
-  q.bindValue(0, klass->fieldsVec()[0]->toVariant(this));
+  if (!whereExpr.isNull())
+    whereExpr.buildBinds(*klass, *this, q);
 
   q.exec();
   check(q);
