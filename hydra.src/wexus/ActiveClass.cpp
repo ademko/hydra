@@ -8,6 +8,7 @@
 #include <wexus/ActiveClass.h>
 
 #include <QSqlQuery>
+#include <QDebug>
 
 #include <wexus/ActiveRecord.h>
 
@@ -17,8 +18,8 @@ using namespace wexus;
 // ActiveField
 //
 
-ActiveClass::ActiveField::ActiveField(const QString &fieldName, const QString &fieldType)
-  : dm_fieldName(fieldName), dm_fieldType(fieldType)
+ActiveClass::ActiveField::ActiveField(int style, const QString &fieldName, const QString &fieldType)
+  : dm_style(style), dm_fieldName(fieldName), dm_fieldType(fieldType)
 {
 }
 
@@ -45,6 +46,13 @@ ActiveClass::ActiveClass(const QString &_className)
   for (QString::iterator ii=dm_tablename.begin(); ii !=dm_tablename.end(); ++ii)
     if (*ii == ':')
       *ii = '_';
+  dm_keycolumn = -1;
+}
+
+int ActiveClass::keyColumn(void) const
+{
+  assert(dm_keycolumn >= 0);
+  return dm_keycolumn;
 }
 
 void ActiveClass::createTable(void) const
@@ -59,13 +67,16 @@ void ActiveClass::createTable(void) const
 
     q += dm_vec[i]->fieldName() + " " + dm_vec[i]->sqlFieldType();
 
-    if (i == 0)
+    if (dm_vec[i]->style() != ActiveClass::fKeyStyle)
+      q += " NOT NULL";   // non-fkeys cannot be null
+
+    if (dm_vec[i]->style() == ActiveClass::keyStyle)
       q += " PRIMARY KEY";
   }
 
   q += ")";
 
-//qDebug() << "creating table" << q;
+qDebug() << q;
   //ActiveRecord::check(db.exec(q));
 
   // we don't check the results of this as it usual fails

@@ -163,24 +163,43 @@ void ActiveRecord::save(void)
   QSqlQuery q(database());
   ActiveClass * klass = activeClass();
   QString s;
+  bool doneone;
 
   s = "UPDATE " + klass->tableName() + " SET ";
 
-  for (int i=1; i<klass->fieldsVec().size(); ++i) {
-    if (i>1)
+  doneone = false;
+  for (int i=0; i<klass->fieldsVec().size(); ++i) {
+    if (klass->fieldsVec()[i]->style() == ActiveClass::keyStyle)
+      continue;
+    if (doneone)
       s += ", ";
+    else
+      doneone = true;
     s += klass->fieldsVec()[i]->fieldName() + " = ?";
   }
 
-  s += " WHERE " + klass->fieldsVec()[0]->fieldName() + " = ?";
+  s += " WHERE ";
+
+  doneone = false;
+  for (int i=0; i<klass->fieldsVec().size(); ++i) {
+    if (klass->fieldsVec()[i]->style() != ActiveClass::keyStyle)
+      continue;
+    if (doneone)
+      s += "AND ";  // future multi-key support?
+    else
+      doneone = true;
+    s += klass->fieldsVec()[0]->fieldName() + " = ?";
+  }
 
 qDebug() << s;
   check( q.prepare(s) , "ActiveRecord::save() prepare() failed");
 
-  for (int i=1; i<klass->fieldsVec().size(); ++i) {
-    q.bindValue(i-1, klass->fieldsVec()[i]->toVariant(this));
-  }
-  q.bindValue(klass->fieldsVec().size()-1, klass->fieldsVec()[0]->toVariant(this));
+  for (int i=0; i<klass->fieldsVec().size(); ++i)
+    if (klass->fieldsVec()[i]->style() != ActiveClass::keyStyle)
+      q.addBindValue(klass->fieldsVec()[i]->toVariant(this));
+  for (int i=0; i<klass->fieldsVec().size(); ++i)
+    if (klass->fieldsVec()[i]->style() == ActiveClass::keyStyle)
+      q.addBindValue(klass->fieldsVec()[i]->toVariant(this));
 
   q.exec();
   check(q);
@@ -190,12 +209,14 @@ void ActiveRecord::destroy(void)
 {
   ActiveClass * klass = activeClass();
 
-  deleteRows(ActiveExpr::fromColumn(0) == klass->fieldsVec()[0]->toVariant(this));
+  deleteRows(ActiveExpr::fromColumn(klass->keyColumn()) == klass->fieldsVec()[0]->toVariant(this));
 }
 
 void ActiveRecord::destroy(const QVariant &keyVal)
 {
-  deleteRows(ActiveExpr::fromColumn(0) == keyVal);
+  ActiveClass * klass = activeClass();
+
+  deleteRows(ActiveExpr::fromColumn(klass->keyColumn()) == keyVal);
 }
 
 void ActiveRecord::deleteRows(const ActiveExpr & whereExpr)

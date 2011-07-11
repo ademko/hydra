@@ -38,10 +38,26 @@ class wexus::ActiveClass
      */ 
     static QString toSqlType(const QString &t);
 
+    /**
+     * Field "styles".
+     *
+     * various "styles" of keys. I really want to call
+     * these "types", but that would conflict with fieldType()
+     * already.
+     * @author Aleksander Demko
+     */ 
+    enum {
+      keyStyle = 1,
+      varStyle,
+      fKeyStyle,
+    };
+
     class ActiveField
     {
       public:
-        ActiveField(const QString &fieldName, const QString &fieldType);
+        ActiveField(int style, const QString &fieldName, const QString &fieldType);
+
+        int style(void) const { return dm_style; }
 
         const QString & fieldName(void) const { return dm_fieldName; }
         const QString & fieldType(void) const { return dm_fieldType; }
@@ -52,6 +68,7 @@ class wexus::ActiveClass
         virtual void setVariant(ActiveRecord *inst, const QVariant &v) = 0;
 
       private:
+        int dm_style;
         QString dm_fieldName, dm_fieldType;
     };
 
@@ -61,8 +78,8 @@ class wexus::ActiveClass
         typedef DATT RECT::*MemberPtr;
 
       public:
-        ActiveFieldType(const QString &fieldName, const QString &fieldType, MemberPtr memberptr)
-          : ActiveField(fieldName, fieldType), dm_memberptr(memberptr) { }
+        ActiveFieldType(int style, const QString &fieldName, const QString &fieldType, MemberPtr memberptr)
+          : ActiveField(style, fieldName, fieldType), dm_memberptr(memberptr) { }
 
         virtual QVariant toVariant(ActiveRecord *inst) const {
           RECT * recinstance = dynamic_cast<RECT*>(inst);
@@ -103,6 +120,14 @@ class wexus::ActiveClass
     const QString & fieldsAsListSansTable(void) const { return dm_fieldsaslistsanstable; }
     const QString & questionsAsList(void) const { return dm_questionsaslist; }
 
+    /**
+     * Returns the index of the key column.
+     * There can only be one (for now.. anyways)
+     *
+     * @author Aleksander Demko
+     */ 
+    int keyColumn(void) const;
+
     /// creates the table in the database
     void createTable(void) const;
 
@@ -118,12 +143,17 @@ class wexus::ActiveClass
   protected:
     /// field adder
     template <class RECT, class DATT>
-      void addField(const QString &fieldName, const QString &fieldType,
+      void addField(int style, const QString &fieldName, const QString &fieldType,
           typename ActiveFieldType<RECT,DATT>::MemberPtr memberptr) {
-        std::shared_ptr<ActiveField> f(new ActiveFieldType<RECT,DATT>(fieldName, fieldType, memberptr));
+        std::shared_ptr<ActiveField> f(new ActiveFieldType<RECT,DATT>(style, fieldName, fieldType, memberptr));
 
         dm_vec.push_back(f);
         dm_map[fieldName] = f;
+
+        if (style == keyStyle) {
+          assert(dm_keycolumn == -1);   // only one primary key field for now
+          dm_keycolumn = dm_vec.size()-1;
+        }
       }
     /// called by descendants construtors
     void doneConstruction(void);
@@ -132,6 +162,8 @@ class wexus::ActiveClass
     QString dm_classname;
     QString dm_tablename;
     QString dm_fieldsaslist, dm_fieldsaslistsanstable, dm_questionsaslist;
+
+    int dm_keycolumn;
 
     FieldVec dm_vec;
     FieldMap dm_map;

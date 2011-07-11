@@ -72,7 +72,7 @@ void PingerController::index(void)
   hosts.destroy();
 
   hosts.order(PingHost::Id);
-  hosts.where(PingHost::Id >= 1000);
+  //hosts.where(PingHost::Id >= 1000);
 
   while (hosts.next()) {
     qDebug() << "FOUND RECORD" << hosts.id << hosts.hostname;
@@ -83,9 +83,11 @@ void PingerController::index(void)
 
   PingSite sites;
 
-  sites.id = 100;
-  sites.sitename = "home network";
-  sites.create();
+  if (!sites.exists(100)) {
+    sites.id = 100;
+    sites.sitename = "home network";
+    sites.create();
+  }
 
   indexHtml();
 }
