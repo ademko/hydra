@@ -606,6 +606,13 @@ static void commandModels(QTextStream &out, hydra::ArgumentParser &args)
     parts.push_back(baseName);
     outfilename = infilename.mid(0, infilename.size() - ext.size()) + "h";
 
+    // check the filename for some rule violations
+    if (parts[parts.size()-1][0].isLower())
+      throw HeaderModelParser::Exception("Table class name must begin with an uppercase letter: " + parts[parts.size()-1]);
+    for (int x=0; x<parts.size(); ++x)
+      if (parts[x].contains("__"))
+        throw HeaderModelParser::Exception("Class names cannot contian double-underscores (__): " + parts[x]);
+
 //qDebug() << "infilename" << infilename << "ext" << ext << "parts" << parts << "outfilename" << outfilename;
 
     ModelGenerator gen(toklist);
