@@ -24,8 +24,20 @@ namespace wexus
 
   class ActiveRecord; //fwd
 
-  inline void variantToData(const QVariant &src, QString *outdata) { *outdata = src.toString(); }
-  inline void variantToData(const QVariant &src, int *outdata) { *outdata = src.toInt(); }
+  inline void variantToData(const QVariant &src, QString *outdata)
+  {
+    if (src.isValid())
+      *outdata = src.toString();
+    else
+      outdata->clear();
+  }
+  inline void variantToData(const QVariant &src, int *outdata)
+  {
+    if (src.isValid())
+      *outdata = src.toInt();
+    else
+      *outdata = -1;
+  }
 }
 
 class wexus::ActiveClass

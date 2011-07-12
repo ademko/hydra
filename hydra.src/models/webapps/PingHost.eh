@@ -18,6 +18,7 @@ namespace webapps
 class webapps::PingHost : public wexus::ActiveRecord
 {
   fields:   // begin parsing of fields, will do all replacement here too
+    webapps::PingSite belongs_to;
     int id; //comment
     QString hostname;
 };

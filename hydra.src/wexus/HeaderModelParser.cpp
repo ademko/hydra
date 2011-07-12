@@ -70,6 +70,8 @@ void HeaderModelParser::parse(QIODevice &input, ModelTokenList &outlist)
           if (p->id == ':') {
             state = in_fields_want_type;
 
+            fieldType.clear();
+
             outlist.push_back(std::shared_ptr<LiteralModelToken>(new LiteralModelToken('L',
                     ary.mid(lit_start - ary.begin(), lit_end - lit_start))));
             outlist.push_back(std::shared_ptr<ModelToken>(new ModelToken('S')));
@@ -79,7 +81,7 @@ void HeaderModelParser::parse(QIODevice &input, ModelTokenList &outlist)
           break;
         case in_fields_want_type:
           if (p->id == CPPToken::TK_Id) {
-            fieldType = p->value();
+            fieldType += p->value();
             state = in_fields_want_name;
           } else if (p->id == '}') {
             state = looking_for_field;  // done
@@ -92,6 +94,10 @@ void HeaderModelParser::parse(QIODevice &input, ModelTokenList &outlist)
             if (!fieldName[0].isLower())
               throw Exception("Field names must start with a lower case letter: " + fieldName);
             state = in_fields_want_semi;
+          } else if (p->id == CPPToken::TK_NameSep) {
+            // got a ::, go back to building the type
+            fieldType += "::";
+            state = in_fields_want_type;
           } else if (p->id == ':') {
             state = looking_for_field;  // done via protected: etc
           } else
@@ -101,6 +107,7 @@ void HeaderModelParser::parse(QIODevice &input, ModelTokenList &outlist)
           if (p->id == ';') {
             outlist.push_back(std::shared_ptr<ModelToken>(new FieldModelToken('F', fieldName, fieldType)));
             state = in_fields_want_type;
+            fieldType.clear();
             lit_start = ary.end();
           } else
             throw Exception("Can't find a ; to terminate the field");

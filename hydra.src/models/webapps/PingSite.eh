@@ -20,6 +20,7 @@ class webapps::PingSite : public wexus::ActiveRecord
   fields:   // begin parsing of fields, will do all replacement here too
     int id; //comment
     QString sitename;
+    QString desc;
 };
 
 

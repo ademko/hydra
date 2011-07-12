@@ -11,6 +11,7 @@
 #include <QDebug>
 
 #include <wexus/ActiveRecord.h>
+#include <wexus/StringUtil.h>
 
 using namespace wexus;
 
@@ -41,11 +42,10 @@ QString ActiveClass::toSqlType(const QString &t)
 }
 
 ActiveClass::ActiveClass(const QString &_className)
-  : dm_classname(_className), dm_tablename(_className)
+  : dm_classname(_className)
 {
-  for (QString::iterator ii=dm_tablename.begin(); ii !=dm_tablename.end(); ++ii)
-    if (*ii == ':')
-      *ii = '_';
+  dm_tablename = colonsToUnderscores(_className);
+
   dm_keycolumn = -1;
 }
 
@@ -67,8 +67,9 @@ void ActiveClass::createTable(void) const
 
     q += dm_vec[i]->fieldName() + " " + dm_vec[i]->sqlFieldType();
 
-    if (dm_vec[i]->style() != ActiveClass::fKeyStyle)
-      q += " NOT NULL";   // non-fkeys cannot be null
+    // trying something... nothing can be be null
+    //if (dm_vec[i]->style() != ActiveClass::fKeyStyle)
+      //q += " NOT NULL";   // non-fkeys cannot be null
 
     if (dm_vec[i]->style() == ActiveClass::keyStyle)
       q += " PRIMARY KEY";

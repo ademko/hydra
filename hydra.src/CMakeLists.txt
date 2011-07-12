@@ -152,6 +152,7 @@ ADD_EXECUTABLE(wexusserver
     ${THIS_PATH}/webapps/PingerController.cpp
     ${THIS_PATH}/views/webapps/PingerController/indexHtml.cpp
     ${THIS_PATH}/models/webapps/PingHost.cpp ${THIS_PATH}/models/webapps/PingSite.cpp
+    ${THIS_PATH}/wexus/StringUtil.cpp
     )
 TARGET_LINK_LIBRARIES(wexusserver hydra)
 ADD_EXECUTABLE(wexusmake
@@ -161,6 +162,7 @@ ADD_EXECUTABLE(wexusmake
     ${THIS_PATH}/wexus/ModelToken.cpp
     ${THIS_PATH}/wexus/HeaderModelParser.cpp
     ${THIS_PATH}/wexus/CPPScanner.cpp
+    ${THIS_PATH}/wexus/StringUtil.cpp
     )
 TARGET_LINK_LIBRARIES(wexusmake hydra)
 

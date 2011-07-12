@@ -76,6 +76,14 @@ class wexus::ActiveRecord
      */ 
     ActiveClass * activeClass(void) const { return dm_class; }
 
+    /**
+     * Resets the fields to default values... usually -1 for ints
+     * and empty strings.
+     *
+     * @author Aleksander Demko
+     */ 
+    void clear(void);
+
   public:
     /**
      * Sets the default ordering.
@@ -203,6 +211,22 @@ class wexus::ActiveRecord
     // virtual dtor required
     virtual ~ActiveRecord();
 
+    /**
+     * Sets the filter column to use in all where clauses.
+     * By default this is -1, for none.
+     *
+     * @author Aleksander Demko
+     */ 
+    void setFilterColumn(int colindex);
+
+    /**
+      * Appends the column filter criteria (if any)
+      * to the given filter and returns that.
+      *
+      * @author Aleksander Demko
+      */ 
+    ActiveExpr filterExpr(const ActiveExpr &e);
+
     void resetQuery(void);
     void setQuery(std::shared_ptr<QSqlQuery> qry);
 
@@ -211,6 +235,7 @@ class wexus::ActiveRecord
 
   private:
     ActiveClass *dm_class;
+    int dm_filtercol;
     ActiveExpr dm_orderByExpr;
     std::shared_ptr<QSqlQuery> dm_query;
 };

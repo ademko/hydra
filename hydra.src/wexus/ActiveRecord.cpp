@@ -49,9 +49,11 @@ ActiveRecord::RecordNotFound::RecordNotFound(void)
 //
 
 ActiveRecord::ActiveRecord(ActiveClass *klass)
-  : dm_class(klass)
+  : dm_class(klass), dm_filtercol(-1)
 {
   assert(dm_class);
+
+  //clear();    // this must be called by decendants
 }
 
 ActiveRecord::~ActiveRecord()
@@ -76,6 +78,14 @@ void ActiveRecord::check(const QSqlQuery &qy)
   }
 }
 
+void ActiveRecord::clear(void)
+{
+  ActiveClass * klass = activeClass();
+
+  for (int i=0; i<klass->fieldsVec().size(); ++i)
+    klass->fieldsVec()[i]->setVariant(this, QVariant());
+}
+
 void ActiveRecord::check(bool b, const QString &exceptionMsg)
 {
   if (!b) {
@@ -86,6 +96,29 @@ void ActiveRecord::check(bool b, const QString &exceptionMsg)
 void ActiveRecord::order(const ActiveExpr & orderByExpr)
 {
   dm_orderByExpr = orderByExpr;
+}
+
+void ActiveRecord::setFilterColumn(int colindex)
+{
+  assert(colindex>=0 && colindex<activeClass()->fieldsVec().size());
+
+  dm_filtercol = colindex;
+}
+
+ActiveExpr ActiveRecord::filterExpr(const ActiveExpr &e)
+{
+  if (dm_filtercol == -1)
+    return e;
+assert(false);
+
+  ActiveClass * klass = activeClass();
+
+  ActiveExpr fexp(ActiveExpr::fromColumn(dm_filtercol) == klass->fieldsVec()[dm_filtercol]->toVariant(this));
+
+  if (e.isNull())
+    return fexp;
+  else
+    return fexp && e;
 }
 
 void ActiveRecord::resetQuery(void)
@@ -110,14 +143,20 @@ void ActiveRecord::where(const ActiveExpr & whereExpr)
 
 void ActiveRecord::find(const QVariant &keyVal)
 {
-  internalWhere(ActiveExpr::fromColumn(0) == keyVal, 1);
+  ActiveClass * klass = activeClass();
+
+  internalWhere(ActiveExpr::fromColumn(klass->keyColumn()) == keyVal, 1);
+
   if (!next())
     throw RecordNotFound();
 }
 
 bool ActiveRecord::exists(const QVariant &keyVal)
 {
-  internalWhere(ActiveExpr::fromColumn(0) == keyVal, 1);
+  ActiveClass * klass = activeClass();
+
+  internalWhere(ActiveExpr::fromColumn(klass->keyColumn()) == keyVal, 1);
+
   return next();
 }
 
@@ -219,11 +258,12 @@ void ActiveRecord::destroy(const QVariant &keyVal)
   deleteRows(ActiveExpr::fromColumn(klass->keyColumn()) == keyVal);
 }
 
-void ActiveRecord::deleteRows(const ActiveExpr & whereExpr)
+void ActiveRecord::deleteRows(const ActiveExpr & _whereExpr)
 {
   QSqlQuery q(database());
   ActiveClass * klass = activeClass();
   QString s;
+  ActiveExpr whereExpr(filterExpr(_whereExpr));
 
   s = "DELETE FROM " + klass->tableName();
   
@@ -242,11 +282,12 @@ qDebug() << s;
   check(q);
 }
 
-int ActiveRecord::count(const ActiveExpr & whereExpr)
+int ActiveRecord::count(const ActiveExpr & _whereExpr)
 {
   QSqlQuery q(database());
   ActiveClass * klass = activeClass();
   QString s;
+  ActiveExpr whereExpr(filterExpr(_whereExpr));
 
   s = "SELECT COUNT(*) FROM " + klass->tableName();
   
@@ -288,13 +329,14 @@ bool ActiveRecord::next(void)
   return true;
 }
 
-void ActiveRecord::internalWhere(const ActiveExpr & whereExpr, int limit)
+void ActiveRecord::internalWhere(const ActiveExpr & _whereExpr, int limit)
 {
   resetQuery();
 
   std::shared_ptr<QSqlQuery> q(new QSqlQuery(database()));
   ActiveClass * klass = activeClass();
   QString s;
+  ActiveExpr whereExpr(filterExpr(_whereExpr));
 
   s = "SELECT " + klass->fieldsAsList() + " FROM " + klass->tableName();
 

@@ -17,6 +17,7 @@
 #include <wexus/ModelTokenList.h>
 #include <wexus/HeaderModelParser.h>
 #include <wexus/CPPScanner.h>
+#include <wexus/StringUtil.h>
 
 #include <QFile>
 #include <QDirIterator>
@@ -49,12 +50,34 @@ class ModelGenerator
 
   private:
     // name, type
-    typedef std::pair<QString, QString> Field;
+    struct Field
+    {
+      QString name, type;
+
+      QStringList belongsType;   // empty for normal fields
+
+      Field(void);
+      Field(const QString &_name, const QString &_type);
+    };
     // not a map because I want to maintain the user's order
     typedef QVector<Field> Fields;
 
     Fields dm_fields;
 };
+
+ModelGenerator::Field::Field(void)
+{
+}
+
+ModelGenerator::Field::Field(const QString &_name, const QString &_type)
+  : name(_name), type(_type)
+{
+  if (_name == "belongs_to") {
+    colonsToParts(type, belongsType);
+    name = "fKey__" + colonsToUnderscores(type);
+    type = "int";
+  }
+}
 
 ModelGenerator::ModelGenerator(ModelTokenList &toklist)
 {
@@ -75,11 +98,11 @@ void ModelGenerator::emitFieldsHeaderSection(QTextStream &output, const QString 
     "  public:\n";
 
   for (x=0; x<dm_fields.size(); ++x)
-    output << "    " << dm_fields[x].second << " " << dm_fields[x].first << ";\n";
+    output << "    " << dm_fields[x].type << " " << dm_fields[x].name << ";\n";
 
   output << "\n";
   for (x=0; x<dm_fields.size(); ++x)
-    output << "    static wexus::ActiveExpr " << upperFirstChar(dm_fields[x].first) << ";\n";
+    output << "    static wexus::ActiveExpr " << upperFirstChar(dm_fields[x].name) << ";\n";
   output << "\n";
 
   output << "  public:\n";
@@ -117,7 +140,7 @@ void ModelGenerator::emitModelCPPSection(QTextStream &output, const QStringList 
   // generate ActiveExpr static inits
 
   for (x=0; x<dm_fields.size(); ++x)
-    output << "ActiveExpr " << klassname << "::" << upperFirstChar(dm_fields[x].first)
+    output << "ActiveExpr " << klassname << "::" << upperFirstChar(dm_fields[x].name)
       << "(ActiveExpr::fromColumn(" << x << "));\n";
   output << "\n";
 
@@ -130,11 +153,21 @@ void ModelGenerator::emitModelCPPSection(QTextStream &output, const QStringList 
     "      : ActiveClass(\"" << klassname << "\")\n"
     "    {\n";
     
+  bool didkey = false;
   for (x=0; x<dm_fields.size(); ++x) {
       output << "      addField<" << klassname << ","
-        << dm_fields[x].second << ">(\"" << dm_fields[x].first
-        << "\", \"" << dm_fields[x].second << "\", &"
-        << klassname << "::" << dm_fields[x].first
+        << dm_fields[x].type << ">(";
+      if (!dm_fields[x].belongsType.isEmpty())
+        output << "fKeyStyle";
+      else if (didkey)
+        output << "varStyle";
+      else {
+        didkey = true;
+        output << "keyStyle";
+      }
+      output << ",\"" << dm_fields[x].name
+        << "\", \"" << dm_fields[x].type << "\", &"
+        << klassname << "::" << dm_fields[x].name
         << ");\n";
   }
   output <<
@@ -148,6 +181,7 @@ void ModelGenerator::emitModelCPPSection(QTextStream &output, const QStringList 
   output << klassname << "::" << parts[parts.size()-1] << "(void)\n"
     "  : ActiveRecord(&thisClassType)\n"
     "{\n"
+    "  clear();\n"
     "}\n\n";
 }
 
