@@ -39,6 +39,14 @@ class wexus::ActiveExpr
 
     bool isNull(void) const;
 
+    /**
+     * Returns the column index if this expr was built with fromColumn.
+     * throws if its not such an expression
+     *
+     * @author Aleksander Demko
+     */ 
+    int columnIndex(void) const;
+
     void buildString(ActiveClass &klass, QString &out) const;
     void buildBinds(ActiveClass &klass, ActiveRecord &recinst, QSqlQuery &out) const;
 

@@ -35,6 +35,29 @@ namespace wexus
    * @author Aleksander Demko
    */ 
   void underscoresToParts(const QString &s, QStringList &out);
+
+  /**
+   * Converts parts back into a CPP name
+   *
+   * @author Aleksander Demko
+   */
+  QString partsToCPP(const QStringList &parts);
+
+  /**
+   * Returns the same string with the first
+   * letter lowercased.
+   *
+   * @author Aleksander Demko
+   */ 
+  QString lowerFirstChar(const QString &s);
+
+  /**
+   * Returns the same string with the first
+   * letter lowercased.
+   *
+   * @author Aleksander Demko
+   */ 
+  QString upperFirstChar(const QString &s);
 };
 
 #endif

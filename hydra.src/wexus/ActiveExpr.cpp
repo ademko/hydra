@@ -8,6 +8,7 @@
 #include <wexus/ActiveExpr.h>
 
 #include <wexus/ActiveClass.h>
+#include <wexus/ActiveRecord.h>   // for exceptions
 
 using namespace wexus;
 
@@ -42,6 +43,8 @@ class ActiveExpr::ColumnIndex : public ActiveExpr::Imp
 {
   public:
     ColumnIndex(int index);
+
+    int columnIndex(void) const { return dm_index; }
 
     virtual void buildString(ActiveClass &klass, QString &out) const;
 
@@ -161,6 +164,17 @@ ActiveExpr::ActiveExpr(const QString &s) : dm_imp(new Var(s)) { }
 bool ActiveExpr::isNull(void) const
 {
   return dm_imp.get() == 0;
+}
+
+int ActiveExpr::columnIndex(void) const
+{
+  assert(dm_imp);
+  ColumnIndex *c = dynamic_cast<ColumnIndex*>(dm_imp.get());
+
+  if (!c)
+    throw ActiveRecord::Exception("ActiveExpr::columnIndex() called on a non-columnIndex expression");
+
+  return c->columnIndex();
 }
 
 void ActiveExpr::buildString(ActiveClass &klass, QString &out) const

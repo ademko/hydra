@@ -84,6 +84,22 @@ class wexus::ActiveRecord
      */ 
     void clear(void);
 
+    /**
+     * Returns a printable string reprensentation
+     * of the fields in this record.
+     *
+     * @author Aleksander Demko
+     */ 
+    QString toString(void) const;
+
+    /**
+     * Sets the filter column to use in all where clauses.
+     * By default this is -1, for none.
+     *
+     * @author Aleksander Demko
+     */ 
+    void setFilterColumn(int colindex);
+
   public:
     /**
      * Sets the default ordering.
@@ -181,11 +197,9 @@ class wexus::ActiveRecord
      * A null query (the default), deletes all the rows.
      * Does nothing on failure.
      *
-     * Can't be called just delete due to a C++ keyword conflict :)
-     *
      * @author Aleksander Demko
      */ 
-    void deleteRows(const ActiveExpr & whereExpr = ActiveExpr());
+    void destroyRows(const ActiveExpr & whereExpr = ActiveExpr());
 
     /**
      * Returns the number of rows that match the given where query,
@@ -210,14 +224,6 @@ class wexus::ActiveRecord
     ActiveRecord(ActiveClass *klass);
     // virtual dtor required
     virtual ~ActiveRecord();
-
-    /**
-     * Sets the filter column to use in all where clauses.
-     * By default this is -1, for none.
-     *
-     * @author Aleksander Demko
-     */ 
-    void setFilterColumn(int colindex);
 
     /**
       * Appends the column filter criteria (if any)

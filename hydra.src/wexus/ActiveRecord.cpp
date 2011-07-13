@@ -27,6 +27,7 @@ using namespace wexus;
 ActiveRecord::Exception::Exception(const QString &_what) throw()
   : dm_what(_what.toUtf8())
 {
+  //assert(false);//optional, useful during debugging
 }
 
 ActiveRecord::Exception::~Exception() throw()
@@ -86,6 +87,29 @@ void ActiveRecord::clear(void)
     klass->fieldsVec()[i]->setVariant(this, QVariant());
 }
 
+QString ActiveRecord::toString(void) const
+{
+  ActiveClass * klass = activeClass();
+  QString r("[");
+
+  for (int i=0; i<klass->fieldsVec().size(); ++i) {
+    if (i>0)
+      r += ",";
+    r += "\"" + klass->fieldsVec()[i]->toVariant(this).toString() + "\"";
+  }
+
+  r += "]";
+
+  return r;
+}
+
+void ActiveRecord::setFilterColumn(int colindex)
+{
+  assert(colindex>=0 && colindex<activeClass()->fieldsVec().size());
+
+  dm_filtercol = colindex;
+}
+
 void ActiveRecord::check(bool b, const QString &exceptionMsg)
 {
   if (!b) {
@@ -98,18 +122,10 @@ void ActiveRecord::order(const ActiveExpr & orderByExpr)
   dm_orderByExpr = orderByExpr;
 }
 
-void ActiveRecord::setFilterColumn(int colindex)
-{
-  assert(colindex>=0 && colindex<activeClass()->fieldsVec().size());
-
-  dm_filtercol = colindex;
-}
-
 ActiveExpr ActiveRecord::filterExpr(const ActiveExpr &e)
 {
   if (dm_filtercol == -1)
     return e;
-assert(false);
 
   ActiveClass * klass = activeClass();
 
@@ -248,17 +264,17 @@ void ActiveRecord::destroy(void)
 {
   ActiveClass * klass = activeClass();
 
-  deleteRows(ActiveExpr::fromColumn(klass->keyColumn()) == klass->fieldsVec()[0]->toVariant(this));
+  destroyRows(ActiveExpr::fromColumn(klass->keyColumn()) == klass->fieldsVec()[klass->keyColumn()]->toVariant(this));
 }
 
 void ActiveRecord::destroy(const QVariant &keyVal)
 {
   ActiveClass * klass = activeClass();
 
-  deleteRows(ActiveExpr::fromColumn(klass->keyColumn()) == keyVal);
+  destroyRows(ActiveExpr::fromColumn(klass->keyColumn()) == keyVal);
 }
 
-void ActiveRecord::deleteRows(const ActiveExpr & _whereExpr)
+void ActiveRecord::destroyRows(const ActiveExpr & _whereExpr)
 {
   QSqlQuery q(database());
   ActiveClass * klass = activeClass();
@@ -273,7 +289,7 @@ void ActiveRecord::deleteRows(const ActiveExpr & _whereExpr)
   }
 
 qDebug() << s;
-  check( q.prepare(s) , "ActiveRecord::deleteRows() prepare() failed");
+  check( q.prepare(s) , "ActiveRecord::destroyRows() prepare() failed");
 
   if (!whereExpr.isNull())
     whereExpr.buildBinds(*klass, *this, q);

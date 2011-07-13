@@ -88,6 +88,23 @@ void PingerController::index(void)
     sites.sitename = "home network";
     sites.create();
   }
+// controller
+
+  PingHost sub = sites.pingHost();
+
+  sub.destroyRows();
+
+  sub.id = 200;
+  sub.hostname = "sub host name";
+  sub.create();
+  sub.id = 201;
+  sub.hostname = "another host name";
+  sub.create();
+
+  sub.all();
+  while (sub.next()) {
+    qDebug() << "FOUND RECORD" << hosts.id << hosts.hostname;
+  }
 
   indexHtml();
 }

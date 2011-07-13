@@ -7,6 +7,8 @@
 
 #include <wexus/StringUtil.h>
 
+#include <assert.h>
+
 using namespace wexus;
 
 QString wexus::colonsToUnderscores(const QString &s)
@@ -30,4 +32,31 @@ void wexus::underscoresToParts(const QString &s, QStringList &out)
   out = s.split("__");
 }
 
+
+QString wexus::partsToCPP(const QStringList &parts)
+{
+  return parts.join("::");
+}
+
+QString wexus::lowerFirstChar(const QString &s)
+{
+  assert(!s.isEmpty());
+
+  QString r(s);
+
+  r[0] = r[0].toLower();
+
+  return r;
+}
+
+QString wexus::upperFirstChar(const QString &s)
+{
+  assert(!s.isEmpty());
+
+  QString r(s);
+
+  r[0] = r[0].toUpper();
+
+  return r;
+}
 

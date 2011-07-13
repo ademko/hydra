@@ -75,7 +75,7 @@ class wexus::ActiveClass
         const QString & fieldType(void) const { return dm_fieldType; }
         QString sqlFieldType(void) const { return toSqlType(dm_fieldType); }
 
-        virtual QVariant toVariant(ActiveRecord *inst) const = 0;
+        virtual QVariant toVariant(const ActiveRecord *inst) const = 0;
         
         virtual void setVariant(ActiveRecord *inst, const QVariant &v) = 0;
 
@@ -93,9 +93,9 @@ class wexus::ActiveClass
         ActiveFieldType(int style, const QString &fieldName, const QString &fieldType, MemberPtr memberptr)
           : ActiveField(style, fieldName, fieldType), dm_memberptr(memberptr) { }
 
-        virtual QVariant toVariant(ActiveRecord *inst) const {
-          RECT * recinstance = dynamic_cast<RECT*>(inst);
-          DATT * datptr;
+        virtual QVariant toVariant(const ActiveRecord *inst) const {
+          const RECT * recinstance = dynamic_cast<const RECT*>(inst);
+          const DATT * datptr;
 
           assert(recinstance);
 
