@@ -188,26 +188,59 @@ bool ActiveRecord::last(const ActiveExpr & whereExpr)
   return next();
 }
 
-void ActiveRecord::create(void)
+void ActiveRecord::create(const QVariant &v)
 {
-  resetQuery();
-
-  QSqlQuery q(database());
   ActiveClass * klass = activeClass();
   QString s;
+
+  resetQuery();
+
+  bool autoinc = !v.isValid();
+  QVariant next_id(v);
+  int tries = 0;
+
+  if (autoinc) {
+    QSqlQuery a(database());
+    s = "SELECT MAX(" + klass->fieldsVec()[klass->keyColumn()]->fieldName()
+      + ") FROM " + klass->tableName();
+qDebug() << s;
+
+    a.exec(s);
+    check(a);
+
+    if (a.next())
+      next_id = a.value(0);
+
+    if (next_id.isNull())
+      next_id = 0;
+    next_id = next_id.toInt() + 1;
+  }
+
+  QSqlQuery q(database());
 
   s = "INSERT INTO " + klass->tableName() + " ("
     + klass->fieldsAsListSansTable() + ") VALUES ("
     + klass->questionsAsList() + ")";
 
-qDebug() << s;
+qDebug() << s << toString();
   check( q.prepare(s) , "ActiveRecord::create() prepare() failed");
 
   for (int i=0; i<klass->fieldsVec().size(); ++i) {
     q.bindValue(i, klass->fieldsVec()[i]->toVariant(this));
   }
 
-  q.exec();
+  bool good;
+  do {
+    klass->fieldsVec()[klass->keyColumn()]->setVariant(this, next_id);
+    q.bindValue(klass->keyColumn(), next_id);
+
+    good = q.exec();
+    tries++;
+
+    if (autoinc)
+      next_id = next_id.toInt() + 1;  //prep if the next iteration, if any
+  } while (autoinc && !good && tries < 5);
+
   check(q);
 }
 
@@ -246,7 +279,7 @@ void ActiveRecord::save(void)
     s += klass->fieldsVec()[0]->fieldName() + " = ?";
   }
 
-qDebug() << s;
+qDebug() << s << toString();
   check( q.prepare(s) , "ActiveRecord::save() prepare() failed");
 
   for (int i=0; i<klass->fieldsVec().size(); ++i)
@@ -373,7 +406,7 @@ void ActiveRecord::internalWhere(const ActiveExpr & _whereExpr, int limit)
       s += " DESC LIMIT 1";
   }
 
-qDebug() << s;
+qDebug() << s << toString();
 
   check( q->prepare(s) , "ActiveRecord::internalWhere() prepare() failed");
 

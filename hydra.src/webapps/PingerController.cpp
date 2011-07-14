@@ -49,8 +49,13 @@ void PingerController::index(void)
   // ActiveRecord test code:
 
   // this stuff should be moved into "migrations" or something
-  PingHost().activeClass()->createTable();
-  PingSite().activeClass()->createTable();
+  {
+    PingHost().activeClass()->createTable();
+    PingSite().activeClass()->createTable();
+
+    //PingHost().destroyRows();
+    //PingSite().destroyRows();
+  }
 
   PingHost hosts;
 
@@ -58,11 +63,9 @@ void PingerController::index(void)
     hosts.destroy();
   hosts.destroy(502);
 
-  hosts.id = 501;
   hosts.hostname = "test record";
-  hosts.create();
-  hosts.id = 502;
-  hosts.create();
+  hosts.create(501);
+  hosts.create(502);
 
   hosts.find(501);
   hosts.hostname = "updated string";
@@ -73,9 +76,11 @@ void PingerController::index(void)
 
   hosts.order(PingHost::Id);
   //hosts.where(PingHost::Id >= 1000);
+  hosts.all();
 
+  qDebug() << "RESULTSET FOLLOWS:";
   while (hosts.next()) {
-    qDebug() << "FOUND RECORD" << hosts.id << hosts.hostname;
+    qDebug() << "FOUND RECORD: " << hosts.toString();
   }
 
   qDebug() << "Total records in DB: " << hosts.count();
@@ -84,9 +89,8 @@ void PingerController::index(void)
   PingSite sites;
 
   if (!sites.exists(100)) {
-    sites.id = 100;
     sites.sitename = "home network";
-    sites.create();
+    sites.create(100);
   }
 // controller
 
@@ -94,16 +98,16 @@ void PingerController::index(void)
 
   sub.destroyRows();
 
-  sub.id = 200;
   sub.hostname = "sub host name";
   sub.create();
-  sub.id = 201;
   sub.hostname = "another host name";
   sub.create();
 
+qDebug() << sub.toString();
   sub.all();
+  qDebug() << "RESULTSET FOLLOWS:";
   while (sub.next()) {
-    qDebug() << "FOUND RECORD" << hosts.id << hosts.hostname;
+    qDebug() << "FOUND RECORD: " << sub.toString();
   }
 
   indexHtml();

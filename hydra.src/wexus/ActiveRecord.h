@@ -162,8 +162,14 @@ class wexus::ActiveRecord
      */
     bool last(const ActiveExpr & whereExpr = ActiveExpr());
 
-    /// insert the current values into the database
-    void create(void);
+    /**
+     * Inserts the current values into the database.
+     * If a specific id is desired, it must be passed here.
+     * Otherwise, one will be auto generated.
+     *
+     * @author Aleksander Demko
+     */ 
+    void create(const QVariant &v = QVariant());
 
     /**
      * Saves the current values back into the database.
