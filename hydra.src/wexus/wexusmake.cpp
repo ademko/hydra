@@ -47,6 +47,8 @@ class ModelGenerator
       QStringList hasType;   // empty for normal fields
       QStringList belongsType;   // empty for normal fields
 
+      bool isKey;
+
       Field(void);
       Field(const QString &_name, const QString &_type);
 
@@ -59,11 +61,12 @@ class ModelGenerator
 };
 
 ModelGenerator::Field::Field(void)
+  : isKey(false)
 {
 }
 
 ModelGenerator::Field::Field(const QString &_name, const QString &_type)
-  : name(_name), type(_type)
+  : name(_name), type(_type), isKey(_name == "id")
 {
   if (_name == "belongs_to") {
     colonsToParts(type, belongsType);
@@ -79,13 +82,24 @@ ModelGenerator::Field::Field(const QString &_name, const QString &_type)
 
 ModelGenerator::ModelGenerator(ModelTokenList &toklist)
 {
+  bool gotkey = false;
+
   for (ModelTokenList::const_iterator mm=toklist.begin(); mm != toklist.end(); ++mm)
     if ((*mm)->type() == 'F') {
       FieldModelToken *fm = dynamic_cast<FieldModelToken*>(mm->get());
       assert(fm);
+      if (fm->fieldName() == "id") {
+        if (gotkey)
+          throw HeaderModelParser::Exception("Field \"id\" defined more tha once");
+        if (fm->fieldType() != "int")
+          throw HeaderModelParser::Exception("Field \"id\" must be of type int, not: " + fm->fieldType());
+        gotkey = true;
+      }
       //qDebug() << "  " << fm->fieldType() << fm->fieldName();
       dm_fields.push_back(Field(fm->fieldName(), fm->fieldType()));
     }
+  if (!gotkey)
+    throw HeaderModelParser::Exception("Miss required field: \"int id;\"");
 }
 
 static void namespacePrint(int index, const QStringList &parts, QTextStream &output)
@@ -183,7 +197,6 @@ void ModelGenerator::emitModelCPPSection(QTextStream &output, const QStringList 
     "      : ActiveClass(\"" << klassname << "\")\n"
     "    {\n";
     
-  bool didkey = false;
   for (x=0; x<dm_fields.size(); ++x) {
       if (!dm_fields[x].isField())
         continue;
@@ -191,12 +204,10 @@ void ModelGenerator::emitModelCPPSection(QTextStream &output, const QStringList 
         << dm_fields[x].type << ">(";
       if (!dm_fields[x].belongsType.isEmpty())
         output << "fKeyStyle";
-      else if (didkey)
-        output << "varStyle";
-      else {
-        didkey = true;
+      else if (dm_fields[x].isKey)
         output << "keyStyle";
-      }
+      else
+        output << "varStyle";
       output << ",\"" << dm_fields[x].name
         << "\", \"" << dm_fields[x].type << "\", &"
         << klassname << "::" << dm_fields[x].name
