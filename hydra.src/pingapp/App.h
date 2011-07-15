@@ -10,9 +10,9 @@
 
 #include <wexus/Application.h>
 
-namespace webapps
+namespace pingapp
 {
-  class PingerApp;
+  class App;
 }
 
 /**
@@ -20,10 +20,10 @@ namespace webapps
  *
  * @author Aleksander Demko
  */ 
-class webapps::PingerApp : public wexus::Application
+class pingapp::App : public wexus::Application
 {
   public:
-    PingerApp(void);
+    App(void);
 };
 
 #endif

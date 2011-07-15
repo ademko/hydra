@@ -5,30 +5,30 @@
  * See the accompanying file LICENSE.MIT.txt for details.
  */
 
-#include <webapps/PingerController.h>
+#include <pingapp/Sites.h>
 
 #include <wexus/HTMLString.h>
 
-#include <webapps/PingHost.h>
-#include <webapps/PingSite.h>
+#include <pingapp/Host.h>
+#include <pingapp/Site.h>
 
 #include <QDebug>
 
 using namespace wexus;
-using namespace webapps;
+using namespace pingapp;
 
 //
 //
-// PingerController
+// Sites
 //
 //
 
-PingerController::PingerController(void)
+Sites::Sites(void)
 { 
-  registerAction<PingerController, &PingerController::index>("index");
+  registerAction<Sites, &Sites::index>("index");
 }
 
-void PingerController::index(void)
+void Sites::index(void)
 {
   if (cookies.contains("counter"))
     cookies["counter"] = cookies["counter"].toInt() + 1;
@@ -39,7 +39,7 @@ void PingerController::index(void)
   //reply()->setServerCookie("SESID", "VAL0", "", "", "/");
   //reply()->setServerCookie("A_COOKIE", "VAL1", "", "", "/pinger");
   //qDebug() << "ClientCookies" << request()->cookies()["SESID"] << request()->cookies()["A_COOKIE"];
-  /*output() << "from within PingerController::index() via Context<p>\n"
+  /*output() << "from within Site::index() via Context<p>\n"
     "and some encoded tags (viewsource): "
     << "<inline_encoded_tag>"
     << HTMLString::encode("<encoded_tag>")
@@ -50,14 +50,14 @@ void PingerController::index(void)
 
   // this stuff should be moved into "migrations" or something
   {
-    PingHost().activeClass()->createTable();
-    PingSite().activeClass()->createTable();
+    Host().activeClass()->createTable();
+    Site().activeClass()->createTable();
 
-    //PingHost().destroyRows();
-    //PingSite().destroyRows();
+    //Host().destroyRows();
+    //Site().destroyRows();
   }
 
-  PingHost hosts;
+  Host hosts;
 
   if (hosts.exists(501))
     hosts.destroy();
@@ -74,8 +74,8 @@ void PingerController::index(void)
   hosts.find(502);
   hosts.destroy();
 
-  hosts.order(PingHost::Id);
-  //hosts.where(PingHost::Id >= 1000);
+  hosts.order(Host::Id);
+  //hosts.where(Host::Id >= 1000);
   hosts.all();
 
   qDebug() << "RESULTSET FOLLOWS:";
@@ -84,9 +84,9 @@ void PingerController::index(void)
   }
 
   qDebug() << "Total records in DB: " << hosts.count();
-  qDebug() << "Total records in DB (index <1000: " << hosts.count(PingHost::Id < 1000);
+  qDebug() << "Total records in DB (index <1000: " << hosts.count(Host::Id < 1000);
 
-  PingSite sites;
+  Site sites;
 
   if (!sites.exists(100)) {
     sites.sitename = "home network";
@@ -94,7 +94,7 @@ void PingerController::index(void)
   }
 // controller
 
-  PingHost sub = sites.pingHost();
+  Host sub = sites.host();
 
   sub.destroyRows();
 

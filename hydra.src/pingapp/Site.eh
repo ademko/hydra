@@ -10,15 +10,15 @@
 
 #include <wexus/ActiveRecord.h>
 
-namespace webapps
+namespace pingapp
 {
-  class PingSite;
+  class Site;
 }
 
-class webapps::PingSite : public wexus::ActiveRecord
+class pingapp::Site : public wexus::ActiveRecord
 {
   fields:   // begin parsing of fields, will do all replacement here too
-    webapps::PingHost has_many;
+    pingapp::Host has_many;
     QString sitename;
     QString desc;
     int id; //comment normally not listed last, just check

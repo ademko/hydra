@@ -10,15 +10,15 @@
 
 #include <wexus/ActiveRecord.h>
 
-namespace webapps
+namespace pingapp
 {
-  class PingHost;
+  class Host;
 }
 
-class webapps::PingHost : public wexus::ActiveRecord
+class pingapp::Host : public wexus::ActiveRecord
 {
   fields:   // begin parsing of fields, will do all replacement here too
-    webapps::PingSite belongs_to;
+    pingapp::Site belongs_to;
     int id; //comment
     QString hostname;
 };

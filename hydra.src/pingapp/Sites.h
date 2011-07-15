@@ -10,15 +10,15 @@
 
 #include <wexus/Controller.h>
 
-namespace webapps
+namespace pingapp
 {
-  class PingerController;
+  class Sites;
 }
 
-class webapps::PingerController : public wexus::Controller
+class pingapp::Sites : public wexus::Controller
 {
   public:
-    PingerController(void);
+    Sites(void);
 
     void index(void);
 
