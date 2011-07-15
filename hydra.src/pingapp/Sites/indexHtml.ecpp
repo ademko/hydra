@@ -1,32 +1,12 @@
 
+Current sites:
 <p>
-Hello, world (from within the template) <br/>
-"a string literal" << 123 = <%= "a string literal" << 123 %> <br/>
-"&lt;inline_coded&gt" = <%= "<inline_coded>" %> <br/>
-HTMLString("&lt;html_string&gt;") = <%= HTMLString("<html_string>") %> <br/>
-
-<form action="" method="post">
-Enter a city:<input type="text" name="city" />
-<input type="submit" />
-</form>
-
-<% if (params.contains("city")) { %>
-  City = <%=params["city"]%>
-<% } else { %>
-  city not set
+<ul>
+<% while (dm_site.next()) { %>
+  <li>id=<%=dm_site.id%> name=<%=dm_site.name%> desc=<%=dm_site.desc%>
 <% } %>
-</p>
+</ul>
 
-The cookie counter is currently: <%= dm_counter %>
-
+<%= linkTo("New Post", "create"); %>
 <p>
-
-<%
-if (!session.contains("clicks"))
-  session["clicks"] = 1000;
-
-session["clicks"] = session["clicks"].toInt() + 3;
-%>
-
-clicks = <%=session["clicks"]%>
 

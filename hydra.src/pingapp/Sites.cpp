@@ -10,7 +10,6 @@
 #include <wexus/HTMLString.h>
 
 #include <pingapp/Host.h>
-#include <pingapp/Site.h>
 
 #include <QDebug>
 
@@ -26,9 +25,27 @@ using namespace pingapp;
 Sites::Sites(void)
 { 
   registerAction<Sites, &Sites::index>("index");
+  registerAction<Sites, &Sites::create>("create");
 }
 
 void Sites::index(void)
+{
+  // need to put this someplace better!
+  // atleast before the migration stuff too
+  Host().activeClass()->createTable();
+  Site().activeClass()->createTable();
+
+  dm_site.all();
+
+  indexHtml();
+}
+
+void Sites::create(void)
+{
+  createHtml();
+}
+
+  /*
 {
   if (cookies.contains("counter"))
     cookies["counter"] = cookies["counter"].toInt() + 1;
@@ -39,12 +56,12 @@ void Sites::index(void)
   //reply()->setServerCookie("SESID", "VAL0", "", "", "/");
   //reply()->setServerCookie("A_COOKIE", "VAL1", "", "", "/pinger");
   //qDebug() << "ClientCookies" << request()->cookies()["SESID"] << request()->cookies()["A_COOKIE"];
-  /*output() << "from within Site::index() via Context<p>\n"
-    "and some encoded tags (viewsource): "
-    << "<inline_encoded_tag>"
-    << HTMLString::encode("<encoded_tag>")
-    << HTMLString("<raw_tag>")
-    << "<p>\n";*/
+  //output() << "from within Site::index() via Context<p>\n"
+  //  "and some encoded tags (viewsource): "
+  //  << "<inline_encoded_tag>"
+  //  << HTMLString::encode("<encoded_tag>")
+  //  << HTMLString("<raw_tag>")
+  //  << "<p>\n";
 
   // ActiveRecord test code:
 
@@ -111,5 +128,5 @@ qDebug() << sub.toString();
   }
 
   indexHtml();
-}
+}*/
 

@@ -10,6 +10,8 @@
 
 #include <wexus/Controller.h>
 
+#include <pingapp/Site.h>
+
 namespace pingapp
 {
   class Sites;
@@ -21,11 +23,14 @@ class pingapp::Sites : public wexus::Controller
     Sites(void);
 
     void index(void);
+    void create(void);
 
     void indexHtml(void);
+    void createHtml(void);
 
   protected:
-    QVariant dm_counter;
+    //QVariant dm_counter;
+    Site dm_site;
 };
 
 #endif

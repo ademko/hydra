@@ -19,7 +19,7 @@ class pingapp::Site : public wexus::ActiveRecord
 {
   fields:   // begin parsing of fields, will do all replacement here too
     pingapp::Host has_many;
-    QString sitename;
+    QString name;
     QString desc;
     int id; //comment normally not listed last, just check
 };

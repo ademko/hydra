@@ -148,12 +148,14 @@ ADD_EXECUTABLE(wexusserver
     ${THIS_PATH}/wexus/Session.cpp
     ${THIS_PATH}/wexus/MongooseServer.cpp ${THIS_PATH}/wexus/mongoose.c
     ${THIS_PATH}/wexus/StringUtil.cpp
+    ${THIS_PATH}/wexus/Widgets.cpp
 
 #pingapp
     ${THIS_PATH}/pingapp/App.cpp
     ${THIS_PATH}/pingapp/Sites.cpp
 #views
     ${THIS_PATH}/pingapp/Sites/indexHtml.cpp
+    ${THIS_PATH}/pingapp/Sites/createHtml.cpp
 #models
     ${THIS_PATH}/pingapp/Host.cpp ${THIS_PATH}/pingapp/Site.cpp
     )
