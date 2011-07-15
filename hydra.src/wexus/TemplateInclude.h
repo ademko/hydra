@@ -12,6 +12,7 @@
 // ecpp->cpp generated files
 
 #include <wexus/HTMLString.h>
+#include <wexus/Widgets.h>
 
 #endif
 

@@ -577,7 +577,7 @@ static void commandViews(QTextStream &out, hydra::ArgumentParser &args)
     parts.push_back(baseName);
     outfilename = infilename.mid(0, infilename.size() - ext.size()) + "cpp";
 
-qDebug() << "infilename" << infilename << "ext" << ext << "parts" << parts << "outfilename" << outfilename;
+//qDebug() << "infilename" << infilename << "ext" << ext << "parts" << parts << "outfilename" << outfilename;
 
     // render the output
     QFile out(outfilename);
