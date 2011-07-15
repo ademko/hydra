@@ -52,7 +52,10 @@ void Controller::handleControllerRequest(const QString &actionname)
   if (ii != dm_actions.end()) {
     // call the found action
     ii->second(this);
+
+    if (Context::instance()->reply().status() == 0)
+      throw HTTPHandler::Exception("Controller called, but it didn't set any status (or send output)");
   } else
-    throw ActionNotFoundException("Action not found: " + actionname);
+    throw ActionNotFoundException("wexus::Controller: Action not found: " + actionname);
 }
 

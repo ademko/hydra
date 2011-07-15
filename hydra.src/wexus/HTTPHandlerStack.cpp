@@ -24,7 +24,7 @@ void HTTPHandlerStack::handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &
   for (int i=0; i<dm_handlers.size(); ++i) {
     dm_handlers[i].second->handleRequest(req, reply);
     if (reply.hasReply())
-      return; //this handler handled the request, stock scanning the stack
+      return; //this handler handled the request, stop scanning the stack
   }
 }
 

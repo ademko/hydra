@@ -9,6 +9,7 @@
 
 #include <assert.h>
 
+#include <QStringList>
 #include <QDebug>
 
 using namespace wexus;
@@ -204,6 +205,19 @@ QTextStream & HTTPReply::output(void)
   return dm_outs;
 }
 
+void HTTPReply::redirectTo(const QString &rawurl)
+{
+  assert(!dm_calledcommit && "[setStatus() must be called BEFORE any output() calls]");
+  // Reply status really should be 303 (I think), but
+  // netscape won're redirect if the status code is 303.
+  // Look into cause later.
+  setStatus(302);
+
+  QStringList l("Location: " + rawurl);
+
+  commitHeader(&l);
+}
+
 /*void HTTPReply::setServerCookie(const QString &name, const QString &value,
         const QString &expires, const QString &domain, const QString &path)
 {
@@ -220,7 +234,7 @@ QTextStream & HTTPReply::output(void)
   dm_servercookies.push_back(c);
 }*/
 
-void HTTPReply::commitHeader(void)
+void HTTPReply::commitHeader(const QStringList *additionalHeaders)
 {
   assert(dm_status>0);
   assert(dm_status>=100 && dm_status<1000);
@@ -245,6 +259,10 @@ void HTTPReply::commitHeader(void)
     "Server: wexus/1.9.0\r\n";
 
   commitCookieHeader();
+
+  if (additionalHeaders)
+    for (QStringList::const_iterator ii=additionalHeaders->begin(); ii != additionalHeaders->end(); ++ii)
+      dm_outs << *ii << "\r\n";
 
   dm_outs <<
     "\r\n";   // end of header, now the body
@@ -330,6 +348,6 @@ void ErrorHTTPHandler::handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &
   if (dm_usermsg.isEmpty())
     reply.output() << "Error 432: ErrorHTTPHandler called.";
   else
-    reply.output() << "Error: " << dm_usermsg;
+    reply.output() << "ErrorHTTPHandler: " << dm_usermsg;
 }
 

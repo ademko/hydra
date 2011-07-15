@@ -38,13 +38,41 @@ Application::~Application()
 void Application::handleApplicationRequest(QString &filteredRequest, wexus::HTTPRequest &req, wexus::HTTPReply &reply)
 {
   QString controllername(filteredRequest.mid(1));
+  QString action("index");
 
-  if (controllername.isEmpty())
-    controllername = "home";
+  if (controllername.isEmpty()) {
+    //controllername = "home";
+    // if no controllername is supplied, redir the user to an explicit default one
+    QString redir_url(req.request());
+
+    if (redir_url[redir_url.size()-1] != '/')
+      redir_url += "/";
+    redir_url += "home/";
+
+    reply.redirectTo(redir_url);
+    return;
+  } else {
+    int index = controllername.indexOf("/");
+
+    // must trail in a /
+    // (this is so simple linkTo()s work nicely
+    if (index == -1) {
+      QString redir_url(req.request());
+
+      redir_url += "/";
+      reply.redirectTo(redir_url);
+      return;
+    }
+
+    assert(index != -1);
+
+    if (index+1 < controllername.size())
+      action = controllername.mid(index+1);
+    controllername = controllername.left(index);
+  }
 
   // compute the action
   // find where the action starts
-  QString action = "index";
 qDebug() << "Application::handleApplicationRequest" << filteredRequest << "controllername" << controllername << "action" << action;
 
   // see if we a have controller for this request
@@ -61,6 +89,6 @@ qDebug() << "Application::handleApplicationRequest" << filteredRequest << "contr
       return;
     }
 
-  throw ControllerNotFoundException("Controller not found: " + controllername);
+  throw ControllerNotFoundException("wexus::Application: Controller not found: " + controllername);
 }
 

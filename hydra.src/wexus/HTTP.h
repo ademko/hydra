@@ -231,6 +231,17 @@ class wexus::HTTPReply
      */ 
     //void setServerCookie(const QString &name, const QString &value, const QString &expires, const QString &domain, const QString &path);
 
+
+    /**
+     * Redirects the user browser to the given url.
+     * This sets the status code too.
+     * output() cannot be called before (or after)
+     * this call.
+     *
+     * @author Aleksander Demko
+     */ 
+    void redirectTo(const QString &rawurl);
+
   private:
     /**
      * Commits and flushes any data to the output stream.
@@ -238,9 +249,13 @@ class wexus::HTTPReply
      * You can this repeadedly, only the first call does something.
      * Calling this with Status set to 0 is an error.
      *
+     * If additionalHeaders is non-null, these headers will also be
+     * sent. Each string in the list will be a line in the
+     * headers. The strings should NOT be terminated by \n etc.
+     *
      * @author Aleksander Demko
      */ 
-    void commitHeader(void);
+    void commitHeader(const QStringList *additionalHeaders = 0);
 
     /// called by commitHeader
     void commitCookieHeader(void);
