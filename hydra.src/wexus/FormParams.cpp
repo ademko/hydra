@@ -20,7 +20,7 @@ using namespace wexus;
  *
  * @author Aleksander Demko
  */ 
-/*class IODeviceIterator
+class IODeviceIterator
 {
   public:
     IODeviceIterator(QIODevice *dev = 0);
@@ -52,12 +52,12 @@ using namespace wexus;
 IODeviceIterator::IODeviceIterator(QIODevice *dev)
   : dm_dev(dev), dm_c(0)
 {
-}*/
+}
 
-FormParams::ParamNotFoundException::ParamNotFoundException(const QString &fieldname)
+/*FormParams::ParamNotFoundException::ParamNotFoundException(const QString &fieldname)
   : wexus::HTTPHandler::Exception("field not found: " + fieldname)
 {
-}
+}*/
 
 FormParams::FormDecodeException::FormDecodeException(void)
   : wexus::HTTPHandler::Exception("FormDecodeException")
@@ -66,65 +66,27 @@ FormParams::FormDecodeException::FormDecodeException(void)
 
 FormParams::FormParams(wexus::HTTPRequest *req)
 {
-  dm_req = req;
+  parseRequest(req);
+}
+
+void FormParams::parseRequest(wexus::HTTPRequest *req)
+{
   assert(req);
 
-  dm_processedreq = false;
-}
-
-bool FormParams::contains(const QString &paramName)
-{
-  parseRequest();
-
-  return dm_params.find(paramName) != dm_params.end();
-}
-
-/*const QVariant & FormParams::param(const QString &paramName)
-{
-  parseRequest();
-
-  params_t::const_iterator ii = dm_params.find(paramName);
-
-  if (ii == dm_params.end())
-    return dm_emptyvariant;
-  else
-    return ii->second;
-}*/
-
-const QVariant & FormParams::operator[](const QString &paramName)
-{
-  parseRequest();
-
-  params_t::const_iterator ii = dm_params.find(paramName);
-
-  if (ii == dm_params.end())
-    throw ParamNotFoundException(paramName);
-  else
-    return ii->second;
-}
-
-void FormParams::parseRequest(void)
-{
-  if (dm_processedreq)
-    return;
-  dm_processedreq = true;
-
-  assert(dm_req);
-
-  if (!dm_req->query().isEmpty())
-    decodeAndParse(dm_req->query().begin(), dm_req->query().end());
+  if (!req->query().isEmpty())
+    decodeAndParse(req->query().begin(), req->query().end());
 
   // parse the post data
-  if (dm_req->contentLength() > 0) {
+  if (req->contentLength() > 0) {
     // read the content length into a string and then process that
     // TODO optimizes this in the future to iterate over the Device
     // santify check this resize operation???
-    QByteArray ary = dm_req->input()->read(dm_req->contentLength());
+    QByteArray ary = req->input()->read(req->contentLength());
 
     decodeAndParse(ary.begin(), ary.end());
   }
 
-  /*IODeviceIterator ii(dm_req->input());
+  /*IODeviceIterator ii(req->input());
   IODeviceIterator endii;
 
   decodeAndParse(ii, endii);*/
@@ -185,7 +147,8 @@ template <class ITER>
         // begin parsing a new name
         is_name = true;
         // insert stored name and value into map
-        dm_params[name] = value;
+        nestedInsert(*this, name, value);
+        //(*this)[name] = value;
         // clear name/value strings for next pair
         name.clear();
         value.clear();
@@ -198,6 +161,37 @@ template <class ITER>
   }
 
   if (!is_name)
-    dm_params[name] = value; // value parsed, insert name and value into map
+    nestedInsert(*this, name, value);
+    //(*this)[name] = value; // value parsed, insert name and value into map
+}
+
+void FormParams::nestedInsert(QVariantMap &m, const QString &key, const QString &val)
+{
+  int idx = key.indexOf('[');
+
+  if (idx == -1) {
+    // easy case
+    m[key] = val;
+    return;
+  }
+
+  // recursive case
+  int endidx = key.lastIndexOf(']');
+
+  if (endidx == -1)
+    throw FormDecodeException();
+
+  QString subkey(key.left(idx));
+  QString recurkey(key.mid(idx+1, endidx-idx-1));
+
+  // gets the current map based on the subkey
+  QVariantMap submap = m[subkey].toMap();
+
+  // recurse
+  nestedInsert(submap, recurkey, val);
+
+  // package up the map and set it back into the varient
+  // TODO this is gross... should be a way to do this IN PLACE
+  m[subkey] = submap;
 }
 
