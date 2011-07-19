@@ -10,6 +10,8 @@
 
 #include <wexus/HTMLString.h>
 
+#include <QVariant>
+
 namespace wexus
 {
   /**
@@ -73,7 +75,7 @@ class wexus::Form
      *
      * @author Aleksander Demko
      */
-    wexus::HTMLString textField(const QString &fieldName, const QString &defaultVal = QString(), int sz = 30, int maxlen = 60) const;
+    wexus::HTMLString textField(const QString &fieldName, const QVariant &defaultVal = QVariant(), int sz = 30, int maxlen = 60) const;
 
     /**
      * The submit button. fieldName is optional and not often used.
@@ -90,7 +92,7 @@ class wexus::Form
      */
     wexus::HTMLString fullFieldName(const QString &fieldName) const;
 
-    QString formValue(const QString &fieldName) const;
+    QVariant formValue(const QString &fieldName) const;
 
   private:
     QString dm_formname;

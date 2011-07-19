@@ -9,6 +9,8 @@
 
 #include <wexus/Context.h>
 
+#include <QDebug>
+
 using namespace wexus;
 
 QString wexus::urlTo(void)
@@ -45,10 +47,10 @@ Form::~Form()
   output() << "</FORM>\n";
 }
 
-wexus::HTMLString Form::textField(const QString &fieldName, const QString &defaultVal, int sz, int maxlen) const
+wexus::HTMLString Form::textField(const QString &fieldName, const QVariant &defaultVal, int sz, int maxlen) const
 {
   HTMLString ret;
-  QString def = formValue(fieldName);
+  QString def = formValue(fieldName).toString();
 
   ret.reserve(100);
  
@@ -56,7 +58,7 @@ wexus::HTMLString Form::textField(const QString &fieldName, const QString &defau
   ret += fullFieldName(fieldName);
   ret += "\" VALUE=\"";
   if (def.isEmpty())
-    ret += HTMLString::encode(defaultVal);
+    ret += HTMLString::encode(defaultVal.toString());
   else
     ret += HTMLString::encode(def);
   ret += "\" SIZE=\"";
@@ -99,9 +101,12 @@ wexus::HTMLString Form::fullFieldName(const QString &fieldName) const
   return ret;
 }
 
-QString Form::formValue(const QString &fieldName) const
+QVariant Form::formValue(const QString &fieldName) const
 {
-  // TODO implement this!
-  return QString();
+//qDebug() << "formValue" << dm_formname << fieldName << Context::instance()->params;
+  if (dm_formname.isEmpty())
+    return Context::instance()->params[fieldName];
+  else
+    return Context::instance()->params[dm_formname].toMap()[fieldName];
 }
 
