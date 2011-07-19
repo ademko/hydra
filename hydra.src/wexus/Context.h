@@ -21,11 +21,18 @@
 namespace wexus
 {
   /**
-   * Returns the current output stream.
+   * Same as Context::instance().output().
    *
    * @author Aleksander Demko
    */ 
   QTextStream & output(void);
+
+  /**
+   * Same as Context::instance().htmlOutput().
+   *
+   * @author Aleksander Demko
+   */ 
+  QTextStream & htmlOutput(void);
 
   class Context;
 

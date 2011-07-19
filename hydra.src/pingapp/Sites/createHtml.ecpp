@@ -1,3 +1,7 @@
 
 new form here
+<% { Form F("f1"); %>
+  <%= F.textField("a_test_field"); %> <br>
+  <%= F.submitButton("go!"); %>
+<% } %>
 

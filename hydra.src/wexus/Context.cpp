@@ -26,7 +26,16 @@ QTextStream & wexus::output(void)
 
   assert(c);
 
-  return c->reply().output();
+  return c->output();
+}
+
+QTextStream & wexus::htmlOutput(void)
+{
+  Context *c = Context::instance();
+
+  assert(c);
+
+  return c->htmlOutput();
 }
 
 Context::Context(wexus::Application *application, const QString &actionname, wexus::HTTPRequest &req, wexus::HTTPReply &reply)

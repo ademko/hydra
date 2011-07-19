@@ -44,6 +44,11 @@ class wexus::HTMLString : public QString
      * @author Aleksander Demko
      */ 
     static HTMLString encode(const QString &s);
+
+    /// assignment operator
+    HTMLString & operator = (const HTMLString &rhs) { *this = rhs; return *this; }
+    /// assignment operator
+    HTMLString & operator = (const QString &rhs) { QString::operator = (rhs); return *this; }
 };
 
 /**
