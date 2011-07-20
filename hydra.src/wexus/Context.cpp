@@ -45,7 +45,8 @@ Context::Context(wexus::Application *application, const QString &actionname, wex
     params(&dm_req),
     cookies(&dm_req, &dm_reply),
     dm_sessionlocker(dm_application->sessionManager().getDataByCookie(cookies)),
-    session(dm_sessionlocker.map())
+    session(dm_sessionlocker.map()),
+    flash(session["flash"].toMap())
 {
   // we need to store a dynamically allocated ptr-to-ptr
   // becase QThreadStorage insists on being able to call delete
@@ -59,6 +60,9 @@ Context * Context::instance(void)
 
 Context::~Context()
 {
+  // save the setFlast as the current flash for the next call
+  session["flash"] = setFlash;
+
   Storage.setLocalData(0);
 }
 

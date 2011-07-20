@@ -35,7 +35,8 @@ namespace wexus
 class wexus::HTTPRequest
 {
   public:
-    typedef QMap<QString, QVariant> ClientCookies;
+    //typedef QMap<QString, QVariant> ClientCookies;
+    typedef QVariantMap ClientCookies;
 
   public:
     HTTPRequest(void);

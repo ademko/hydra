@@ -110,7 +110,7 @@ class wexus::Context
      */ 
     Cookies cookies;
 
-  protected:
+  private:
     // this has to be constructed AFTER cookies but before session
     SessionLocker dm_sessionlocker;
   public:
@@ -121,6 +121,22 @@ class wexus::Context
      * @author Aleksander Demko
      */ 
     QVariantMap &session;
+
+    /**
+     * The incoming flash sent by the previous calls.
+     *
+     * @author Aleksander Demko
+     */ 
+    const QVariantMap flash;
+
+
+    /**
+     * The flash that will be preseved for the next calls.
+     * In the next call, this will be the contents of inFlash.
+     *
+     * @author Aleksander Demko
+     */ 
+    QVariantMap setFlash;
 };
 
 #endif
