@@ -84,7 +84,7 @@ class wexus::ControllerContext
      *
      * @author Aleksander Demko
      */ 
-    Session &session;
+    QVariantMap &session;
 };
 
 /**

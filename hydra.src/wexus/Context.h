@@ -90,6 +90,7 @@ class wexus::Context
     std::shared_ptr<QIODevice> dm_htmldevice;
     std::shared_ptr<QTextStream> dm_htmloutput;
 
+
   public:
     // public things
     // placed her to maintain a proper initialization order
@@ -109,12 +110,17 @@ class wexus::Context
      */ 
     Cookies cookies;
 
+  protected:
+    // this has to be constructed AFTER cookies but before session
+    SessionLocker dm_sessionlocker;
+  public:
+
     /**
      * The session, if any
      *
      * @author Aleksander Demko
      */ 
-    Session session;
+    QVariantMap &session;
 };
 
 #endif

@@ -18,7 +18,7 @@
 
 namespace wexus
 {
-  class Session;
+  class SessionLocker;
   class SessionManager;
 }
 
@@ -28,7 +28,7 @@ namespace wexus
  *
  * @author Aleksander Demko
  */ 
-class wexus::Session
+class wexus::SessionLocker
 {
   public:
     class Data
@@ -36,8 +36,7 @@ class wexus::Session
       public:
         // called by Session, used to protect fieldValues
         QMutex mutex;
-        typedef QMap<QString, QVariant> FieldValues;
-        FieldValues fieldValues;
+        QVariantMap fieldValues;
     };
 
   public:
@@ -48,44 +47,20 @@ class wexus::Session
      *
      * @author Aleksander Demko
      */ 
-    Session(std::shared_ptr<Data> data);
+    SessionLocker(std::shared_ptr<Data> data);
 
     /// destructor
-    ~Session();
+    ~SessionLocker();
 
-    /**
-     * Does this session set have a particular field?
-     *
-     * @author Aleksander Demko
-     */ 
-    bool contains(const QString &fieldName);
-
-    /**
-     * Gets a field, const-version
-     * Returns an invalid QVariant on not found
-     * (perhaps it should throw an exception instead?)
-     *
-     * @author Aleksander Demko
-     */ 
-    const QVariant & operator[](const QString &fieldName) const;
-
-    /**
-     * Gets a field.
-     * Returns a new variable if not found.
-     * Returns an invalid QVariant on not found
-     * (perhaps it should throw an exception instead?)
-     *
-     * @author Aleksander Demko
-     */ 
-    QVariant & operator[](const QString &fieldName);
+    /// gets the linked QVariantMap of session values
+    QVariantMap & map(void) const { return dm_data->fieldValues; }
 
   private:
     /// parse the linked HTTPRequest, if it hasnt already
-    void parseRequest(void);
+    //void parseRequest(void);
 
   private:
     std::shared_ptr<Data> dm_data;
-    QVariant dm_emptyvariant;
 };
 
 /**
@@ -107,7 +82,7 @@ class wexus::SessionManager
      *
      * @author Aleksander Demko
      */ 
-    std::shared_ptr<Session::Data> getData(const QUuid &id);
+    std::shared_ptr<SessionLocker::Data> getData(const QUuid &id);
 
     /**
      * Extra the session by the UUID stored in the session cookie,
@@ -115,10 +90,10 @@ class wexus::SessionManager
      *
      * @author Aleksander Demko
      */ 
-    std::shared_ptr<Session::Data> getDataByCookie(Cookies &cookies);
+    std::shared_ptr<SessionLocker::Data> getDataByCookie(Cookies &cookies);
 
   private:
-    QMap<QUuid, std::shared_ptr<Session::Data> > dm_map;
+    QMap<QUuid, std::shared_ptr<SessionLocker::Data> > dm_map;
 };
 
 #endif

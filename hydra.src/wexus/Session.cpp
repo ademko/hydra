@@ -17,7 +17,7 @@ using namespace wexus;
 //
 //
 
-Session::Session(std::shared_ptr<Session::Data> data)
+SessionLocker::SessionLocker(std::shared_ptr<SessionLocker::Data> data)
   : dm_data(data)
 {
   assert(dm_data.get());
@@ -25,29 +25,9 @@ Session::Session(std::shared_ptr<Session::Data> data)
   dm_data->mutex.lock();
 }
 
-Session::~Session()
+SessionLocker::~SessionLocker()
 {
   dm_data->mutex.unlock();
-}
-
-bool Session::contains(const QString &fieldName)
-{
-  return dm_data->fieldValues.contains(fieldName);
-}
-
-const QVariant & Session::operator[](const QString &fieldName) const
-{
-  Data::FieldValues::const_iterator ii = dm_data->fieldValues.find(fieldName);
-
-  if (ii == dm_data->fieldValues.end())
-    return dm_emptyvariant;
-  else
-    return *ii;
-}
-
-QVariant & Session::operator[](const QString &fieldName)
-{
-  return dm_data->fieldValues[fieldName];
 }
 
 //
@@ -60,18 +40,18 @@ SessionManager::SessionManager(void)
 {
 }
 
-std::shared_ptr<Session::Data> SessionManager::getData(const QUuid &id)
+std::shared_ptr<SessionLocker::Data> SessionManager::getData(const QUuid &id)
 {
   if (dm_map.contains(id))
     return dm_map[id];
 
   // create it
-  std::shared_ptr<Session::Data> ptr(new Session::Data);
+  std::shared_ptr<SessionLocker::Data> ptr(new SessionLocker::Data);
   dm_map[id] = ptr;
   return ptr;
 }
 
-std::shared_ptr<Session::Data> SessionManager::getDataByCookie(Cookies &cookies)
+std::shared_ptr<SessionLocker::Data> SessionManager::getDataByCookie(Cookies &cookies)
 {
   QUuid id;
 

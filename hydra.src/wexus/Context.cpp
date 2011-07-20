@@ -44,7 +44,8 @@ Context::Context(wexus::Application *application, const QString &actionname, wex
     dm_req(req), dm_reply(reply),
     params(&dm_req),
     cookies(&dm_req, &dm_reply),
-    session(dm_application->sessionManager().getDataByCookie(cookies))
+    dm_sessionlocker(dm_application->sessionManager().getDataByCookie(cookies)),
+    session(dm_sessionlocker.map())
 {
   // we need to store a dynamically allocated ptr-to-ptr
   // becase QThreadStorage insists on being able to call delete
