@@ -14,5 +14,7 @@
 #include <wexus/HTMLString.h>
 #include <wexus/Widgets.h>
 
+#include <QDebug>
+
 #endif
 
