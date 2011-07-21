@@ -52,8 +52,6 @@ class wexus::ActiveExpr
 
     // explicit "ctors"
 
-    static ActiveExpr fromNull(void);
-
     static ActiveExpr fromColumn(int index);
 
     // operators
