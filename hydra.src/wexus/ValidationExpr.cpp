@@ -26,6 +26,17 @@ ValidationExpr::Imp::~Imp()
 {
 }
 
+class ValidationExpr::Optional : public ValidationExpr::Imp
+{
+  public:
+    virtual bool test(const QVariant &v, QStringList *outerrors) const;
+};
+
+bool ValidationExpr::Optional::test(const QVariant &v, QStringList *outerrors) const
+{
+  return true;
+}
+
 class ValidationExpr::Required : public ValidationExpr::Imp
 {
   public:
@@ -166,6 +177,11 @@ bool ValidationExpr::test(const QVariant &v, QStringList *outerrors) const
   assert(dm_imp.get());
 
   return dm_imp->test(v, outerrors);
+}
+
+ValidationExpr ValidationExpr::optional(void)
+{
+  return ValidationExpr(std::shared_ptr<Imp>(new Optional));
 }
 
 ValidationExpr ValidationExpr::required(void)

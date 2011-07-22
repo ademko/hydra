@@ -43,7 +43,11 @@ class wexus::ValidationExpr
 
     // explicit "ctors"
 
-    // the value cannot be invalid
+
+    /// always returns true
+    static ValidationExpr optional(void);
+
+    /// the value cannot be invalid
     static ValidationExpr required(void);
 
     // note that all the follow checkers
@@ -70,6 +74,7 @@ class wexus::ValidationExpr
 
   private:
     class Imp;
+    class Optional;
     class Required;
     class Length;
     class UniOp;

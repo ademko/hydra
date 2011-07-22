@@ -9,6 +9,7 @@
 #define __INCLUDED_WEXUS_WIDGETS_H__
 
 #include <wexus/HTMLString.h>
+#include <wexus/ValidationExpr.h>
 
 #include <QVariant>
 
@@ -75,7 +76,7 @@ class wexus::Form
      *
      * @author Aleksander Demko
      */
-    wexus::HTMLString textField(const QString &fieldName, const QVariant &defaultVal = QVariant(), int sz = 30, int maxlen = 60) const;
+    wexus::HTMLString textField(const ValidationExpr &valExpr, const QString &fieldName, const QVariant &defaultVal = QVariant(), int sz = 30, int maxlen = 60) const;
 
     /**
      * The submit button. fieldName is optional and not often used.

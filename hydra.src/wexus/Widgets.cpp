@@ -47,7 +47,7 @@ Form::~Form()
   output() << "</FORM>\n";
 }
 
-wexus::HTMLString Form::textField(const QString &fieldName, const QVariant &defaultVal, int sz, int maxlen) const
+wexus::HTMLString Form::textField(const ValidationExpr &valExpr, const QString &fieldName, const QVariant &defaultVal, int sz, int maxlen) const
 {
   HTMLString ret;
   QString def = formValue(fieldName).toString();
@@ -67,6 +67,9 @@ wexus::HTMLString Form::textField(const QString &fieldName, const QVariant &defa
   ret += QString::number(maxlen);
   ret += "\" />\n";
     
+  // save the validation expression
+  //if (!valExpr.isNull())
+    //VarPath(setFlash)["validation"][dm_formname][fieldName] = valExpr.toVariant();
   return ret;
 }
 
