@@ -18,6 +18,8 @@
 #include <wexus/Cookies.h>
 #include <wexus/Session.h>
 
+#include <QStringList>
+
 namespace wexus
 {
   /**
@@ -129,7 +131,6 @@ class wexus::Context
      */ 
     const QVariantMap flash;
 
-
     /**
      * The flash that will be preseved for the next calls.
      * In the next call, this will be the contents of inFlash.
@@ -137,6 +138,13 @@ class wexus::Context
      * @author Aleksander Demko
      */ 
     QVariantMap setFlash;
+
+    /**
+     * Errors.
+     *
+     * @author Aleksander Demko
+     */ 
+    QStringList errors;
 };
 
 #endif

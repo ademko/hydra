@@ -36,10 +36,10 @@ class wexus::ValidationExpr
     // "serialization"
 
     /// package this expression into a variant
-    QVariant toVariant(void);
+    QVariant toVariant(void) const;
 
     /// unpackage an expression from the variant
-    ValidationExpr fromVariant(const QVariant &v);
+    static ValidationExpr fromVariant(const QVariant &v);
 
     // explicit "ctors"
 
@@ -72,6 +72,8 @@ class wexus::ValidationExpr
     ValidationExpr operator ! (void); // not operator
     ValidationExpr operator && (const ValidationExpr &rhs);
 
+  public:
+    class ImpObject;
   private:
     class Imp;
     class Optional;

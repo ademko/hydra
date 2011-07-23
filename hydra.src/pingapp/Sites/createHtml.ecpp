@@ -1,7 +1,9 @@
 
+<% renderErrors(); %>
+
 new form here
 <% { Form F("f1"); %>
-  <%= F.textField("a_test_field"); %> <br>
+  <%= F.textField(!ValidationExpr::zeroLength() && ValidationExpr::minLength(10), "a_test_field", "default"); %> <br>
   <%= F.submitButton("go!"); %>
 <% } %>
 

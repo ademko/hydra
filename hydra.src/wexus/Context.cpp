@@ -11,8 +11,10 @@
 
 #include <wexus/HTMLString.h>
 #include <wexus/Application.h>
+#include <wexus/Widgets.h>
 
 #include <QThreadStorage>
+#include <QDebug>
 
 using namespace wexus;
 
@@ -48,9 +50,14 @@ Context::Context(wexus::Application *application, const QString &actionname, wex
     session(dm_sessionlocker.map()),
     flash(session["flash"].toMap())
 {
+  // clear the flash
+  session["flash"] = QVariant();
+
   // we need to store a dynamically allocated ptr-to-ptr
   // becase QThreadStorage insists on being able to call delete
   Storage.setLocalData(new ContextPtr(this));
+
+  Form::testFlashValidators(params, flash, errors);
 }
 
 Context * Context::instance(void)

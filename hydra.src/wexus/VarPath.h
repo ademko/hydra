@@ -25,6 +25,18 @@ namespace wexus
    * @author Aleksander Demko
    */ 
   QVariantMap & asVariantMap(QVariant &v);
+
+  /**
+   * This is a powerful function that lets you
+   * access the QVariantMap map within the v
+   * (no copies!).
+   *
+   * Uses internal Qt access - might need
+   * to be updated in the future.
+   *
+   * @author Aleksander Demko
+   */ 
+  const QVariantMap & asVariantMap(const QVariant &v);
 }
 
 /**

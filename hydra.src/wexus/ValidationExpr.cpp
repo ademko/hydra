@@ -13,6 +13,22 @@
 
 using namespace wexus;
 
+//
+// ImpObject
+//
+
+class ValidationExpr::ImpObject
+{
+  public:
+    std::shared_ptr<Imp> imp;
+};
+
+Q_DECLARE_METATYPE(ValidationExpr::ImpObject)
+
+//
+// Imp
+//
+
 class ValidationExpr::Imp
 {
   public:
@@ -80,7 +96,7 @@ bool ValidationExpr::Length::test(const QVariant &v, QStringList *outerrors) con
   if (!v.isValid())
     return true;
 
-qDebug() << "dm_op" << dm_op << "dm_val" << dm_val << "toInt" << v.toInt();
+//qDebug() << "dm_op" << dm_op << "dm_val" << dm_val << "toInt" << v.toInt();
   if (dm_op == GTE) {
     r = v.toString().size() >= dm_val;
     if (!r && outerrors)
@@ -153,6 +169,12 @@ bool ValidationExpr::BinOp::test(const QVariant &v, QStringList *outerrors) cons
     dm_right->test(v, outerrors);
 }
 
+//
+//
+// ValidationExpr
+//
+//
+
 ValidationExpr::ValidationExpr(void)
 {
 }
@@ -177,6 +199,23 @@ bool ValidationExpr::test(const QVariant &v, QStringList *outerrors) const
   assert(dm_imp.get());
 
   return dm_imp->test(v, outerrors);
+}
+
+QVariant ValidationExpr::toVariant(void) const
+{
+  ImpObject o;
+
+  o.imp = dm_imp;
+
+  return QVariant::fromValue(o);
+}
+
+ValidationExpr ValidationExpr::fromVariant(const QVariant &v)
+{
+  // check the type of v here?
+  ImpObject o = v.value<ImpObject>();
+
+  return ValidationExpr(o.imp);
 }
 
 ValidationExpr ValidationExpr::optional(void)

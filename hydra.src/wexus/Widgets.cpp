@@ -7,7 +7,10 @@
 
 #include <wexus/Widgets.h>
 
+#include <assert.h>
+
 #include <wexus/Context.h>
+#include <wexus/VarPath.h>
 
 #include <QDebug>
 
@@ -26,6 +29,27 @@ HTMLString wexus::linkTo(const QString &desc, const QString &rawurl)
 void wexus::redirectTo(const QString &rawurl)
 {
   Context::instance()->reply().redirectTo(rawurl);
+}
+
+bool wexus::renderErrors(void)
+{
+  Context *ctx = Context::instance();
+
+  assert(ctx);
+
+  bool haserrors = !ctx->errors.isEmpty();
+
+  if (haserrors) {
+    output() << "<h3>Form Errors!</h3>\n<ul>\n";
+    for (QStringList::const_iterator ii=ctx->errors.begin(); ii != ctx->errors.end(); ++ii) {
+      output() << "<li>";
+      htmlOutput() << *ii;
+      output() << "</li>";
+    }
+    output() << "</ul>\n";
+  }
+
+  return haserrors;
 }
 
 Form::Form(const QString &formname, const QString &rawurl, int method)
@@ -68,8 +92,12 @@ wexus::HTMLString Form::textField(const ValidationExpr &valExpr, const QString &
   ret += "\" />\n";
     
   // save the validation expression
-  //if (!valExpr.isNull())
-    //VarPath(setFlash)["validation"][dm_formname][fieldName] = valExpr.toVariant();
+  if (!valExpr.isNull()) {
+    VarPath p(Context::instance()->setFlash);
+  
+    p["validators"][dm_formname][fieldName] = valExpr.toVariant();
+  }
+
   return ret;
 }
 
@@ -89,6 +117,36 @@ wexus::HTMLString Form::submitButton(const QString &desc, const QString &fieldNa
     
   return ret;
 
+}
+
+static void testFlashValidatorsDriver(const QVariantMap &params, const QVariantMap &validators, QStringList &errors)
+{
+  QVariantMap::const_iterator ii, endii;
+  QVariantMap::const_iterator vv;
+
+  endii = params.end();
+  for (ii = params.begin(); ii != endii; ++ii) {
+    // check if there is a validator for this param
+    vv = validators.find(ii.key());
+    if (vv == validators.end())
+      continue;
+    // if its a map, we recurse
+    if (vv->type() == QVariant::Map)
+      testFlashValidatorsDriver(asVariantMap(*ii), asVariantMap(*vv), errors);
+    else {
+      // its not a map, execute the validator
+      ValidationExpr validexpr = ValidationExpr::fromVariant(*vv);
+
+      validexpr.test(*ii, &errors);
+    }
+  }
+}
+
+void Form::testFlashValidators(const QVariantMap &params, const QVariantMap &flash, QStringList &errors)
+{
+  if (!flash.contains("validators"))
+    return;
+  testFlashValidatorsDriver(params, asVariantMap(flash["validators"]), errors);
 }
 
 wexus::HTMLString Form::fullFieldName(const QString &fieldName) const

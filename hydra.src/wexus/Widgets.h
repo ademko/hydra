@@ -39,6 +39,14 @@ namespace wexus
   void redirectTo(const QString &rawurl);
 
   /**
+   * Renders any errors.
+   * Returns true if there are any errors.
+   *
+   * @author Aleksander Demko
+   */ 
+  bool renderErrors(void);
+
+  /**
    * An HTML form.
    * This emits a complete form via the output() stream.
    *
@@ -84,6 +92,10 @@ class wexus::Form
      * @author Aleksander Demko
      */ 
     wexus::HTMLString submitButton(const QString &desc, const QString &fieldName = QString()) const;
+
+  public:
+    static void testFlashValidators(const QVariantMap &params,
+        const QVariantMap &flash, QStringList &errors);
 
   protected:
     /**

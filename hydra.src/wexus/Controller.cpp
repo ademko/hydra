@@ -26,7 +26,8 @@ ControllerContext::ControllerContext(void)
   cookies(dm_context.cookies),
   session(dm_context.session),
   flash(dm_context.flash),
-  setFlash(dm_context.setFlash)
+  setFlash(dm_context.setFlash),
+  errors(dm_context.errors)
 {
   assert(Context::instance());
 }

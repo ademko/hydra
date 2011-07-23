@@ -93,7 +93,6 @@ class wexus::ControllerContext
      */ 
     const QVariantMap &flash;
 
-
     /**
      * The flash that will be preseved for the next calls.
      * In the next call, this will be the contents of inFlash.
@@ -101,6 +100,13 @@ class wexus::ControllerContext
      * @author Aleksander Demko
      */ 
     QVariantMap &setFlash;
+
+    /**
+     * Errors.
+     *
+     * @author Aleksander Demko
+     */
+    QStringList &errors;
 };
 
 /**

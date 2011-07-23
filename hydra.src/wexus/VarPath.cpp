@@ -19,6 +19,7 @@ class AsMap : public QVariant
 {
   public:
     QVariantMap * mapPtr(void);
+    const QVariantMap * mapPtr(void) const;
 };
 
 template <typename T>
@@ -29,6 +30,14 @@ inline T * my_v_cast(QVariant::Private *d, T * = 0)
  : static_cast<T *>(static_cast<void *>(&d->data.c)));
 }
 
+template <typename T>
+inline T * my_v_cast(const QVariant::Private *d, T * = 0)
+  {
+    return ((sizeof(T) > sizeof(QVariant::Private::Data))
+         ? static_cast<T *>(d->data.shared->ptr)
+ : static_cast<T *>(static_cast<const void *>(&d->data.c)));
+}
+
 QVariantMap * AsMap::mapPtr(void)
 {
   if (type() != Map) {
@@ -36,14 +45,27 @@ QVariantMap * AsMap::mapPtr(void)
     throw VarPath::MapRequiredException();
   }
 
-  //QVariant::Private *my_d = &d;
-
   return my_v_cast<QVariantMap>(&d);
+}
+
+const QVariantMap * AsMap::mapPtr(void) const
+{
+  if (type() != Map) {
+    assert(type() == Map);
+    throw VarPath::MapRequiredException();
+  }
+
+  return my_v_cast<const QVariantMap>(&d);
 }
 
 QVariantMap & wexus::asVariantMap(QVariant &v)
 {
   return *reinterpret_cast<AsMap*>(&v)->mapPtr();
+}
+
+const QVariantMap & wexus::asVariantMap(const QVariant &v)
+{
+  return *reinterpret_cast<const AsMap*>(&v)->mapPtr();
 }
 
 //
