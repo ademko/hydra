@@ -40,8 +40,9 @@ class wexus::VarPath
       virtual const char* what() const throw ()
       { return "VarPath::Exception"; }
     };
-    class TypeException : public Exception {};
     class NotFoundException : public Exception {};
+    class MapRequiredException : public Exception {};
+    class VariantRequiredException : public Exception {};
 
   public:
     /**
@@ -66,11 +67,11 @@ class wexus::VarPath
     VarPath operator [](const QString &key);
 
     /**
-     * Const version of []. Throws the field is not found.
+     * Same as [], but Throws if field is not found.
      *
      * @author Aleksander Demko
      */ 
-    //VarPath operator ()(const QString &key) const;
+    VarPath operator ()(const QString &key);
 
     /**
      * Assignment operator.

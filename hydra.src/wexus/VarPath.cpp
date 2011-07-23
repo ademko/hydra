@@ -31,12 +31,16 @@ inline T * my_v_cast(QVariant::Private *d, T * = 0)
 
 QVariantMap * AsMap::mapPtr(void)
 {
-  assert(type() == Map);
+  if (type() != Map) {
+    assert(type() == Map);
+    throw VarPath::MapRequiredException();
+  }
 
   //QVariant::Private *my_d = &d;
 
   return my_v_cast<QVariantMap>(&d);
 }
+
 QVariantMap & wexus::asVariantMap(QVariant &v)
 {
   return *reinterpret_cast<AsMap*>(&v)->mapPtr();
@@ -69,24 +73,21 @@ VarPath VarPath::operator [](const QString &key)
   // not the root node
 
   // create a map if this is a new subnode
-  if (!dm_node->isValid())
+  if (dm_node->isValid()) {
+    // make sure it doesnt already exist as a non-map
+    if (dm_node->type() != QVariant::Map)
+      throw MapRequiredException();
+  } else
     (*dm_node) = QVariantMap();
 
-  // make sure it doesnt already exist as a non-map
-  if (dm_node->type() != QVariant::Map)
-    throw TypeException();
 
   QVariant &ref = asVariantMap(*dm_node)[key];
   return VarPath(ref);
 }
 
-// TODO to implement this function
-// we need to fully implement a ConstVarPath class
-// to shadow VarPath, but with const reference
-
-/*VarPath VarPath::operator ()(const QString &key) const
+VarPath VarPath::operator ()(const QString &key)
 {
-  QVariantMap::const_iterator ii, endii;
+  QVariantMap::iterator ii, endii;
 
   if (dm_map) {
     // map type
@@ -94,10 +95,10 @@ VarPath VarPath::operator [](const QString &key)
     endii = dm_map->end();
   } else {
     // node type
-  if (dm_node->type() == QVariant::Map)
     if (dm_node->type() != QVariant::Map)
-      throw TypeException();
-    const QVariantMap & map = asVariantMap(*dm_node);
+      throw MapRequiredException();
+
+    QVariantMap & map = asVariantMap(*dm_node);
 
     ii = map.find(key);
     endii = map.end();
@@ -106,15 +107,13 @@ VarPath VarPath::operator [](const QString &key)
   if (ii == endii)
     throw NotFoundException();
 
-  // we probably need a ConstVarPath to finish this method
-
-  return ConstVarPath(*ii);
-}*/
+  return VarPath(*ii);
+}
 
 VarPath & VarPath::operator = (const QVariant &v)
 {
   if (!dm_node)
-    throw Exception();
+    throw VariantRequiredException();
 
   (*dm_node) = v;
 
@@ -124,16 +123,23 @@ VarPath & VarPath::operator = (const QVariant &v)
 QVariant & VarPath::asVariant(void)
 {
   if (!dm_node)
-    throw Exception();
+    throw VariantRequiredException();
 
   return *dm_node;
 }
 
 QVariantMap & VarPath::asMap(void)
 {
-  if (!dm_map)
-    throw Exception();
+  if (dm_map)
+    return *dm_map;
 
-  return *dm_map;
+  assert(dm_node);
+
+  if (dm_node->type() != QVariant::Map)
+    throw MapRequiredException();
+
+  QVariantMap & map = asVariantMap(*dm_node);
+
+  return map;
 }
 
