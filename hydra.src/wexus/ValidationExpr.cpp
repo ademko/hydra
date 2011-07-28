@@ -76,16 +76,17 @@ class ValidationExpr::Length : public ValidationExpr::Imp
       GTE,
       LTE,
     };
-    Length(int op, int val);
+    Length(int op, int val, const char * errormsg = 0);
 
     virtual bool test(const QVariant &v, QStringList *outerrors) const;
 
   private:
     int dm_op, dm_val;
+    const char * dm_errormesg;
 };
 
-ValidationExpr::Length::Length(int op, int val)
-  : dm_op(op), dm_val(val)
+ValidationExpr::Length::Length(int op, int val, const char * errormsg)
+  : dm_op(op), dm_val(val), dm_errormesg(errormsg)
 {
 }
 
@@ -99,18 +100,26 @@ bool ValidationExpr::Length::test(const QVariant &v, QStringList *outerrors) con
 //qDebug() << "dm_op" << dm_op << "dm_val" << dm_val << "toInt" << v.toInt();
   if (dm_op == GTE) {
     r = v.toString().size() >= dm_val;
-    if (!r && outerrors)
-      outerrors->push_back("too short (must be " + QString::number(dm_val) + " characters)");
+    if (!r && outerrors) {
+      if (dm_errormesg)
+        outerrors->push_back(dm_errormesg);
+      else
+        outerrors->push_back("too short (must be " + QString::number(dm_val) + " characters)");
+    }
   } else { //LTE
     r = v.toString().size() <= dm_val;
-    if (!r && outerrors)
-      outerrors->push_back("too long (must be at most " + QString::number(dm_val) + " characters)");
+    if (!r && outerrors) {
+      if (dm_errormesg)
+        outerrors->push_back(dm_errormesg);
+      else
+        outerrors->push_back("too long (must be at most " + QString::number(dm_val) + " characters)");
+    }
   }
 
   return r;
 }
 
-class ValidationExpr::UniOp : public ValidationExpr::Imp
+/*class ValidationExpr::UniOp : public ValidationExpr::Imp
 {
   public:
     enum {
@@ -136,7 +145,7 @@ bool ValidationExpr::UniOp::test(const QVariant &v, QStringList *outerrors) cons
   // dm_op == NOT
 
   return !dm_left->test(v, outerrors);
-}
+}*/
 
 class ValidationExpr::BinOp : public ValidationExpr::Imp
 {
@@ -238,14 +247,15 @@ ValidationExpr ValidationExpr::maxLength(int l)
   return ValidationExpr(std::shared_ptr<Imp>(new Length(Length::LTE, l)));
 }
 
-ValidationExpr ValidationExpr::zeroLength(void)
+ValidationExpr ValidationExpr::nonEmptyLength(void)
 {
-  return ValidationExpr(std::shared_ptr<Imp>(new Length(Length::LTE, 0)));
+  return ValidationExpr(std::shared_ptr<Imp>(new Length(Length::GTE, 1, "cannot be empty")));
 }
 
-ValidationExpr ValidationExpr::operator ! (void)
+// removed the NOT operator
+/*ValidationExpr ValidationExpr::operator ! (void)
 {
   return ValidationExpr(std::shared_ptr<Imp>(new UniOp(UniOp::NOT, dm_imp)));
-}
+}*/
 
 ValidationExpr ValidationExpr::operator && (const ValidationExpr &rhs) { return ValidationExpr(std::shared_ptr<Imp>(new BinOp(BinOp::AND, dm_imp, rhs.dm_imp))); }

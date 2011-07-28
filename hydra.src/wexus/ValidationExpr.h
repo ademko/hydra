@@ -18,14 +18,31 @@ namespace wexus
   class ValidationExpr;
 }
 
+/**
+ * A validation expression.
+ *
+ * Although there were plans to be able to create
+ * nesting operators, compelte with ! || and other operators,
+ * this was deemed to confusing with respect to how
+ * to make meaningfull error messages. A future
+ * project, perhaps.
+ *
+ * @author Aleksander Demko
+ */ 
 class wexus::ValidationExpr
 {
   public:
-    /// null expression, that doesn't require anything
+    /**
+     * Null expression, that doesn't require anything
+     * This expression cannot be used or tested.
+     *
+     * @author Aleksander Demko
+     */ 
     ValidationExpr(void);
     /// shallow copy ctor
     ValidationExpr(const ValidationExpr &rhs);
 
+    /// is this the default, null expression
     bool isNull(void) const;
 
     /// tests to se if v meets the requiresments
@@ -58,7 +75,7 @@ class wexus::ValidationExpr
     // string checkers
     static ValidationExpr minLength(int l);
     static ValidationExpr maxLength(int l);
-    static ValidationExpr zeroLength(void);    // same as maxLength(0)
+    static ValidationExpr nonEmptyLength(void);    // similar to minLength(1), but with a different error message
 
     // int checkers
     static ValidationExpr minValue(double d);
@@ -69,7 +86,7 @@ class wexus::ValidationExpr
 
     // operators
 
-    ValidationExpr operator ! (void); // not operator
+    //ValidationExpr operator ! (void); // not operator
     ValidationExpr operator && (const ValidationExpr &rhs);
 
   public:
@@ -79,7 +96,7 @@ class wexus::ValidationExpr
     class Optional;
     class Required;
     class Length;
-    class UniOp;
+    //class UniOp;
     class BinOp;
 
     ValidationExpr(const std::shared_ptr<Imp> &imp);
