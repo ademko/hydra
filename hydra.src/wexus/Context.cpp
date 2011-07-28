@@ -44,7 +44,7 @@ Context::Context(wexus::Application *application, const QString &actionname, wex
   : dm_application(application),
     dm_actionname(actionname),
     dm_req(req), dm_reply(reply),
-    params(&dm_req),
+    params(ParamsParser::parse(&dm_req)),
     cookies(&dm_req, &dm_reply),
     dm_sessionlocker(dm_application->sessionManager().getDataByCookie(cookies)),
     session(dm_sessionlocker.map()),

@@ -142,7 +142,7 @@ ADD_EXECUTABLE(wexusserver
     ${THIS_PATH}/wexus/HTTPHandlerStack.cpp
     ${THIS_PATH}/wexus/FileHTTPHandler.cpp ${THIS_PATH}/wexus/MimeTypes.cpp
     ${THIS_PATH}/wexus/Site.cpp ${THIS_PATH}/wexus/Application.cpp ${THIS_PATH}/wexus/Controller.cpp
-    ${THIS_PATH}/wexus/HTMLString.cpp ${THIS_PATH}/wexus/FormParams.cpp
+    ${THIS_PATH}/wexus/HTMLString.cpp ${THIS_PATH}/wexus/ParamsParser.cpp
     ${THIS_PATH}/wexus/Cookies.cpp ${THIS_PATH}/wexus/Context.cpp
     ${THIS_PATH}/wexus/ActiveRecord.cpp ${THIS_PATH}/wexus/ActiveClass.cpp ${THIS_PATH}/wexus/ActiveExpr.cpp
     ${THIS_PATH}/wexus/Session.cpp

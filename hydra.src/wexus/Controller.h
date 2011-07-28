@@ -70,7 +70,7 @@ class wexus::ControllerContext
      *
      * @author Aleksander Demko
      */ 
-    FormParams &params;
+    QVariantMap &params;
 
     /**
      * The cookies.

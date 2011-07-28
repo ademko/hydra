@@ -5,7 +5,7 @@
  * See the accompanying file LICENSE.MIT.txt for details.
  */
 
-#include <wexus/FormParams.h>
+#include <wexus/ParamsParser.h>
 
 #include <assert.h>
 
@@ -20,7 +20,7 @@ using namespace wexus;
  *
  * @author Aleksander Demko
  */ 
-class IODeviceIterator
+/*class IODeviceIterator
 {
   public:
     IODeviceIterator(QIODevice *dev = 0);
@@ -52,29 +52,33 @@ class IODeviceIterator
 IODeviceIterator::IODeviceIterator(QIODevice *dev)
   : dm_dev(dev), dm_c(0)
 {
-}
+}*/
 
-/*FormParams::ParamNotFoundException::ParamNotFoundException(const QString &fieldname)
+/*ParamsParser::ParamNotFoundException::ParamNotFoundException(const QString &fieldname)
   : wexus::HTTPHandler::Exception("field not found: " + fieldname)
 {
 }*/
 
-FormParams::FormDecodeException::FormDecodeException(void)
-  : wexus::HTTPHandler::Exception("FormDecodeException")
+ParamsParser::ParamsDecodeException::ParamsDecodeException(void)
+  : wexus::HTTPHandler::Exception("ParamsDecodeException")
 {
 }
 
-FormParams::FormParams(wexus::HTTPRequest *req)
+QVariantMap ParamsParser::parse(wexus::HTTPRequest *req)
 {
-  parseRequest(req);
+  QVariantMap ret;
+
+  parse(req, ret);
+
+  return ret;
 }
 
-void FormParams::parseRequest(wexus::HTTPRequest *req)
+void ParamsParser::parse(wexus::HTTPRequest *req, QVariantMap &out)
 {
   assert(req);
 
   if (!req->query().isEmpty())
-    decodeAndParse(req->query().begin(), req->query().end());
+    decodeAndParse(req->query().begin(), req->query().end(), out);
 
   // parse the post data
   if (req->contentLength() > 0) {
@@ -83,7 +87,7 @@ void FormParams::parseRequest(wexus::HTTPRequest *req)
     // santify check this resize operation???
     QByteArray ary = req->input()->read(req->contentLength());
 
-    decodeAndParse(ary.begin(), ary.end());
+    decodeAndParse(ary.begin(), ary.end(), out);
   }
 
   /*IODeviceIterator ii(req->input());
@@ -98,7 +102,7 @@ template <>
   inline char toChar<QChar>(QChar c) { return c.toAscii(); }
 
 template <class ITER>
-  void FormParams::decodeAndParse(ITER encodedBegin, ITER encodedEnd)
+  void ParamsParser::decodeAndParse(ITER encodedBegin, ITER encodedEnd, QVariantMap &out)
 {
   // currently iterating over the name?
   bool is_name = true;
@@ -121,19 +125,19 @@ template <class ITER>
         {
           ++ii;
           if (ii == encodedEnd)
-            throw FormDecodeException(); // fail as we've reached the end of the string before decoding this hex
+            throw ParamsDecodeException(); // fail as we've reached the end of the string before decoding this hex
           hexstr[0] = *ii;
 
           ++ii;
           if (ii == encodedEnd)
-            throw FormDecodeException(); // fail as we've reached the end of the string before decoding this hex
+            throw ParamsDecodeException(); // fail as we've reached the end of the string before decoding this hex
           hexstr[1] = *ii;
 
           bool ok;
           int uni = hexstr.toInt(&ok, 16);
 
           if (!ok)
-            throw FormDecodeException();
+            throw ParamsDecodeException();
 
           // convert the hex to ASCII
           (is_name ? name : value).append(QChar(uni));
@@ -147,7 +151,7 @@ template <class ITER>
         // begin parsing a new name
         is_name = true;
         // insert stored name and value into map
-        nestedInsert(*this, name, value);
+        nestedInsert(out, name, value);
         //(*this)[name] = value;
         // clear name/value strings for next pair
         name.clear();
@@ -161,11 +165,11 @@ template <class ITER>
   }
 
   if (!is_name)
-    nestedInsert(*this, name, value);
+    nestedInsert(out, name, value);
     //(*this)[name] = value; // value parsed, insert name and value into map
 }
 
-void FormParams::nestedInsert(QVariantMap &m, const QString &key, const QString &val)
+void ParamsParser::nestedInsert(QVariantMap &m, const QString &key, const QString &val)
 {
   int idx = key.indexOf('[');
 
@@ -179,7 +183,7 @@ void FormParams::nestedInsert(QVariantMap &m, const QString &key, const QString 
   int endidx = key.lastIndexOf(']');
 
   if (endidx == -1)
-    throw FormDecodeException();
+    throw ParamsDecodeException();
 
   QString subkey(key.left(idx));
   QString recurkey(key.mid(idx+1, endidx-idx-1));

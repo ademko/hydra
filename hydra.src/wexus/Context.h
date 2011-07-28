@@ -14,7 +14,7 @@
 
 #include <wexus/HTTPRequest.h>
 #include <wexus/HTTPReply.h>
-#include <wexus/FormParams.h>
+#include <wexus/ParamsParser.h>
 #include <wexus/Cookies.h>
 #include <wexus/Session.h>
 
@@ -103,7 +103,7 @@ class wexus::Context
      *
      * @author Aleksander Demko
      */ 
-    FormParams params;
+    QVariantMap params;
 
     /**
      * The cookies.
