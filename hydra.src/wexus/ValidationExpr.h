@@ -16,6 +16,8 @@
 namespace wexus
 {
   class ValidationExpr;
+
+  class validate;
 }
 
 /**
@@ -105,6 +107,23 @@ class wexus::ValidationExpr
 
   private:
     std::shared_ptr<Imp> dm_imp;
+};
+
+/**
+ * This is a convience class. Rather than make a new validate namespace
+ * and make a bunch of inline functions to bounce to the static methods
+ * of ValidationExpr, we'll make a similarly named class that just
+ * inherits all the static methods.
+ * 
+ * @author Aleksander Demko
+ */ 
+class wexus::validate : public ValidationExpr
+{
+  public:
+
+  private:
+    /// not implemented. this class is not instantiatable.
+    validate(void);
 };
 
 #endif

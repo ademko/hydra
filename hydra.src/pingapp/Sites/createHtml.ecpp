@@ -3,7 +3,7 @@
 
 new form here
 <% { Form F("f1"); %>
-  <%= F.textField(ValidationExpr::nonEmptyLength() && ValidationExpr::minLength(10), "a_test_field", "default"); %> <br>
+  <%= F.textField(validate::nonEmptyLength() && validate::minLength(10), "a_test_field", "default"); %> <br>
   <%= F.submitButton("go!"); %>
 <% } %>
 
