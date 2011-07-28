@@ -5,7 +5,7 @@
  * See the accompanying file LICENSE.MIT.txt for details.
  */
 
-#include <wexus/Session.h>
+#include <wexus/SessionManager.h>
 
 #include <assert.h>
 

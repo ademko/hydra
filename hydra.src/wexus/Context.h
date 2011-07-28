@@ -16,7 +16,7 @@
 #include <wexus/HTTPReply.h>
 #include <wexus/ParamsParser.h>
 #include <wexus/Cookies.h>
-#include <wexus/Session.h>
+#include <wexus/SessionManager.h>
 
 #include <QStringList>
 

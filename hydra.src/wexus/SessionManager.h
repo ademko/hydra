@@ -5,8 +5,8 @@
  * See the accompanying file LICENSE.MIT.txt for details.
  */
 
-#ifndef __INCLUDED_WEXUS_SESSION_H__
-#define __INCLUDED_WEXUS_SESSION_H__
+#ifndef __INCLUDED_WEXUS_SESSIONMANAGER_H__
+#define __INCLUDED_WEXUS_SESSIONMANAGER_H__
 
 #include <QMutex>
 #include <QUuid>
