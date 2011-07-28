@@ -15,20 +15,20 @@ using namespace wexus;
 Form::Form(const QString &formname, const QString &rawurl, int method)
   : dm_formname(formname)
 {
-  output() << "<FORM ";
+  Context::output() << "<FORM ";
 
   switch (method) {
-    case Method_Post: output() << "METHOD=\"POST\""; break;
-    case Method_Get: output() << "METHOD=\"GET\""; break;
-    case Method_Upload: output() << "METHOD=\"POST\" ENCTYPE=\"multipart/form-data\""; break;
+    case Method_Post: Context::output() << "METHOD=\"POST\""; break;
+    case Method_Get: Context::output() << "METHOD=\"GET\""; break;
+    case Method_Upload: Context::output() << "METHOD=\"POST\" ENCTYPE=\"multipart/form-data\""; break;
   }
 
-  output() << "ACTION=\"" << rawurl << "\">\n";
+  Context::output() << "ACTION=\"" << rawurl << "\">\n";
 }
 
 Form::~Form()
 {
-  output() << "</FORM>\n";
+  Context::output() << "</FORM>\n";
 }
 
 wexus::HTMLString Form::textField(const ValidationExpr &valExpr, const QString &fieldName, const QVariant &defaultVal, int sz, int maxlen) const
@@ -53,7 +53,7 @@ wexus::HTMLString Form::textField(const ValidationExpr &valExpr, const QString &
     
   // save the validation expression
   if (!valExpr.isNull()) {
-    VarPath p(Context::instance()->setFlash);
+    VarPath p(Context::threadInstance()->setFlash);
   
     p["validators"][dm_formname][fieldName] = valExpr.toVariant();
   }
@@ -126,8 +126,8 @@ QVariant Form::formValue(const QString &fieldName) const
 {
 //qDebug() << "formValue" << dm_formname << fieldName << Context::instance()->params;
   if (dm_formname.isEmpty())
-    return Context::instance()->params[fieldName];
+    return Context::threadInstance()->params[fieldName];
   else
-    return Context::instance()->params[dm_formname].toMap()[fieldName];
+    return Context::threadInstance()->params[dm_formname].toMap()[fieldName];
 }
 

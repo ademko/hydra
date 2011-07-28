@@ -22,24 +22,6 @@ typedef Context* ContextPtr;
 
 static QThreadStorage<ContextPtr *> Storage;
 
-QTextStream & wexus::output(void)
-{
-  Context *c = Context::instance();
-
-  assert(c);
-
-  return c->output();
-}
-
-QTextStream & wexus::htmlOutput(void)
-{
-  Context *c = Context::instance();
-
-  assert(c);
-
-  return c->htmlOutput();
-}
-
 Context::Context(wexus::Application *application, const QString &actionname, wexus::HTTPRequest &req, wexus::HTTPReply &reply)
   : dm_application(application),
     dm_actionname(actionname),
@@ -60,9 +42,13 @@ Context::Context(wexus::Application *application, const QString &actionname, wex
   Form::testFlashValidators(params, flash, errors);
 }
 
-Context * Context::instance(void)
+Context * Context::threadInstance(void)
 {
-  return *(Storage.localData());
+  Context *ret = *(Storage.localData());
+
+  assert(ret);
+
+  return ret;
 }
 
 Context::~Context()
@@ -75,24 +61,28 @@ Context::~Context()
 
 QTextStream & Context::output(void)
 {
-  // flush the other textstreams
-  if (dm_htmloutput.get())
-    dm_htmloutput->flush();
+  Context *here = threadInstance();
 
-  return dm_reply.output();
+  // flush the other textstreams
+  if (here->dm_htmloutput.get())
+    here->dm_htmloutput->flush();
+
+  return here->dm_reply.output();
 }
 
 QTextStream & Context::htmlOutput(void)
 {
+  Context *here = threadInstance();
+
   // flush the other textstreams
-  dm_reply.output().flush();
+  here->dm_reply.output().flush();
 
-  if (dm_htmloutput.get())
-    return *dm_htmloutput;
+  if (here->dm_htmloutput.get())
+    return *here->dm_htmloutput;
 
-  dm_htmldevice.reset(new HTMLEncoderDevice(dm_reply.output().device()));
-  dm_htmloutput.reset(new QTextStream(dm_htmldevice.get()));
+  here->dm_htmldevice.reset(new HTMLEncoderDevice(here->dm_reply.output().device()));
+  here->dm_htmloutput.reset(new QTextStream(here->dm_htmldevice.get()));
 
-  return *dm_htmloutput;
+  return *here->dm_htmloutput;
 }
 

@@ -17,7 +17,7 @@ using namespace wexus;
 
 QString wexus::urlTo(void)
 {
-  return Context::instance()->request().request();
+  return Context::request().request();
 }
 
 HTMLString wexus::linkTo(const QString &desc, const QString &rawurl)
@@ -27,25 +27,25 @@ HTMLString wexus::linkTo(const QString &desc, const QString &rawurl)
 
 void wexus::redirectTo(const QString &rawurl)
 {
-  Context::instance()->reply().redirectTo(rawurl);
+  Context::reply().redirectTo(rawurl);
 }
 
 bool wexus::renderErrors(void)
 {
-  Context *ctx = Context::instance();
+  Context *ctx = Context::threadInstance();
 
   assert(ctx);
 
   bool haserrors = !ctx->errors.isEmpty();
 
   if (haserrors) {
-    output() << "<h3>Form Errors!</h3>\n<ul>\n";
+    Context::output() << "<h3>Form Errors!</h3>\n<ul>\n";
     for (QStringList::const_iterator ii=ctx->errors.begin(); ii != ctx->errors.end(); ++ii) {
-      output() << "<li>";
-      htmlOutput() << *ii;
-      output() << "</li>";
+      Context::output() << "<li>";
+      Context::htmlOutput() << *ii;
+      Context::output() << "</li>";
     }
-    output() << "</ul>\n";
+    Context::output() << "</ul>\n";
   }
 
   return haserrors;

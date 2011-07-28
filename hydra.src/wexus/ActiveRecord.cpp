@@ -63,7 +63,7 @@ ActiveRecord::~ActiveRecord()
 
 QSqlDatabase & ActiveRecord::database(void)
 {
-  QSqlDatabase &db = Context::instance()->application()->database();
+  QSqlDatabase &db = Context::application()->database();
 
   if (!db.isOpen())
     throw Exception("DB is closed");

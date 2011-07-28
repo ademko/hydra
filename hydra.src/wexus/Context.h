@@ -22,20 +22,6 @@
 
 namespace wexus
 {
-  /**
-   * Same as Context::instance().output().
-   *
-   * @author Aleksander Demko
-   */ 
-  QTextStream & output(void);
-
-  /**
-   * Same as Context::instance().htmlOutput().
-   *
-   * @author Aleksander Demko
-   */ 
-  QTextStream & htmlOutput(void);
-
   class Context;
 
   class Application;  // forward
@@ -56,24 +42,26 @@ class wexus::Context
     /// destructor
     ~Context();
 
-    /// returns the static instance
-    static Context *instance(void);
+    /**
+     * Returns the "static-like" instance for this thread.
+     *
+     * @author Aleksander Demko
+     */ 
+    static Context *threadInstance(void);
 
     // might remove these in the future, maybe, not sure
 
-    wexus::Application * application(void) const { return dm_application; }
-    const QString actionName(void) const { return dm_actionname; }
-    wexus::HTTPRequest & request(void) const { return dm_req; }
-    wexus::HTTPReply & reply(void) const { return dm_reply; }
-
-    // should these be static with implied instance()??
+    static wexus::Application * application(void) { return threadInstance()->dm_application; }
+    static const QString & actionName(void) { return threadInstance()->dm_actionname; }
+    static wexus::HTTPRequest & request(void) { return threadInstance()->dm_req; }
+    static wexus::HTTPReply & reply(void) { return threadInstance()->dm_reply; }
 
     /**
      * Returns the raw output stream.
      *
      * @author Aleksander Demko
      */ 
-    QTextStream & output(void);
+    static QTextStream & output(void);
 
     /**
      * Returns a stream that HTML escapes all output
@@ -81,7 +69,7 @@ class wexus::Context
      *
      * @author Aleksander Demko
      */ 
-    QTextStream & htmlOutput(void);
+    static QTextStream & htmlOutput(void);
 
   private:
     wexus::Application *dm_application;
@@ -92,9 +80,10 @@ class wexus::Context
     std::shared_ptr<QIODevice> dm_htmldevice;
     std::shared_ptr<QTextStream> dm_htmloutput;
 
-
   public:
     // public things
+    // cant make these nice-static because they arent methods
+    // (and I dont really want to convert them to getter-like methods... yet)
     // placed her to maintain a proper initialization order
 
     /**

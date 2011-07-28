@@ -21,7 +21,7 @@ using namespace wexus;
 
 
 ControllerContext::ControllerContext(void)
-  : dm_context(*Context::instance()),
+  : dm_context(*Context::threadInstance()),
   params(dm_context.params),
   cookies(dm_context.cookies),
   session(dm_context.session),
@@ -29,7 +29,6 @@ ControllerContext::ControllerContext(void)
   setFlash(dm_context.setFlash),
   errors(dm_context.errors)
 {
-  assert(Context::instance());
 }
 
 //
@@ -56,7 +55,7 @@ void Controller::handleControllerRequest(const QString &actionname)
     // call the found action
     ii->second(this);
 
-    if (Context::instance()->reply().status() == 0)
+    if (Context::reply().status() == 0)
       throw HTTPHandler::Exception("Controller called, but it didn't set any status (or send output)");
   } else
     throw ActionNotFoundException("wexus::Controller: Action not found: " + actionname);
