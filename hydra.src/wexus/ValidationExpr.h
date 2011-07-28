@@ -87,6 +87,8 @@ class wexus::ValidationExpr
     // operators
 
     //ValidationExpr operator ! (void); // not operator
+
+    /// (short circuit) and operator
     ValidationExpr operator && (const ValidationExpr &rhs);
 
   public:

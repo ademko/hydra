@@ -11,7 +11,7 @@
 
 #include <wexus/HTMLString.h>
 #include <wexus/Application.h>
-#include <wexus/Widgets.h>
+#include <wexus/Form.h>
 
 #include <QThreadStorage>
 #include <QDebug>
