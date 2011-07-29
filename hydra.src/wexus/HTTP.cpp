@@ -310,7 +310,7 @@ HTTPHandler::Exception::Exception(void)
 }
 
 HTTPHandler::Exception::Exception(const QString &usermsg)
-  : dm_usermsg(usermsg)
+  : dm_usermsg(usermsg), dm_what(usermsg.toUtf8())
 {
 }
 

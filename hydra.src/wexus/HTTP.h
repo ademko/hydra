@@ -294,8 +294,7 @@ class wexus::HTTPHandler
 
         virtual ~Exception() throw ();
 
-        virtual const char* what() const throw ()
-          { return "wexus::HTTPHandler::Exception"; }
+        virtual const char* what() const throw () { return dm_what; }
 
         /**
          * The user-visable error message string.
@@ -305,8 +304,9 @@ class wexus::HTTPHandler
         const QString & userMessage(void) const { return dm_usermsg; }
 
       protected:
-      protected:
         QString dm_usermsg;
+        // cant be a QString as then what() will return a * to a temporary
+        QByteArray dm_what;
     };
 
   public:
