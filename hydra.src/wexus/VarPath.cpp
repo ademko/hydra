@@ -7,7 +7,7 @@
 
 #include <wexus/VarPath.h>
 
-#include <assert.h>
+#include <wexus/Assert.h>
 
 using namespace wexus;
 
@@ -41,7 +41,7 @@ inline T * my_v_cast(const QVariant::Private *d, T * = 0)
 QVariantMap * AsMap::mapPtr(void)
 {
   if (type() != Map) {
-    assert(type() == Map);
+    assertThrow(type() == Map);
     throw VarPath::MapRequiredException();
   }
 
@@ -51,7 +51,7 @@ QVariantMap * AsMap::mapPtr(void)
 const QVariantMap * AsMap::mapPtr(void) const
 {
   if (type() != Map) {
-    assert(type() == Map);
+    assertThrow(type() == Map);
     throw VarPath::MapRequiredException();
   }
 
@@ -155,7 +155,7 @@ QVariantMap & VarPath::asMap(void)
   if (dm_map)
     return *dm_map;
 
-  assert(dm_node);
+  assertThrow(dm_node);
 
   if (dm_node->type() != QVariant::Map)
     throw MapRequiredException();

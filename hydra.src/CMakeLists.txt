@@ -149,6 +149,7 @@ ADD_EXECUTABLE(wexusserver
     ${THIS_PATH}/wexus/MongooseServer.cpp ${THIS_PATH}/wexus/mongoose.c
     ${THIS_PATH}/wexus/StringUtil.cpp ${THIS_PATH}/wexus/VarPath.cpp
     ${THIS_PATH}/wexus/Widgets.cpp ${THIS_PATH}/wexus/Form.cpp ${THIS_PATH}/wexus/ValidationExpr.cpp
+    ${THIS_PATH}/wexus/Assert.cpp
 
 #pingapp
     ${THIS_PATH}/pingapp/App.cpp
