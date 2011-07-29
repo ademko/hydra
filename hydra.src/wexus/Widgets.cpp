@@ -27,7 +27,10 @@ HTMLString wexus::linkTo(const QString &desc, const QString &rawurl)
 
 void wexus::redirectTo(const QString &rawurl)
 {
-  Context::reply().redirectTo(rawurl);
+  if (rawurl.isEmpty())
+    Context::reply().redirectTo(Context::request().request());
+  else
+    Context::reply().redirectTo(rawurl);
 }
 
 bool wexus::renderErrors(void)

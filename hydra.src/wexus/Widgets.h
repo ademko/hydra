@@ -33,9 +33,12 @@ namespace wexus
    * Redirectst the user to the given url.
    * This must be called before any output, etc.
    *
+   * An empty string (the default) redirects to self. This is a bonus
+   * feature to this function that is not in HTTPReply::redirectTo().
+   *
    * @author Aleksander Demko
    */ 
-  void redirectTo(const QString &rawurl);
+  void redirectTo(const QString &rawurl = QString());
 
   /**
    * Renders any errors.

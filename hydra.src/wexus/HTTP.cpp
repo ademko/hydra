@@ -208,6 +208,7 @@ QTextStream & HTTPReply::output(void)
 void HTTPReply::redirectTo(const QString &rawurl)
 {
   assert(!dm_calledcommit && "[setStatus() must be called BEFORE any output() calls]");
+  assert(!rawurl.isEmpty());
   // Reply status really should be 303 (I think), but
   // netscape won're redirect if the status code is 303.
   // Look into cause later.
