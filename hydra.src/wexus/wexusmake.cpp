@@ -42,7 +42,7 @@ class ModelGenerator
     // name, type
     struct Field
     {
-      QString name, type;
+      QString name, type, validationExpr;
 
       QStringList hasType;   // empty for normal fields
       QStringList belongsType;   // empty for normal fields
@@ -50,7 +50,7 @@ class ModelGenerator
       bool isKey;
 
       Field(void);
-      Field(const QString &_name, const QString &_type);
+      Field(const QString &_name, const QString &_type, const QString &_validationExpr);
 
       bool isField(void) const { return hasType.isEmpty(); }
     };
@@ -65,8 +65,8 @@ ModelGenerator::Field::Field(void)
 {
 }
 
-ModelGenerator::Field::Field(const QString &_name, const QString &_type)
-  : name(_name), type(_type), isKey(_name == "id")
+ModelGenerator::Field::Field(const QString &_name, const QString &_type, const QString &_validationExpr)
+  : name(_name), type(_type), validationExpr(_validationExpr), isKey(_name == "id")
 {
   if (_name == "belongs_to") {
     colonsToParts(type, belongsType);
@@ -96,7 +96,7 @@ ModelGenerator::ModelGenerator(ModelTokenList &toklist)
         gotkey = true;
       }
       //qDebug() << "  " << fm->fieldType() << fm->fieldName();
-      dm_fields.push_back(Field(fm->fieldName(), fm->fieldType()));
+      dm_fields.push_back(Field(fm->fieldName(), fm->fieldType(), fm->fieldValidationExpr()));
     }
   if (!gotkey)
     throw HeaderModelParser::Exception("Miss required field: \"int id;\"");
@@ -209,8 +209,12 @@ void ModelGenerator::emitModelCPPSection(QTextStream &output, const QStringList 
       else
         output << "varStyle";
       output << ",\"" << dm_fields[x].name
-        << "\", \"" << dm_fields[x].type << "\", &"
-        << klassname << "::" << dm_fields[x].name
+        << "\", \"" << dm_fields[x].type << "\",";
+      if (dm_fields[x].validationExpr.isEmpty())
+        output << " wexus::ValidationExpr(),";
+      else
+        output << " (" << dm_fields[x].validationExpr << "),";
+      output << " &" << klassname << "::" << dm_fields[x].name
         << ");\n";
   }
   output <<

@@ -247,7 +247,7 @@ ValidationExpr ValidationExpr::maxLength(int l)
   return ValidationExpr(std::shared_ptr<Imp>(new Length(Length::LTE, l)));
 }
 
-ValidationExpr ValidationExpr::nonEmptyLength(void)
+ValidationExpr ValidationExpr::notEmptyLength(void)
 {
   return ValidationExpr(std::shared_ptr<Imp>(new Length(Length::GTE, 1, "cannot be empty")));
 }

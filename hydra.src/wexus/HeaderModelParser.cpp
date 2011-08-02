@@ -51,8 +51,11 @@ void HeaderModelParser::parse(QIODevice &input, ModelTokenList &outlist)
       in_fields_want_type,
       in_fields_want_name,
       in_fields_want_semi,
+      in_fields_want_validationexpr,
     } state = looking_for_field;
     QString fieldType, fieldName;
+    QString fieldValidationExpr;
+    int parencount = 0;
 
     for (; p != pe; ++p) {
       if (lit_start == ary.end())
@@ -104,13 +107,30 @@ void HeaderModelParser::parse(QIODevice &input, ModelTokenList &outlist)
             throw Exception("Expected field name");
           break;
         case in_fields_want_semi:
-          if (p->id == ';') {
-            outlist.push_back(std::shared_ptr<ModelToken>(new FieldModelToken('F', fieldName, fieldType)));
+          if (p->id == '(') {
+            state = in_fields_want_validationexpr;
+            parencount = 0;
+            fieldValidationExpr.clear();
+          } else if (p->id == ';') {
+            outlist.push_back(std::shared_ptr<ModelToken>(new FieldModelToken('F', fieldName, fieldType, fieldValidationExpr)));
             state = in_fields_want_type;
             fieldType.clear();
             lit_start = ary.end();
           } else
             throw Exception("Can't find a ; to terminate the field");
+          break;
+        case in_fields_want_validationexpr:
+          if (p->id == ')' && parencount == 0) {
+            // time to break out of this state
+qDebug() << "in_fields_want_validationexpr" << fieldValidationExpr;
+            state = in_fields_want_semi;
+            break;
+          }
+          if (p->id == '(')
+            parencount++;
+          if (p->id == ')')
+            parencount--;
+          fieldValidationExpr += " " + p->value();
           break;
       }//switch
     }//for p

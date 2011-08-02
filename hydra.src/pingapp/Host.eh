@@ -20,7 +20,7 @@ class pingapp::Host : public wexus::ActiveRecord
   fields:   // begin parsing of fields, will do all replacement here too
     pingapp::Site belongs_to;
     int id; //comment
-    QString hostname;
+    QString hostname(validate::notEmptyLength());
 };
 
 

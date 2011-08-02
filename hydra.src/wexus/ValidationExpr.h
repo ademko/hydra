@@ -77,7 +77,7 @@ class wexus::ValidationExpr
     // string checkers
     static ValidationExpr minLength(int l);
     static ValidationExpr maxLength(int l);
-    static ValidationExpr nonEmptyLength(void);    // similar to minLength(1), but with a different error message
+    static ValidationExpr notEmptyLength(void);    // similar to minLength(1), but with a different error message
 
     // int checkers
     static ValidationExpr minValue(double d);

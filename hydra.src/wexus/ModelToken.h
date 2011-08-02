@@ -77,13 +77,15 @@ class wexus::FieldModelToken : public wexus::ModelToken
      * @author Aleksander Demko
      */ 
     FieldModelToken(char typ,
-        const QString &fieldName, const QString &fieldType);
+        const QString &fieldName, const QString &fieldType,
+        const QString &fieldValidationExpr);
 
     const QString & fieldName(void) const { return dm_fieldName; }
     const QString & fieldType(void) const { return dm_fieldType; }
+    const QString & fieldValidationExpr(void) const { return dm_fieldValidationExpr; }
 
   private:
-    QString dm_fieldName, dm_fieldType;
+    QString dm_fieldName, dm_fieldType, dm_fieldValidationExpr;
 };
 
 #endif

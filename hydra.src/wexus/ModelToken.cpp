@@ -23,8 +23,10 @@ LiteralModelToken::LiteralModelToken(char typ, const QByteArray &lit)
 }
 
 FieldModelToken::FieldModelToken(char typ,
-        const QString &fieldName, const QString &fieldType)
-  : ModelToken(typ), dm_fieldName(fieldName), dm_fieldType(fieldType)
+        const QString &fieldName, const QString &fieldType,
+        const QString &fieldValidationExpr)
+  : ModelToken(typ), dm_fieldName(fieldName), dm_fieldType(fieldType),
+    dm_fieldValidationExpr(fieldValidationExpr)
 {
   assert(typ == 'F');
 }

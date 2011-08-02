@@ -18,6 +18,8 @@
 #include <QVariant>
 #include <QSqlDatabase>
 
+#include <wexus/ValidationExpr.h>
+
 namespace wexus
 {
   class ActiveClass;
@@ -67,13 +69,15 @@ class wexus::ActiveClass
     class ActiveField
     {
       public:
-        ActiveField(int style, const QString &fieldName, const QString &fieldType);
+        ActiveField(int style, const QString &fieldName, const QString &fieldType, const ValidationExpr &valexpr);
 
         int style(void) const { return dm_style; }
 
         const QString & fieldName(void) const { return dm_fieldName; }
         const QString & fieldType(void) const { return dm_fieldType; }
         QString sqlFieldType(void) const { return toSqlType(dm_fieldType); }
+
+        const ValidationExpr validationExpr(void) const { return dm_valexpr; }
 
         virtual QVariant toVariant(const ActiveRecord *inst) const = 0;
         
@@ -82,6 +86,7 @@ class wexus::ActiveClass
       private:
         int dm_style;
         QString dm_fieldName, dm_fieldType;
+        ValidationExpr dm_valexpr;
     };
 
     template <class RECT, class DATT> class ActiveFieldType : public ActiveField
@@ -90,8 +95,8 @@ class wexus::ActiveClass
         typedef DATT RECT::*MemberPtr;
 
       public:
-        ActiveFieldType(int style, const QString &fieldName, const QString &fieldType, MemberPtr memberptr)
-          : ActiveField(style, fieldName, fieldType), dm_memberptr(memberptr) { }
+        ActiveFieldType(int style, const QString &fieldName, const QString &fieldType, const ValidationExpr &valexpr, MemberPtr memberptr)
+          : ActiveField(style, fieldName, fieldType, valexpr), dm_memberptr(memberptr) { }
 
         virtual QVariant toVariant(const ActiveRecord *inst) const {
           const RECT * recinstance = dynamic_cast<const RECT*>(inst);
@@ -156,8 +161,9 @@ class wexus::ActiveClass
     /// field adder
     template <class RECT, class DATT>
       void addField(int style, const QString &fieldName, const QString &fieldType,
+          const ValidationExpr &valexpr,
           typename ActiveFieldType<RECT,DATT>::MemberPtr memberptr) {
-        std::shared_ptr<ActiveField> f(new ActiveFieldType<RECT,DATT>(style, fieldName, fieldType, memberptr));
+        std::shared_ptr<ActiveField> f(new ActiveFieldType<RECT,DATT>(style, fieldName, fieldType, valexpr, memberptr));
 
         dm_vec.push_back(f);
         dm_map[fieldName] = f;

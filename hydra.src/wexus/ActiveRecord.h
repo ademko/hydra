@@ -12,6 +12,7 @@
 
 #include <wexus/ActiveExpr.h>
 #include <wexus/ActiveClass.h>
+#include <wexus/ValidationExpr.h>
 
 namespace wexus
 {

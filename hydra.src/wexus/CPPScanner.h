@@ -62,8 +62,9 @@ class wexus::CPPToken
   public:
     CPPToken(int _id, QByteArray::const_iterator _ts, QByteArray::const_iterator _te);
 
+    /// returns this token as a debug-printable like string
     QString toString(void) const;
-    // returns ts/te as a string
+    /// returns ts/te as a string
     QString value(void) const;
 
     operator int(void) const { return id; }
