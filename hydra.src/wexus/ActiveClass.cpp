@@ -19,8 +19,8 @@ using namespace wexus;
 // ActiveField
 //
 
-ActiveClass::ActiveField::ActiveField(int style, const QString &fieldName, const QString &fieldType, const ValidationExpr &valexpr)
-  : dm_style(style), dm_fieldName(fieldName), dm_fieldType(fieldType), dm_valexpr(valexpr)
+ActiveClass::ActiveField::ActiveField(int style, const QString &fieldName, const QString &fieldType, const ValidationExpr &valexpr, const QVariant &initVal)
+  : dm_style(style), dm_fieldName(fieldName), dm_fieldType(fieldType), dm_valexpr(valexpr), dm_initval(initVal)
 {
 }
 

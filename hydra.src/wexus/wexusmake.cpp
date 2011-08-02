@@ -42,7 +42,7 @@ class ModelGenerator
     // name, type
     struct Field
     {
-      QString name, type, validationExpr;
+      QString name, type, validationExpr, initLit;
 
       QStringList hasType;   // empty for normal fields
       QStringList belongsType;   // empty for normal fields
@@ -50,7 +50,7 @@ class ModelGenerator
       bool isKey;
 
       Field(void);
-      Field(const QString &_name, const QString &_type, const QString &_validationExpr);
+      Field(const QString &_name, const QString &_type, const QString &_validationExpr, const QString &_initlit);
 
       bool isField(void) const { return hasType.isEmpty(); }
     };
@@ -65,8 +65,9 @@ ModelGenerator::Field::Field(void)
 {
 }
 
-ModelGenerator::Field::Field(const QString &_name, const QString &_type, const QString &_validationExpr)
-  : name(_name), type(_type), validationExpr(_validationExpr), isKey(_name == "id")
+ModelGenerator::Field::Field(const QString &_name, const QString &_type, const QString &_validationExpr, const QString &_initlit)
+  : name(_name), type(_type), validationExpr(_validationExpr),
+    initLit(_initlit), isKey(_name == "id")
 {
   if (_name == "belongs_to") {
     colonsToParts(type, belongsType);
@@ -96,7 +97,7 @@ ModelGenerator::ModelGenerator(ModelTokenList &toklist)
         gotkey = true;
       }
       //qDebug() << "  " << fm->fieldType() << fm->fieldName();
-      dm_fields.push_back(Field(fm->fieldName(), fm->fieldType(), fm->fieldValidationExpr()));
+      dm_fields.push_back(Field(fm->fieldName(), fm->fieldType(), fm->fieldValidationExpr(), fm->fieldInitLit()));
     }
   if (!gotkey)
     throw HeaderModelParser::Exception("Miss required field: \"int id;\"");
@@ -214,6 +215,11 @@ void ModelGenerator::emitModelCPPSection(QTextStream &output, const QStringList 
         output << " wexus::ValidationExpr(),";
       else
         output << " (" << dm_fields[x].validationExpr << "),";
+      if (dm_fields[x].initLit.isEmpty())
+        output << " QVariant(),";
+      else
+        output << " (" << dm_fields[x].initLit << "),";
+
       output << " &" << klassname << "::" << dm_fields[x].name
         << ");\n";
   }

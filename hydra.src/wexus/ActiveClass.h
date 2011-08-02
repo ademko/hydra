@@ -69,7 +69,8 @@ class wexus::ActiveClass
     class ActiveField
     {
       public:
-        ActiveField(int style, const QString &fieldName, const QString &fieldType, const ValidationExpr &valexpr);
+        ActiveField(int style, const QString &fieldName, const QString &fieldType,
+            const ValidationExpr &valexpr, const QVariant &initVal);
 
         int style(void) const { return dm_style; }
 
@@ -79,6 +80,8 @@ class wexus::ActiveClass
 
         const ValidationExpr validationExpr(void) const { return dm_valexpr; }
 
+        const QVariant & initVal(void) const { return dm_initval; }
+
         virtual QVariant toVariant(const ActiveRecord *inst) const = 0;
         
         virtual void setVariant(ActiveRecord *inst, const QVariant &v) = 0;
@@ -87,6 +90,7 @@ class wexus::ActiveClass
         int dm_style;
         QString dm_fieldName, dm_fieldType;
         ValidationExpr dm_valexpr;
+        QVariant dm_initval;
     };
 
     template <class RECT, class DATT> class ActiveFieldType : public ActiveField
@@ -95,8 +99,10 @@ class wexus::ActiveClass
         typedef DATT RECT::*MemberPtr;
 
       public:
-        ActiveFieldType(int style, const QString &fieldName, const QString &fieldType, const ValidationExpr &valexpr, MemberPtr memberptr)
-          : ActiveField(style, fieldName, fieldType, valexpr), dm_memberptr(memberptr) { }
+        ActiveFieldType(int style, const QString &fieldName, const QString &fieldType,
+            const ValidationExpr &valexpr, const QVariant &initVal,
+            MemberPtr memberptr)
+          : ActiveField(style, fieldName, fieldType, valexpr, initVal), dm_memberptr(memberptr) { }
 
         virtual QVariant toVariant(const ActiveRecord *inst) const {
           const RECT * recinstance = dynamic_cast<const RECT*>(inst);
@@ -162,8 +168,9 @@ class wexus::ActiveClass
     template <class RECT, class DATT>
       void addField(int style, const QString &fieldName, const QString &fieldType,
           const ValidationExpr &valexpr,
+          const QVariant &initVal,
           typename ActiveFieldType<RECT,DATT>::MemberPtr memberptr) {
-        std::shared_ptr<ActiveField> f(new ActiveFieldType<RECT,DATT>(style, fieldName, fieldType, valexpr, memberptr));
+        std::shared_ptr<ActiveField> f(new ActiveFieldType<RECT,DATT>(style, fieldName, fieldType, valexpr, initVal, memberptr));
 
         dm_vec.push_back(f);
         dm_map[fieldName] = f;

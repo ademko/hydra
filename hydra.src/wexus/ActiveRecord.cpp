@@ -84,7 +84,7 @@ void ActiveRecord::clear(void)
   ActiveClass * klass = activeClass();
 
   for (int i=0; i<klass->fieldsVec().size(); ++i)
-    klass->fieldsVec()[i]->setVariant(this, QVariant());
+    klass->fieldsVec()[i]->setVariant(this, klass->fieldsVec()[i]->initVal());
 }
 
 QString ActiveRecord::toString(void) const
