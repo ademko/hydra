@@ -88,20 +88,21 @@ void ActiveRecord::clear(void)
     klass->fieldsVec()[i]->setVariant(this, klass->fieldsVec()[i]->initVal());
 }
 
-void ActiveRecord::test(QStringList *outerrors) const
+void ActiveRecord::test(Context::Errors *outerrors) const
 {
-  if (!outerrors)
-    outerrors = &Context::threadInstance()->errors;
-
-  assert(outerrors);
-
   ActiveClass * klass = activeClass();
+  QStringList errorlist;
 
   for (int i=0; i<klass->fieldsVec().size(); ++i)
-    if (!klass->fieldsVec()[i]->validationExpr().isNull())
+    if (!klass->fieldsVec()[i]->validationExpr().isNull()) {
       klass->fieldsVec()[i]->validationExpr().test(
           klass->fieldsVec()[i]->toVariant(this),
-          outerrors);
+          outerrors ? &errorlist : 0);
+      if (outerrors && !errorlist.isEmpty()) {
+        (*outerrors)[klass->fieldsVec()[i]->fieldName()] = errorlist;
+        errorlist.clear();
+      }
+    }
 }
 
 bool ActiveRecord::fromForm(const QVariant &v)

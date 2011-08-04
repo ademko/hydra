@@ -128,12 +128,14 @@ class wexus::Context
      */ 
     QVariantMap setFlash;
 
+    typedef QMap<QString, QStringList> Errors;
+
     /**
      * Errors.
      *
      * @author Aleksander Demko
      */ 
-    QStringList errors;
+    Errors errors;
 };
 
 #endif

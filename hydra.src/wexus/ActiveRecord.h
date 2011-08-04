@@ -13,6 +13,7 @@
 #include <wexus/ActiveExpr.h>
 #include <wexus/ActiveClass.h>
 #include <wexus/ValidationExpr.h>
+#include <wexus/Context.h>
 
 namespace wexus
 {
@@ -89,11 +90,11 @@ class wexus::ActiveRecord
      * Validates the fields in the current record
      * against any defined validation checks.
      *
-     * If outerrors is null, Context::errors will be used.
+     * outerrors should be Context::errors.
      *
      * @author Aleksander Demko
      */
-    void test(QStringList *outerrors = 0) const;
+    void test(Context::Errors *outerrors = 0) const;
 
     /**
      * Calls clear() first.

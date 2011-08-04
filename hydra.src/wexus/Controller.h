@@ -106,7 +106,7 @@ class wexus::ControllerContext
      *
      * @author Aleksander Demko
      */
-    QStringList &errors;
+    Context::Errors &errors;
 };
 
 /**

@@ -43,11 +43,10 @@ bool wexus::renderErrors(void)
 
   if (haserrors) {
     Context::output() << "<h3>Form Errors!</h3>\n<ul>\n";
-    for (QStringList::const_iterator ii=ctx->errors.begin(); ii != ctx->errors.end(); ++ii) {
-      Context::output() << "<li>";
-      Context::htmlOutput() << *ii;
-      Context::output() << "</li>";
-    }
+    for (Context::Errors::const_iterator ii=ctx->errors.begin(); ii != ctx->errors.end(); ++ii)
+      for (QStringList::const_iterator ee=ii->begin(); ee != ii->end(); ++ee)
+        Context::output() << "<li><i>" << HTMLString::encode(ii.key()) << "</i> "
+          << HTMLString::encode(*ee) << "</li>\n";
     Context::output() << "</ul>\n";
   }
 

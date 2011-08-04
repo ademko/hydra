@@ -79,7 +79,7 @@ wexus::HTMLString Form::submitButton(const QString &desc, const QString &fieldNa
 
 }
 
-static void testFlashValidatorsDriver(const QVariantMap &params, const QVariantMap &validators, QStringList &errors)
+static void testFlashValidatorsDriver(const QVariantMap &params, const QVariantMap &validators, Context::Errors &errors)
 {
   QVariantMap::const_iterator ii, endii;
   QVariantMap::const_iterator vv;
@@ -97,12 +97,15 @@ static void testFlashValidatorsDriver(const QVariantMap &params, const QVariantM
       // its not a map, execute the validator
       ValidationExpr validexpr = ValidationExpr::fromVariant(*vv);
 
-      validexpr.test(*ii, &errors);
+      QStringList errorslist;
+      validexpr.test(*ii, &errorslist);
+      if (!errorslist.isEmpty())
+        errors[ii.key()] = errorslist;
     }
   }
 }
 
-void Form::testFlashValidators(const QVariantMap &params, const QVariantMap &flash, QStringList &errors)
+void Form::testFlashValidators(const QVariantMap &params, const QVariantMap &flash, Context::Errors &errors)
 {
   if (!flash.contains("validators"))
     return;

@@ -10,6 +10,7 @@
 
 #include <wexus/Widgets.h>
 #include <wexus/ValidationExpr.h>
+#include <wexus/Context.h>
 
 namespace wexus
 {
@@ -62,7 +63,7 @@ class wexus::Form
 
   public:
     static void testFlashValidators(const QVariantMap &params,
-        const QVariantMap &flash, QStringList &errors);
+        const QVariantMap &flash, Context::Errors &errors);
 
   protected:
     /**
