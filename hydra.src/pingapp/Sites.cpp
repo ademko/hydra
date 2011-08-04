@@ -7,9 +7,7 @@
 
 #include <pingapp/Sites.h>
 
-#include <wexus/HTMLString.h>
-
-#include <pingapp/Host.h>
+#include <wexus/TemplateInclude.h>    // lazy :)
 
 #include <QDebug>
 
@@ -42,13 +40,13 @@ void Sites::index(void)
 
 void Sites::create(void)
 {
-  if (params.contains("host")) {
-    Host h;
+  Site S;
+  if (S.fromForm(params["site"])) {
+    // insert it into the DB
+    S.create();
 
-    if (h.fromForm(params["host"])) {
-qDebug() << "ok fromForm";
-    } else
-qDebug() << "BAD fromForm";
+    setFlash["notice"] = "Site added.";
+    redirectTo("index");
   }
 
   createHtml();

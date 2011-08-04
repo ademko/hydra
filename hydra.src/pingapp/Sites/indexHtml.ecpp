@@ -1,12 +1,19 @@
 
+<% renderNotice(); %>
+
 Current sites:
 <p>
 <ul>
 <% while (dm_site.next()) { %>
   <li>id=<%=dm_site.id%> name=<%=dm_site.name%> desc=<%=dm_site.desc%>
+  <% Host subhost = dm_site.host();
+     while (subhost.next()) { %>
+       host=<%= subhost.hostname %>
+  <% } %>
+  </li>
 <% } %>
 </ul>
 
-<%= linkTo("New Post", "create"); %>
+<%= linkTo("New Site", "create"); %>
 <p>
 

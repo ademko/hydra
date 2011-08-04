@@ -1,10 +1,14 @@
 
 <% renderErrors(); %>
 
+<% renderNotice(); %>
+
 new form here
-<% { Form F("host"); %>
-  <%= F.textField("hostname", "(default host name)"); %> <br>
-  <%= F.textField("description", "a description"); %>
-  <%= F.submitButton("go!"); %>
+<% { Form F("site"); %>
+  Site name: <%= F.textField("name"); %> <br>
+  Site description (optional): <%= F.textField("desc"); %>
+  <%= F.submitButton("add"); %>
 <% } %>
+
+<%= linkTo("Back", "index") %>
 

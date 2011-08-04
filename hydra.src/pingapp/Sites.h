@@ -11,6 +11,7 @@
 #include <wexus/Controller.h>
 
 #include <pingapp/Site.h>
+#include <pingapp/Host.h>
 
 namespace pingapp
 {

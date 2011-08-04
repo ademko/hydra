@@ -33,7 +33,7 @@ void wexus::redirectTo(const QString &rawurl)
     Context::reply().redirectTo(rawurl);
 }
 
-bool wexus::renderErrors(void)
+void wexus::renderErrors(void)
 {
   Context *ctx = Context::threadInstance();
 
@@ -50,6 +50,12 @@ bool wexus::renderErrors(void)
     Context::output() << "</ul>\n";
   }
 
-  return haserrors;
+  //return haserrors;
+}
+
+void wexus::renderNotice(void)
+{
+  Context::output() << "<p> " << HTMLString::encode(
+      Context::threadInstance()->flash["notice"].toString()) << "</p>\n";
 }
 

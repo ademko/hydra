@@ -46,7 +46,14 @@ namespace wexus
    *
    * @author Aleksander Demko
    */ 
-  bool renderErrors(void);
+  void renderErrors(void);
+
+  /**
+   * Renders flash["notice"]
+   *
+   * @author Aleksander Demko
+   */ 
+  void renderNotice(void);
 }
 
 #endif
