@@ -17,6 +17,7 @@
 
 #include <wexus/Context.h>
 #include <wexus/Application.h>
+#include <wexus/VarPath.h>
 
 using namespace wexus;
 
@@ -85,6 +86,52 @@ void ActiveRecord::clear(void)
 
   for (int i=0; i<klass->fieldsVec().size(); ++i)
     klass->fieldsVec()[i]->setVariant(this, klass->fieldsVec()[i]->initVal());
+}
+
+void ActiveRecord::test(QStringList *outerrors) const
+{
+  if (!outerrors)
+    outerrors = &Context::threadInstance()->errors;
+
+  assert(outerrors);
+
+  ActiveClass * klass = activeClass();
+
+  for (int i=0; i<klass->fieldsVec().size(); ++i)
+    if (!klass->fieldsVec()[i]->validationExpr().isNull())
+      klass->fieldsVec()[i]->validationExpr().test(
+          klass->fieldsVec()[i]->toVariant(this),
+          outerrors);
+}
+
+bool ActiveRecord::fromForm(const QVariant &v)
+{
+  // reset the record first
+  clear();
+
+  if (!v.isValid())
+    return false;
+
+  Context *c = Context::threadInstance();
+  ActiveClass * klass = activeClass();
+
+  const QVariantMap &m = asVariantMap(v);   // will throw if its not a map
+
+  for (QVariantMap::const_iterator ii = m.begin(); ii != m.end(); ++ii) {
+
+    if (!klass->fieldsMap().contains(ii.key()))
+      throw HTTPHandler::Exception("unkown ActiveRecord field: " + ii.key());
+    std::shared_ptr<ActiveClass::ActiveField> f = *klass->fieldsMap().find(ii.key());
+    if (f->style() != ActiveClass::varStyle)
+      throw HTTPHandler::Exception("not varStyle field: " + ii.key());    // dont overwrite any of the keys
+    // finally, assign the form value to this DB record
+    f->setVariant(this, *ii);
+  }
+
+  // finally, test them all
+  test(&c->errors);
+
+  return c->errors.isEmpty();
 }
 
 QString ActiveRecord::toString(void) const

@@ -51,7 +51,7 @@ class wexus::Form
      *
      * @author Aleksander Demko
      */
-    wexus::HTMLString textField(const ValidationExpr &valExpr, const QString &fieldName, const QVariant &defaultVal = QVariant(), int sz = 30, int maxlen = 60) const;
+    wexus::HTMLString textField(const QString &fieldName, const QVariant &defaultVal = QVariant(), int sz = 30, int maxlen = 60, const ValidationExpr &valExpr = ValidationExpr()) const;
 
     /**
      * The submit button. fieldName is optional and not often used.

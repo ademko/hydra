@@ -86,6 +86,29 @@ class wexus::ActiveRecord
     void clear(void);
 
     /**
+     * Validates the fields in the current record
+     * against any defined validation checks.
+     *
+     * If outerrors is null, Context::errors will be used.
+     *
+     * @author Aleksander Demko
+     */
+    void test(QStringList *outerrors = 0) const;
+
+    /**
+     * Calls clear() first.
+     *
+     * Extracts the fields from the given form map and calls
+     * test().
+     *
+     * Returns true if atleast one field was extracted
+     * and errors is empty (after calling test())
+     *
+     * @author Aleksander Demko
+     */ 
+    bool fromForm(const QVariant &v);
+
+    /**
      * Returns a printable string reprensentation
      * of the fields in this record.
      *
@@ -100,7 +123,7 @@ class wexus::ActiveRecord
      * @author Aleksander Demko
      */ 
     void setFilterColumn(int colindex);
-
+    
   public:
     /**
      * Sets the default ordering.

@@ -42,6 +42,15 @@ void Sites::index(void)
 
 void Sites::create(void)
 {
+  if (params.contains("host")) {
+    Host h;
+
+    if (h.fromForm(params["host"])) {
+qDebug() << "ok fromForm";
+    } else
+qDebug() << "BAD fromForm";
+  }
+
   createHtml();
 }
 

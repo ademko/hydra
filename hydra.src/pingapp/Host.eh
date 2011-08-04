@@ -21,6 +21,7 @@ class pingapp::Host : public wexus::ActiveRecord
     pingapp::Site belongs_to;
     int id; //comment
     QString hostname(validate::notEmptyLength()) = "unnamed";
+    QString description;
 };
 
 

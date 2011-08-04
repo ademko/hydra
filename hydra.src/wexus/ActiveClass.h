@@ -78,7 +78,7 @@ class wexus::ActiveClass
         const QString & fieldType(void) const { return dm_fieldType; }
         QString sqlFieldType(void) const { return toSqlType(dm_fieldType); }
 
-        const ValidationExpr validationExpr(void) const { return dm_valexpr; }
+        const ValidationExpr & validationExpr(void) const { return dm_valexpr; }
 
         const QVariant & initVal(void) const { return dm_initval; }
 

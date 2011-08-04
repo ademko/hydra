@@ -31,7 +31,7 @@ Form::~Form()
   Context::output() << "</FORM>\n";
 }
 
-wexus::HTMLString Form::textField(const ValidationExpr &valExpr, const QString &fieldName, const QVariant &defaultVal, int sz, int maxlen) const
+wexus::HTMLString Form::textField(const QString &fieldName, const QVariant &defaultVal, int sz, int maxlen, const ValidationExpr &valExpr) const
 {
   HTMLString ret;
   QString def = formValue(fieldName).toString();

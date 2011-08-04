@@ -2,8 +2,9 @@
 <% renderErrors(); %>
 
 new form here
-<% { Form F("f1"); %>
-  <%= F.textField(validate::notEmptyLength() && validate::minLength(10), "a_test_field", "default"); %> <br>
+<% { Form F("host"); %>
+  <%= F.textField("hostname", "(default host name)"); %> <br>
+  <%= F.textField("description", "a description"); %>
   <%= F.submitButton("go!"); %>
 <% } %>
 

@@ -88,6 +88,8 @@ void HeaderModelParser::parse(QIODevice &input, ModelTokenList &outlist)
           if (p->id == CPPToken::TK_Id) {
             fieldType += p->value();
             state = in_fields_want_name;
+            fieldValidationExpr.clear();
+            fieldInitLit.clear();
           } else if (p->id == '}') {
             state = looking_for_field;  // done
           } else
@@ -111,11 +113,9 @@ void HeaderModelParser::parse(QIODevice &input, ModelTokenList &outlist)
         case in_fields_want_semi:
           if (p->id == '=' && !in_initlit) {
             in_initlit = true;
-            fieldInitLit.clear();
           } else if (p->id == '(') {
             state = in_fields_want_validationexpr;
             parencount = 0;
-            fieldValidationExpr.clear();
           } else if (p->id == ';') {
             outlist.push_back(std::shared_ptr<ModelToken>(new FieldModelToken('F', fieldName, fieldType, fieldValidationExpr, fieldInitLit)));
             state = in_fields_want_type;
