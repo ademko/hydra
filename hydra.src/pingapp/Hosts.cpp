@@ -5,25 +5,22 @@
  * See the accompanying file LICENSE.MIT.txt for details.
  */
 
-#include <pingapp/App.h>
-
-#include <pingapp/Sites.h>
 #include <pingapp/Hosts.h>
+
+#include <wexus/TemplateInclude.h>    // lazy :)
+
+#include <QDebug>
 
 using namespace wexus;
 using namespace pingapp;
 
-//
-//
-// App
-//
-//
-
-App::App(void)
+Hosts::Hosts(void)
 {
-  registerController<Sites>("sites");
-  registerController<Hosts>("hosts");
+  registerAction<Hosts, &Hosts::index>("index");
 }
 
-static hydra::Register<App> r1("pingapp::App");
+void Hosts::index(void)
+{
+  indexHtml();
+}
 
