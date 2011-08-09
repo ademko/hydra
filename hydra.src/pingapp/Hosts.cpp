@@ -7,9 +7,12 @@
 
 #include <pingapp/Hosts.h>
 
-#include <wexus/TemplateInclude.h>    // lazy :)
-
 #include <QDebug>
+
+#include <wexus/TemplateInclude.h>    // lazy :)
+#include <wexus/Registry.h>
+
+#include <pingapp/App.h>
 
 using namespace wexus;
 using namespace pingapp;
@@ -23,4 +26,7 @@ void Hosts::index(void)
 {
   indexHtml();
 }
+
+static wexus::RegisterController<App, Hosts> r1("pingapp::Hosts");
+static wexus::RegisterAction<Hosts, &Hosts::index> r2("index");
 

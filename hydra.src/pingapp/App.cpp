@@ -7,6 +7,8 @@
 
 #include <pingapp/App.h>
 
+#include <wexus/Registry.h>
+
 #include <pingapp/Sites.h>
 #include <pingapp/Hosts.h>
 
@@ -26,4 +28,6 @@ App::App(void)
 }
 
 static hydra::Register<App> r1("pingapp::App");
+
+static RegisterApp<App> r2("pingapp::App");
 

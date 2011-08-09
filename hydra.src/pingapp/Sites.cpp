@@ -7,9 +7,12 @@
 
 #include <pingapp/Sites.h>
 
-#include <wexus/TemplateInclude.h>    // lazy :)
-
 #include <QDebug>
+
+#include <wexus/TemplateInclude.h>    // lazy :)
+#include <wexus/Registry.h>
+
+#include <pingapp/App.h>
 
 using namespace wexus;
 using namespace pingapp;
@@ -136,4 +139,8 @@ qDebug() << sub.toString();
 
   indexHtml();
 }*/
+
+static wexus::RegisterController<pingapp::App, Sites> r1("pingapp::Sites");
+static wexus::RegisterAction<Sites, &Sites::index> r2("index");
+static wexus::RegisterAction<Sites, &Sites::create> r3("create");
 
