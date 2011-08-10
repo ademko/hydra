@@ -23,11 +23,7 @@ using namespace pingapp;
 
 App::App(void)
 {
-  registerController<Sites>("sites");
-  registerController<Hosts>("hosts");
 }
-
-static hydra::Register<App> r1("pingapp::App");
 
 static RegisterApp<App> r2("pingapp::App");
 

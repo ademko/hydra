@@ -8,11 +8,10 @@
 #ifndef __INCLUDED_WEXUS_APPLICATION_H__
 #define __INCLUDED_WEXUS_APPLICATION_H__
 
-#include <hydra/Registry.h>
-
 #include <wexus/Controller.h>
 #include <wexus/HTTPRequest.h>
 #include <wexus/HTTPReply.h>
+#include <wexus/Registry.h>
 
 #include <QSqlDatabase>
 
@@ -36,9 +35,6 @@ namespace wexus
 class wexus::Application
 {
   public:
-    typedef hydra::Registry<Application> registry_type;
-    static registry_type registry;
-
     class ControllerNotFoundException : public wexus::HTTPHandler::Exception
     {
       public:
@@ -68,24 +64,11 @@ class wexus::Application
     /// inherited constructor
     Application(void);
 
-    /**
-     * Registers a controller.
-     *
-     * @param shortname the name of the controller, as seen in url. This should not have
-     * any slashes or other punctutation. Example "home" "users" etc
-     * @author Aleksander Demko
-     */ 
-    template <class T>
-      void registerController(const char *shortname)
-      { dm_controllers.appendFunc(&hydra::loadfunc_impl<Controller,T>, shortname); }
-
   private:
-    // TODO in the future, replace this registry with something that
-    // uses a map rather than vector?
-    hydra::Registry<Controller> dm_controllers;
-
     SessionManager dm_sessionmanager;
     QSqlDatabase dm_db;
+
+    std::shared_ptr<Registry::AppInfo> dm_appinfo;
 };
 
 #endif

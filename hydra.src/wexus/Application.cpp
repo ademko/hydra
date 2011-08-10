@@ -7,11 +7,11 @@
 
 #include <wexus/Application.h>
 
+#include <QDebug>
+
 #include <assert.h>
 
 using namespace wexus;
-
-Application::registry_type Application::registry;
 
 Application::Application(void)
 {
@@ -76,20 +76,24 @@ void Application::handleApplicationRequest(QString &filteredRequest, wexus::HTTP
   // find where the action starts
 qDebug() << "Application::handleApplicationRequest" << filteredRequest << "controllername" << controllername << "action" << action;
 
+  // get my own info object
+  // this cant be done in the ctor, as the decendant object isnt built yet
+  if (!dm_appinfo.get()) {
+    dm_appinfo = Registry::appsByType()[typeid(*this).name()];
+
+    assert(dm_appinfo.get());
+  }
+
   // see if we a have controller for this request
-  for (int i=0; i<dm_controllers.size(); ++i)
-    if (controllername == dm_controllers.name(i)) {
-      Context ctx(this, action, req, reply);
+  if (dm_appinfo->controllers.contains(controllername)) {
+    Context ctx(this, action, req, reply);
 
-      std::shared_ptr<Controller> C = dm_controllers.create(i);
+    std::shared_ptr<Controller> C( dm_appinfo->controllers[controllername]->loader() );
 
-      assert(C.get());
+    assert(C.get());
 
-      C->handleControllerRequest(action);
-
-      return;
-    }
-
-  throw ControllerNotFoundException("wexus::Application: Controller not found: " + controllername);
+    C->handleControllerRequest(action);
+  } else
+    throw ControllerNotFoundException("wexus::Application: Controller not found: " + controllername);
 }
 
