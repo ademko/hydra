@@ -36,6 +36,13 @@ template <class T>
   return QString(typeid(T).name());
 }
 
+/**
+ * wexus::MemberFunction represents a pointer-to-member
+ * as a comprable (well, only =) object.
+ * This is used for wexus::Registry work
+ *
+ * @author Aleksander Demko
+ */ 
 class wexus::MemberFunction
 {
   private:

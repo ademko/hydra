@@ -47,6 +47,21 @@ class wexus::Application
     virtual ~Application();
 
     /**
+     * Called by wexus::Site during addApplication
+     *
+     * @author Aleksander Demko
+     */
+    void setMountPoint(const QString &mountPoint);
+
+    /**
+     * Returns the mount point.
+     * Mount points always end in /
+     *
+     * @author Aleksander Demko
+     */
+    const QString &mountPoint(void) const { return dm_mountpoint; }
+
+    /**
      * A enhanced handleApplicationRequest() call from the wexus::Site to wexus::Application.
      * filteredRequest contains just the action call. It always starts with atleast a /
      *
@@ -60,11 +75,15 @@ class wexus::Application
 
     QSqlDatabase & database(void) { return dm_db; }
 
+    std::shared_ptr<Registry::AppInfo> appInfo(void);
+
   protected:
     /// inherited constructor
     Application(void);
 
   private:
+    QString dm_mountpoint;
+
     SessionManager dm_sessionmanager;
     QSqlDatabase dm_db;
 

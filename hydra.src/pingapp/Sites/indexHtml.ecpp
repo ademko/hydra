@@ -14,6 +14,6 @@ Current sites:
 <% } %>
 </ul>
 
-<%= linkTo("New Site", "create"); %>
+<%= linkTo("New Site", &Sites::create); %>
 <p>
 

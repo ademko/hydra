@@ -63,8 +63,8 @@ std::shared_ptr<Registry::ControllerInfo> Registry::newControllerInfo(const char
   ci->loader = loader;
 
   // add this controller to the AppInfo
-  ci->app = Registry::linkAppInfo(_apptype);
-  ci->app->controllers[_cname] = ci;
+  ci->application = Registry::linkAppInfo(_apptype);
+  ci->application->controllers[_cname] = ci;
 
   // dont touch actions, as it may be set already
 

@@ -36,6 +36,11 @@ Application::~Application()
   }
 }
 
+void Application::setMountPoint(const QString &mountPoint)
+{
+  dm_mountpoint = mountPoint;
+}
+
 void Application::handleApplicationRequest(QString &filteredRequest, wexus::HTTPRequest &req, wexus::HTTPReply &reply)
 {
   QString controllername(filteredRequest.mid(1));
@@ -78,22 +83,27 @@ qDebug() << "Application::handleApplicationRequest" << filteredRequest << "contr
 
   // get my own info object
   // this cant be done in the ctor, as the decendant object isnt built yet
-  if (!dm_appinfo.get()) {
-    dm_appinfo = Registry::appsByType()[typeid(*this).name()];
-
-    assert(dm_appinfo.get());
-  }
-
   // see if we a have controller for this request
-  if (dm_appinfo->controllers.contains(controllername)) {
+  if (appInfo()->controllers.contains(controllername)) {
     Context ctx(this, action, req, reply);
 
-    std::shared_ptr<Controller> C( dm_appinfo->controllers[controllername]->loader() );
+    std::shared_ptr<Controller> C( appInfo()->controllers[controllername]->loader() );
 
     assert(C.get());
 
     C->handleControllerRequest(action);
   } else
     throw ControllerNotFoundException("wexus::Application: Controller not found: " + controllername);
+}
+
+std::shared_ptr<Registry::AppInfo> Application::appInfo(void)
+{
+  if (!dm_appinfo.get()) {
+    dm_appinfo = Registry::appsByType()[typeid(*this).name()];
+
+    assert(dm_appinfo.get());
+  }
+
+  return dm_appinfo;
 }
 

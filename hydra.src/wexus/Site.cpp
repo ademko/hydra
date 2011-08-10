@@ -107,6 +107,9 @@ void Site::addApplication(const QString &mountpoint, std::shared_ptr<Application
 {
   assert(!mountpoint.isEmpty());
   assert(mountpoint[mountpoint.size()-1] == '/');
+
+  app->setMountPoint(mountpoint);
+
   addHandler(std::shared_ptr<ApplicationHandler>(new ApplicationHandler(mountpoint, app)));
 }
 

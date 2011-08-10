@@ -7,6 +7,8 @@
 
 #include <wexus/MemberFunction.h>
 
+#include <QDebug>
+
 wexus::MemberFunction::MemberFunction(void)
 {
 }
@@ -28,7 +30,7 @@ bool wexus::MemberFunction::equals(const MemberFunction &rhs) const
   // else, theyre equal and we need to compare dm_mfn
   // equality means we can also do the following cast:
 
-  return dm_imp->equals(*dm_imp);
+  return dm_imp->equals(*rhs.dm_imp);
 }
 
 // test code

@@ -10,6 +10,9 @@
 #include <assert.h>
 
 #include <wexus/Context.h>
+#include <wexus/Registry.h>
+#include <wexus/Application.h>
+#include <wexus/Assert.h>
 
 #include <QDebug>
 
@@ -23,6 +26,38 @@ QString wexus::urlTo(void)
 HTMLString wexus::linkTo(const QString &desc, const QString &rawurl)
 {
   return HTMLString("<A HREF=\"" + rawurl + "\">" + HTMLString::encode(desc) + "</A>");
+}
+
+QString wexus::memberFunctionToUrl(const QString controllertype, const MemberFunction &mfn)
+{
+  if (!Registry::controllersByType().contains(controllertype))
+    assertThrow(false);
+
+  // first, find the controllertype
+  std::shared_ptr<Registry::ControllerInfo> cinfo =
+    Registry::controllersByType()[controllertype];
+
+  assert(cinfo.get());
+
+  // verify that that this controller type is inded part of my application
+  assertThrow(Context::application()->appInfo() == cinfo->application);
+
+  // find the MemberFunction within this controllers member functions
+  Registry::ControllerInfo::ActionMap::const_iterator ii, endii;
+
+  ii = cinfo->actions.begin();
+  endii = cinfo->actions.end();
+
+  // TODO fix this function
+  // make sure MemberFunction stuf works
+
+  for (; ii != endii; ++ii)
+    if ((*ii)->mfn == mfn) // found it
+      return Context::application()->mountPoint() + cinfo->name + "/" + (*ii)->actionname;
+
+  // didnt find anything
+  assertThrow(false);
+  return "";  // will never reach here
 }
 
 void wexus::redirectTo(const QString &rawurl)

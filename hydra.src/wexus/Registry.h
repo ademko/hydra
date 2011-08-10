@@ -37,6 +37,12 @@ namespace wexus
   typedef void (*ActionFunc)(Controller *c);
 };
 
+/**
+ * A type registry for applications, controllers and actions.
+ * This is a singleton.
+ *
+ * @author Aleksander Demko
+ */ 
 class wexus::Registry
 {
   public:
@@ -57,6 +63,7 @@ class wexus::Registry
     class ControllerInfo
     {
       public:
+        // maps actionames to actions
         typedef QMap<QString, std::shared_ptr<ActionInfo>  > ActionMap;
       public:
         QString classtype; // the type string (from typeid)
@@ -64,8 +71,10 @@ class wexus::Registry
 
         ControllerLoader loader;
 
-        std::shared_ptr<AppInfo> app;
+        /// parent app
+        std::shared_ptr<AppInfo> application;
 
+        /// maps actionames to actions
         ActionMap actions;
     };
     class ActionInfo
@@ -74,6 +83,7 @@ class wexus::Registry
         MemberFunction mfn;
         QString actionname;
 
+        /// parent controller
         std::shared_ptr<ControllerInfo> controller;
 
         ActionFunc func;
