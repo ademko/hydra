@@ -22,16 +22,17 @@ Application::Application(void)
   dm_db.setDatabaseName("/tmp/one.sqlite");
   bool good = dm_db.open();
   assert(good);
-//qDebug() << "creating DB";
 }
 
 Application::~Application()
 {
   // tear down DB
   if (dm_db.isOpen()) {
-    QSqlDatabase::removeDatabase("C1");
-
     dm_db.close();
+
+    dm_db = QSqlDatabase(); // we need to "null" dm_db otherwise removeDatabasew ill think its open
+
+    QSqlDatabase::removeDatabase("C1");
   }
 }
 
