@@ -134,30 +134,6 @@ class wexus::Controller : public wexus::ControllerContext
   protected:
     /// constructor
     Controller(void);
-
-    // see if this can be made nicery using
-    // some C++ or macro magic?
-    //template <void (C::*METH)(void), class C>
-    template <class C, void (C::*METH)(void)>
-      void registerAction(const char *actioname)
-      { dm_actions[actioname] = methodToFunc<C, METH>; }
-
-  private:
-    template <class C, void (C::*LMETH)(void)>
-      static void methodToFunc(Controller *c)
-      {
-        // bounce the function call to a method call
-        C *here = dynamic_cast<C*>(c);
-        assert(here);
-
-        ((*here).*LMETH)();
-      }
-
-  private:
-    typedef void (*actionfunc_t)(Controller *c);
-    typedef std::map<QString, actionfunc_t> actionmap_t;
-
-    actionmap_t dm_actions;
 };
 
 #endif

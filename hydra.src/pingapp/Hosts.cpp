@@ -19,7 +19,6 @@ using namespace pingapp;
 
 Hosts::Hosts(void)
 {
-  registerAction<Hosts, &Hosts::index>("index");
 }
 
 void Hosts::index(void)

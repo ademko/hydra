@@ -25,8 +25,6 @@ using namespace pingapp;
 
 Sites::Sites(void)
 { 
-  registerAction<Sites, &Sites::index>("index");
-  registerAction<Sites, &Sites::create>("create");
 }
 
 void Sites::index(void)

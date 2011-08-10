@@ -11,6 +11,8 @@
 
 #include <QDebug>
 
+#include <wexus/Registry.h>
+
 using namespace wexus;
 
 //
@@ -49,15 +51,24 @@ void Controller::handleControllerRequest(const QString &actionname)
 {
   qDebug() << "Controller::handleControllerRequest" << actionname;
 
-  actionmap_t::iterator ii = dm_actions.find(actionname);
+  QString cname(typeid(*this).name());
 
-  if (ii != dm_actions.end()) {
+  if (!Registry::controllersByType().contains(cname))
+    throw ActionNotFoundException("wexus::Controller: ControllerInfo not found: " + cname);
+
+  std::shared_ptr<Registry::ControllerInfo> cinfo(Registry::controllersByType()[cname]);
+
+  assert(cinfo.get());
+
+  if (!cinfo->actions.contains(actionname))
+    throw ActionNotFoundException("wexus::Controller: Action not found: " + actionname);
+
+  {
     // call the found action
-    ii->second(this);
+    cinfo->actions[actionname]->func(this);
 
     if (Context::reply().status() == 0)
       throw HTTPHandler::Exception("Controller called, but it didn't set any status (or send output)");
-  } else
-    throw ActionNotFoundException("wexus::Controller: Action not found: " + actionname);
+  }
 }
 
