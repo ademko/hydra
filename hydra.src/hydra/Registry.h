@@ -8,6 +8,8 @@
 #ifndef __INCLUDED_HYDRA_REGiSTRY_H__
 #define __INCLUDED_HYDRA_REGiSTRY_H__
 
+#include <memory>
+
 #include <hydra/TR1.h>
 
 #include <QDebug>
@@ -79,12 +81,15 @@ template <class BASE> class hydra::Registry
     const char * name(size_t index) { instance(); return (*dm_funcs)[index].name; }
 
   private:
+    // makes sure dm_funcs is not null
     void instance(void);
 
   private:
     // this is a pointer rather than direct for cleaner start up initialization
     // resolution (ie. we can control it somewhat)
-    std::vector<payload_t> *dm_funcs;
+    // also, auto_ptr since we still want initilization/destruction
+    // at ctor/dtor time
+    std::auto_ptr<std::vector<payload_t> > dm_funcs;
 };
 
 /*template <class BASE>
@@ -99,8 +104,8 @@ template <class BASE>
 void hydra::Registry<BASE>::instance(void)
 {
   //qDebug() << __FUNCTION__ << (dm_funcs !=0);
-  if (!dm_funcs)
-    dm_funcs = new std::vector<payload_t>;
+  if (!dm_funcs.get())
+    dm_funcs.reset(new std::vector<payload_t>);
 }
 
 /**
