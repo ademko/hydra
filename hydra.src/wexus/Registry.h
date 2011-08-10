@@ -40,13 +40,18 @@ namespace wexus
 class wexus::Registry
 {
   public:
+    class ControllerInfo;
     class AppInfo
     {
       public:
-        QString type; // the type string (from typeid)
-        QString name; // the application name
+        typedef QMap<QString, std::shared_ptr<ControllerInfo>  > ControllerMap; // controllers by their name
+      public:
+        QString classtype; // the type string (from typeid)
+        QString classname; // the application name
 
         ApplicationLoader loader;
+
+        ControllerMap controllers;
     };
     class ActionInfo;
     class ControllerInfo
@@ -54,7 +59,7 @@ class wexus::Registry
       public:
         typedef QMap<QString, std::shared_ptr<ActionInfo>  > ActionMap;
       public:
-        QString type; // the type string (from typeid)
+        QString classtype; // the type string (from typeid)
         QString name; // the controller name
 
         ControllerLoader loader;
@@ -79,7 +84,6 @@ class wexus::Registry
     typedef QMap<QString, std::shared_ptr<AppInfo>  > AppNameMap; // apps by their name
 
     typedef QMap<QString, std::shared_ptr<ControllerInfo>  > ControllerTypeMap; // controllers by their typeinfo.name()
-    typedef QMap<QString, std::shared_ptr<ControllerInfo>  > ControllerNameMap; // controllers by their name
 
     typedef QList<std::shared_ptr<ActionInfo>  > ActionTypeList; // cant be a map cuz MemberFunction doesnt have operator<
 
@@ -87,9 +91,8 @@ class wexus::Registry
     static AppNameMap & appsByName(void) { return instance()->dm_appname; }
 
     static ControllerTypeMap & controllersByType(void) { return instance()->dm_contype; }
-    static ControllerNameMap & controllersByName(void) { return instance()->dm_conname; }
 
-    static ActionTypeList actionList(void) { return instance()->dm_actionlist; }
+    static ActionTypeList & actionList(void) { return instance()->dm_actionlist; }
 
     /// called by RegisterApp
     static std::shared_ptr<AppInfo> newAppInfo(const char *_appname, const char *_typename, ApplicationLoader loader);
@@ -118,7 +121,6 @@ class wexus::Registry
     AppNameMap dm_appname;
 
     ControllerTypeMap dm_contype;
-    ControllerNameMap dm_conname;
 
     ActionTypeList dm_actionlist;
 };

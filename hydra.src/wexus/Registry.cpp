@@ -7,6 +7,8 @@
 
 #include <wexus/Registry.h>
 
+#include <QDebug>
+
 using namespace wexus;
 
 Registry * Registry::dm_instance;
@@ -21,20 +23,19 @@ Registry * Registry::instance(void)
 
 std::shared_ptr<Registry::AppInfo> Registry::newAppInfo(const char *_appname, const char *_typename, ApplicationLoader loader)
 {
-  std::shared_ptr<AppInfo> ai;
-  QString appname(_appname), tname(_typename);
+  std::shared_ptr<AppInfo> & ai = Registry::appsByType()[_typename];
 
-  if (Registry::appsByType().contains(tname))
-    ai = Registry::appsByType()[tname];
-  else
+  QString appname(_appname);
+
+  if (!ai.get())
     ai.reset(new AppInfo);
 
   // sometimes, it can exist in the type map but not in the name map
   if (!Registry::appsByName().contains(appname))
     Registry::appsByName()[appname] = ai;
 
-  ai->type = tname;
-  ai->name = appname;
+  ai->classtype = _typename;
+  ai->classname = appname;
   ai->loader = loader;
 
   return ai;
@@ -52,22 +53,20 @@ std::shared_ptr<Registry::AppInfo> Registry::linkAppInfo(const char *_apptype)
 
 std::shared_ptr<Registry::ControllerInfo> Registry::newControllerInfo(const char *_cname, const char *_typename, const char *_apptype, ControllerLoader loader)
 {
-  std::shared_ptr<ControllerInfo> ci;
-  QString cname(_cname), tname(_typename);
+  std::shared_ptr<ControllerInfo> & ci = Registry::controllersByType()[_typename];
 
-  if (Registry::controllersByType().contains(tname))
-    ci = Registry::controllersByType()[tname];
-  else
+  if (!ci)
     ci.reset(new ControllerInfo);
 
-  // sometimes, it can exist in the type map but not in the name map
-  if (!Registry::controllersByName().contains(cname))
-    Registry::controllersByName()[cname] = ci;
-
-  ci->type = tname;
-  ci->name = cname;
+  ci->classtype = _typename;
+  ci->name = _cname;
   ci->loader = loader;
+
+  // add this controller to the AppInfo
   ci->app = Registry::linkAppInfo(_apptype);
+  ci->app->controllers[_cname] = ci;
+
+  // dont touch actions, as it may be set already
 
   return ci;
 }
@@ -88,8 +87,10 @@ std::shared_ptr<Registry::ActionInfo> Registry::newActionInfo(wexus::MemberFunct
 
   info->mfn = mfn;
   info->actionname = _actionname;
-  info->controller = linkControllerInfo(_ctype);
   info->func = func;
+
+  info->controller = linkControllerInfo(_ctype);
+  info->controller->actions[_actionname] = info;
 
   Registry::actionList().push_back(info);
 

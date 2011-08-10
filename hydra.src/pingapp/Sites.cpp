@@ -140,7 +140,7 @@ qDebug() << sub.toString();
   indexHtml();
 }*/
 
-static wexus::RegisterController<pingapp::App, Sites> r1("pingapp::Sites");
+static wexus::RegisterController<pingapp::App, Sites> r1("sites");
 static wexus::RegisterAction<Sites, &Sites::index> r2("index");
 static wexus::RegisterAction<Sites, &Sites::create> r3("create");
 

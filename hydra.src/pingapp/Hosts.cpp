@@ -27,6 +27,6 @@ void Hosts::index(void)
   indexHtml();
 }
 
-static wexus::RegisterController<App, Hosts> r1("pingapp::Hosts");
+static wexus::RegisterController<App, Hosts> r1("hosts");
 static wexus::RegisterAction<Hosts, &Hosts::index> r2("index");
 
