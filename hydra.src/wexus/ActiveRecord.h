@@ -8,7 +8,7 @@
 #ifndef __INCLUDED_WEXUS_ACTIVERECORD_H__
 #define __INCLUDED_WEXUS_ACTIVERECORD_H__
 
-#include <hydra/TR1.h>
+#include <wexus/TR1.h>
 
 #include <wexus/ActiveExpr.h>
 #include <wexus/ActiveClass.h>

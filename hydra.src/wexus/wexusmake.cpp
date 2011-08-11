@@ -9,8 +9,7 @@
 
 #include <assert.h>
 
-#include <hydra/ArgumentParser.h>
-#include <hydra/Engine.h>   // for HYDRA_COPYRIGHT_STRING
+#include <hydra/ArgumentParser.h>   //only hydra dependancy
 
 #include <wexus/TemplateTokenList.h>
 #include <wexus/HTMLTemplateParser.h>
@@ -18,6 +17,7 @@
 #include <wexus/HeaderModelParser.h>
 #include <wexus/CPPScanner.h>
 #include <wexus/StringUtil.h>
+#include <wexus/HTTP.h>
 
 #include <QFile>
 #include <QDirIterator>
@@ -258,7 +258,7 @@ static void showHelp(const QString &progname, QTextStream &out)
   out <<
     progname << " -- Wexus Utility -- " " (" __DATE__ " " __TIME__ ")\n"
     "A programmers tool for Wexus Library users\n"
-    "Copyright (c) " HYDRA_COPYRIGHT_STRING ", Aleksander B. Demko\n\n"
+    "Copyright (c) " WEXUS_COPYRIGHT_STRING ", Aleksander B. Demko\n\n"
     "Usage:\n"
     "  " << progname << " command [command options]\n\n"
     "Where command can be one of:\n"

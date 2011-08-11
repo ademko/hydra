@@ -10,7 +10,7 @@
 
 #include <map>
 
-#include <hydra/TR1.h>
+#include <wexus/TR1.h>
 #include <wexus/HTTPHandler.h>
 
 namespace wexus

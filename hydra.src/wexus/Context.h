@@ -10,7 +10,7 @@
 
 #include <QTextStream>
 
-#include <hydra/TR1.h>
+#include <wexus/TR1.h>
 
 #include <wexus/HTTPRequest.h>
 #include <wexus/HTTPReply.h>

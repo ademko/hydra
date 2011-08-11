@@ -13,7 +13,7 @@
 #include <QMap>
 #include <QVariant>
 
-#include <hydra/TR1.h>
+#include <wexus/TR1.h>
 #include <wexus/Cookies.h>
 
 namespace wexus

@@ -10,7 +10,7 @@
 
 #include <QList>
 
-#include <hydra/TR1.h>
+#include <wexus/TR1.h>
 
 #include <wexus/TemplateToken.h>
 

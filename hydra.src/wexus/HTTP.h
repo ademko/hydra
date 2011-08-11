@@ -15,6 +15,9 @@
 #include <QString>
 #include <QTextStream>
 
+#define WEXUS_VERSION_STRING "0.20"
+#define WEXUS_COPYRIGHT_STRING "2011"
+
 namespace wexus
 {
   QString escapeForXML(const QString &s);

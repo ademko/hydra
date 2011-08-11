@@ -8,7 +8,7 @@
 #ifndef __INLCLUDED_WEXUS_ACTIVEEXPR_H__
 #define __INLCLUDED_WEXUS_ACTIVEEXPR_H__
 
-#include <hydra/TR1.h>
+#include <wexus/TR1.h>
 
 #include <QVariant>
 #include <QSqlQuery>
