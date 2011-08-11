@@ -42,6 +42,12 @@ namespace wexus
   }
 }
 
+/**
+ * Represents a wexus::ActiveRecord type.
+ * Every wexus::ActiveRecord has a link to one of these.
+ *
+ * @author Aleksander Demko
+ */ 
 class wexus::ActiveClass
 {
   public:
@@ -66,24 +72,77 @@ class wexus::ActiveClass
       fKeyStyle,
     };
 
+    /**
+     * Represents one field in an wexus::ActiveClass
+     *
+     * @author Aleksander Demko
+     */ 
     class ActiveField
     {
       public:
+        /// constructor
         ActiveField(int style, const QString &fieldName, const QString &fieldType,
             const ValidationExpr &valexpr, const QVariant &initVal);
 
+        /**
+         * Returns the "style" (type) of field this is.
+         *
+         * @author Aleksander Demko
+         */ 
         int style(void) const { return dm_style; }
 
+        /**
+         * Returns the field name of this field.
+         *
+         * @author Aleksander Demko
+         */ 
         const QString & fieldName(void) const { return dm_fieldName; }
+        /**
+         * Returns the C++ data type of this field.
+         *
+         * @author Aleksander Demko
+         */ 
         const QString & fieldType(void) const { return dm_fieldType; }
+        /**
+         * Returns the SQL datatype (converted from fieldType() via toSqlType())
+         * of this field.
+         *
+         * @author Aleksander Demko
+         */ 
         QString sqlFieldType(void) const { return toSqlType(dm_fieldType); }
 
+        /**
+         * Returns the wexus::ValidationExpr defined in the .eh
+         * for this field, or a null wexus::ValidationExpr is
+         * none was defined.
+         *
+         * @author Aleksander Demko
+         */ 
         const ValidationExpr & validationExpr(void) const { return dm_valexpr; }
 
+        /**
+         * Returns the default value, as defined in the .eh file.
+         * Returns an invalida QVariant if none was set.
+         *
+         * @author Aleksander Demko
+         */ 
         const QVariant & initVal(void) const { return dm_initval; }
 
+        /**
+         * Converts the current value of this field in the given
+         * wexus::ActiveRecord instance to a QVariant
+         * and returns it.
+         *
+         * @author Aleksander Demko
+         */ 
         virtual QVariant toVariant(const ActiveRecord *inst) const = 0;
         
+        /**
+         * Sets the value of thie field in the given wexus::ActiveRecord
+         * instance to v.
+         *
+         * @author Aleksander Demko
+         */ 
         virtual void setVariant(ActiveRecord *inst, const QVariant &v) = 0;
 
       private:
@@ -135,12 +194,41 @@ class wexus::ActiveClass
     /// ctor
     ActiveClass(const QString &_className);
 
+    /**
+     * The C++ class name of this type.
+     *
+     * @author Aleksander Demko
+     */ 
     const QString & className(void) const { return dm_classname; }
 
+    /**
+     * The C++ class converted to a SQL-comptabile string (mostly :: removed)
+     *
+     * @author Aleksander Demko
+     */ 
     const QString & tableName(void) const { return dm_tablename; }
 
+    /**
+     * Returns all the field names as one string, seperated
+     * by commas. Each field name will be prefixed by tableName().
+     *
+     * @author Aleksander Demko
+     */ 
     const QString & fieldsAsList(void) const { return dm_fieldsaslist; }
+    /**
+     * Returns all the field names as one string, seperated
+     * by commas.
+     *
+     * @author Aleksander Demko
+     */ 
     const QString & fieldsAsListSansTable(void) const { return dm_fieldsaslistsanstable; }
+    /**
+     * Returns a list of question marks, each seperated by a comma.
+     * There will be as many question marks as their are fields in this
+     * class.
+     *
+     * @author Aleksander Demko
+     */ 
     const QString & questionsAsList(void) const { return dm_questionsaslist; }
 
     /**

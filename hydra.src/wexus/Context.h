@@ -49,11 +49,30 @@ class wexus::Context
      */ 
     static Context *threadInstance(void);
 
-    // might remove these in the future, maybe, not sure
-
+    /**
+     * The application instance that spawned this context.
+     *
+     * @author Aleksander Demko
+     */ 
     static wexus::Application * application(void) { return threadInstance()->dm_application; }
+    /**
+     * The current action name.
+     *
+     * @author Aleksander Demko
+     */ 
     static const QString & actionName(void) { return threadInstance()->dm_actionname; }
+    /**
+     * The wexus::HTTPRequest object that started this request.
+     *
+     * @author Aleksander Demko
+     */ 
     static wexus::HTTPRequest & request(void) { return threadInstance()->dm_req; }
+    /**
+     * The wexus::HTTPReply object that will be used to reply
+     * to the user.
+     *
+     * @author Aleksander Demko
+     */ 
     static wexus::HTTPReply & reply(void) { return threadInstance()->dm_reply; }
 
     /**
