@@ -25,9 +25,11 @@ class pingapp::Sites : public wexus::Controller
 
     void index(void);
     void create(void);
+    void edit(void);
 
     void indexHtml(void);
     void createHtml(void);
+    void editHtml(void);
 
   protected:
     //QVariant dm_counter;
