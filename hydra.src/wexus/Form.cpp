@@ -135,7 +135,7 @@ QVariant Form::formValue(const QString &fieldName) const
   if (!ret.isValid() && dm_rec) {
     // try to get the default value of this field
     if (dm_rec->activeClass()->fieldsMap().contains(fieldName))
-      ret = dm_rec->activeClass()->fieldsMap()[fieldName]->initVal();
+      ret = dm_rec->activeClass()->fieldsMap()[fieldName]->toVariant(dm_rec);
   }
 
   return ret;
