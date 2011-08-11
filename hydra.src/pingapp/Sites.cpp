@@ -53,7 +53,7 @@ void Sites::create(void)
     S.create();
 
     setFlash["notice"] = "Site added.";
-    redirectTo("index");
+    redirectTo(&Sites::index);
   }
 
   createHtml();
@@ -66,7 +66,7 @@ void Sites::edit(void)
   Site S;
   if (S.fromForm()) {
     setFlash["notice"] = "Site updated.";
-    redirectTo("index");
+    redirectTo(&Sites::index);
   }
 qDebug() << "HERRO" << dm_site.desc;
 

@@ -65,6 +65,11 @@ namespace wexus
    */ 
   void redirectTo(const QString &rawurl = QString());
 
+  template <class CONTROLLER>
+    void redirectTo(void (CONTROLLER::*mfn)(void)) {
+      redirectTo(memberFunctionToUrl(typeToString<CONTROLLER>(), MemberFunction(mfn)));
+    }
+
   /**
    * Renders any errors.
    * Returns true if there are any errors.
