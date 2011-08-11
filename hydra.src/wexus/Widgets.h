@@ -15,6 +15,8 @@
 
 namespace wexus
 {
+  class ActiveRecord;//fwd
+
   /**
    * Comptes the a url to this location.
    *
@@ -34,11 +36,22 @@ namespace wexus
   // throws on errors
   // returns a raw url
   QString memberFunctionToUrl(const QString controllertype, const MemberFunction &mfn);
+  // internal function for linkTo
+  // throws on errors
+  // returns a raw url
+  QString recToIdUrl(wexus::ActiveRecord &rec);
 
   template <class CONTROLLER>
     wexus::HTMLString linkTo(const QString &desc, void (CONTROLLER::*mfn)(void)) {
       // de-inline this function
       return linkTo(desc, memberFunctionToUrl(typeToString<CONTROLLER>(), MemberFunction(mfn)));
+    }
+
+  template <class CONTROLLER>
+    wexus::HTMLString linkTo(const QString &desc, void (CONTROLLER::*mfn)(void), wexus::ActiveRecord &rec) {
+      // de-inline this function
+      return linkTo(desc, memberFunctionToUrl(typeToString<CONTROLLER>(), MemberFunction(mfn))
+          + recToIdUrl(rec));
     }
 
   /**

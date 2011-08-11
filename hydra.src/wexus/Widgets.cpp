@@ -12,6 +12,7 @@
 #include <wexus/Context.h>
 #include <wexus/Registry.h>
 #include <wexus/Application.h>
+#include <wexus/ActiveRecord.h>
 #include <wexus/Assert.h>
 
 #include <QDebug>
@@ -58,6 +59,11 @@ QString wexus::memberFunctionToUrl(const QString controllertype, const MemberFun
   // didnt find anything
   assertThrow(false);
   return "";  // will never reach here
+}
+
+QString wexus::recToIdUrl(wexus::ActiveRecord &rec)
+{
+  return "?id=" + rec.activeClass()->keyField()->toVariant(&rec).toString();
 }
 
 void wexus::redirectTo(const QString &rawurl)

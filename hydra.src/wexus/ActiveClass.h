@@ -235,9 +235,18 @@ class wexus::ActiveClass
      * Returns the index of the key column.
      * There can only be one (for now.. anyways)
      *
+     * Never fails.
+     *
      * @author Aleksander Demko
      */ 
     int keyColumn(void) const;
+
+    /**
+     * Return the ActiveField referenced by keyColumn()
+     *
+     * @author Aleksander Demko
+     */ 
+    std::shared_ptr<ActiveField> keyField(void) const { return fieldsVec()[keyColumn()]; }
 
     /// creates the table in the database
     void createTable(void) const;
@@ -246,9 +255,34 @@ class wexus::ActiveClass
     typedef QVector<std::shared_ptr<ActiveField> > FieldVec;
     typedef QMap<QString, std::shared_ptr<ActiveField> > FieldMap;
 
+    /**
+     * Returns all the fields as a vector.
+     *
+     * @author Aleksander Demko
+     */ 
     FieldVec & fieldsVec(void) { return dm_vec; }
+
+    /**
+     * Returns all the fields as a vector.
+     *
+     * @author Aleksander Demko
+     */ 
     const FieldVec & fieldsVec(void) const { return dm_vec; }
+
+    /**
+     * Returns all the fields as a map
+     * keyed by their field names.
+     *
+     * @author Aleksander Demko
+     */ 
     FieldMap & fieldsMap(void) { return dm_map; }
+
+    /**
+     * Returns all the fields as a map
+     * keyed by their field names.
+     *
+     * @author Aleksander Demko
+     */ 
     const FieldMap & fieldsMap(void) const { return dm_map; }
 
   protected:
