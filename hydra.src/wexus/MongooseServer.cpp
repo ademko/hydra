@@ -14,6 +14,7 @@
 
 #include <QMutex>
 #include <QWaitCondition>
+#include <QDateTime>
 #include <QDebug>
 
 #include <wexus/HTTP.h>
@@ -235,6 +236,12 @@ qDebug() << "MongooseServer::callback handling: " << req.request();
   }
   catch (HTTPHandler::Exception &e) {
     ErrorHTTPHandler(e.userMessage()).handleRequest(req, rep);
+  }
+  catch (std::exception &e) {
+    QDateTime now(QDateTime::currentDateTime());
+
+qDebug() << now.toString() << "what()" << e.what();
+    ErrorHTTPHandler("MongooseServer: std::exception @" + now.toString()).handleRequest(req, rep);
   }
 
   return here;  // always returning non-null to show that ive handled the request
