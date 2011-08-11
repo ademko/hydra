@@ -13,17 +13,15 @@
 using namespace wexus;
 
 Form::Form(const QString &formname, const QString &rawurl, int method)
-  : dm_formname(formname)
+  : dm_formname(formname), dm_rec(0)
 {
-  Context::output() << "<FORM ";
+  outputHeader(rawurl, method);
+}
 
-  switch (method) {
-    case Method_Post: Context::output() << "METHOD=\"POST\""; break;
-    case Method_Get: Context::output() << "METHOD=\"GET\""; break;
-    case Method_Upload: Context::output() << "METHOD=\"POST\" ENCTYPE=\"multipart/form-data\""; break;
-  }
-
-  Context::output() << "ACTION=\"" << rawurl << "\">\n";
+Form::Form(ActiveRecord &rec, const QString &rawurl, int method)
+  : dm_formname(rec.activeClass()->tableName()), dm_rec(&rec)
+{
+  outputHeader(rawurl, method);
 }
 
 Form::~Form()
@@ -34,17 +32,17 @@ Form::~Form()
 wexus::HTMLString Form::textField(const QString &fieldName, const QVariant &defaultVal, int sz, int maxlen, const ValidationExpr &valExpr) const
 {
   HTMLString ret;
-  QString def = formValue(fieldName).toString();
+  QVariant def = formValue(fieldName).toString();
 
   ret.reserve(100);
  
   ret += "<INPUT TYPE=\"TEXT\" NAME=\"";
   ret += fullFieldName(fieldName);
   ret += "\" VALUE=\"";
-  if (def.isEmpty())
-    ret += HTMLString::encode(defaultVal.toString());
+  if (def.isValid())
+    ret += HTMLString::encode(def.toString());
   else
-    ret += HTMLString::encode(def);
+    ret += HTMLString::encode(defaultVal.toString());
   ret += "\" SIZE=\"";
   ret += QString::number(sz);
   ret += "\" MAXLENGTH=\"";
@@ -127,10 +125,32 @@ wexus::HTMLString Form::fullFieldName(const QString &fieldName) const
 
 QVariant Form::formValue(const QString &fieldName) const
 {
+  QVariant ret;
 //qDebug() << "formValue" << dm_formname << fieldName << Context::instance()->params;
   if (dm_formname.isEmpty())
-    return Context::threadInstance()->params[fieldName];
+    ret = Context::threadInstance()->params[fieldName];
   else
-    return Context::threadInstance()->params[dm_formname].toMap()[fieldName];
+    ret = Context::threadInstance()->params[dm_formname].toMap()[fieldName];
+
+  if (!ret.isValid() && dm_rec) {
+    // try to get the default value of this field
+    if (dm_rec->activeClass()->fieldsMap().contains(fieldName))
+      ret = dm_rec->activeClass()->fieldsMap()[fieldName]->initVal();
+  }
+
+  return ret;
+}
+
+void Form::outputHeader(const QString &rawurl, int method)
+{
+  Context::output() << "<FORM ";
+
+  switch (method) {
+    case Method_Post: Context::output() << "METHOD=\"POST\""; break;
+    case Method_Get: Context::output() << "METHOD=\"GET\""; break;
+    case Method_Upload: Context::output() << "METHOD=\"POST\" ENCTYPE=\"multipart/form-data\""; break;
+  }
+
+  Context::output() << "ACTION=\"" << rawurl << "\">\n";
 }
 

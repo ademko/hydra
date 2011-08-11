@@ -102,12 +102,16 @@ class wexus::ActiveRecord
      * Extracts the fields from the given form map and calls
      * test().
      *
+     * If is v is invalid (the default), then
+     * params[activeClass()->table()] will be assumed
+     * (this works with the Form(ActiveRecord&) class.
+     *
      * Returns true if atleast one field was extracted
      * and errors is empty (after calling test())
      *
      * @author Aleksander Demko
      */ 
-    bool fromForm(const QVariant &v);
+    bool fromForm(const QVariant &v = QVariant());
 
     /**
      * Returns a printable string reprensentation

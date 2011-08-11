@@ -11,6 +11,7 @@
 #include <wexus/Widgets.h>
 #include <wexus/ValidationExpr.h>
 #include <wexus/Context.h>
+#include <wexus/ActiveRecord.h>
 
 namespace wexus
 {
@@ -39,11 +40,18 @@ class wexus::Form
 
   public:
     /**
-     * Constrcutor.
+     * Constructor.
      *
      * @author Aleksander Demko
      */ 
     Form(const QString &formname, const QString &rawurl = urlTo(), int method = Method_Post);
+    /**
+     * Constructor that uses the given ActiveRecord for default
+     * values.
+     *
+     * @author Aleksander Demko
+     */ 
+    Form(ActiveRecord &rec, const QString &rawurl = urlTo(), int method = Method_Post);
     /// destructor
     ~Form();
 
@@ -73,10 +81,23 @@ class wexus::Form
      */
     wexus::HTMLString fullFieldName(const QString &fieldName) const;
 
+    /**
+     * Returns the current value from the form. If there isn't
+     * one, then this returns the current value of fieldName
+     * in the active record. If there is no activerecord
+     * for this form, then this returns QVariant (an inValid
+     * QVariant)
+     *
+     * @author Aleksander Demko
+     */ 
     QVariant formValue(const QString &fieldName) const;
 
   private:
+    void outputHeader(const QString &rawurl, int method);
+
+  protected:
     QString dm_formname;
+    ActiveRecord *dm_rec; // might be null if one wasn't supplied
 };
 
 #endif

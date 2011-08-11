@@ -110,16 +110,20 @@ bool ActiveRecord::fromForm(const QVariant &v)
   // reset the record first
   clear();
 
-  if (!v.isValid())
-    return false;
+  QVariant tableNameParams;
+
+  if (!v.isValid()) {
+    tableNameParams = Context::threadInstance()->params[activeClass()->tableName()];
+    if (!tableNameParams.isValid())
+      return false;
+  }
 
   Context *c = Context::threadInstance();
   ActiveClass * klass = activeClass();
 
-  const QVariantMap &m = asVariantMap(v);   // will throw if its not a map
+  const QVariantMap &m = asVariantMap(v.isValid()? v : tableNameParams);   // will throw if its not a map
 
   for (QVariantMap::const_iterator ii = m.begin(); ii != m.end(); ++ii) {
-
     if (!klass->fieldsMap().contains(ii.key()))
       throw HTTPHandler::Exception("unkown ActiveRecord field: " + ii.key());
     std::shared_ptr<ActiveClass::ActiveField> f = *klass->fieldsMap().find(ii.key());

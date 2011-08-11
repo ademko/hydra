@@ -42,7 +42,7 @@ void Sites::index(void)
 void Sites::create(void)
 {
   Site S;
-  if (S.fromForm(params["site"])) {
+  if (S.fromForm()) {
     // insert it into the DB
     S.create();
 

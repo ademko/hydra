@@ -4,7 +4,7 @@
 <% renderNotice(); %>
 
 new form here
-<% { Form F("site"); %>
+<% { Form F(dm_site); %>
   Site name: <%= F.textField("name"); %> <br>
   Site description (optional): <%= F.textField("desc"); %>
   <%= F.submitButton("add"); %>
