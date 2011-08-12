@@ -8,6 +8,8 @@
 #ifndef __INCLUDED_WEXUS_ASSERT_H__
 #define __INCLUDED_WEXUS_ASSERT_H__
 
+#include <assert.h>
+
 #include <exception>
 
 #include <QVariant>
@@ -25,11 +27,16 @@ namespace wexus
     public:
       /// constructor
       AssertException(const char *msg);
+      /// for QString
+      AssertException(const QString &msg);
+      /// dtor
+      virtual ~AssertException() throw();
 
       virtual const char* what() const throw () { return dm_msg; }
 
     protected:
       const char * dm_msg;
+      QByteArray dm_buf;
   };
 
   /**
@@ -50,6 +57,8 @@ namespace wexus
    */ 
 #define assertThrow(b) \
   wexus::assertThrowMsg((b), "assertThrow failed at: " __FILE__ ":" assertThrow_QUOTEME(__LINE__) )
+// so we can switch between them sometimes :)
+#define assertThrow__(b) assert(b)
 
   class AssertThrower
   {

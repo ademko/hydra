@@ -12,8 +12,8 @@
 #include <wexus/Context.h>
 #include <wexus/Registry.h>
 #include <wexus/Application.h>
-#include <wexus/ActiveRecord.h>
 #include <wexus/Assert.h>
+#include <wexus/VarPath.h>
 
 #include <QDebug>
 
@@ -49,21 +49,72 @@ QString wexus::memberFunctionToUrl(const QString controllertype, const MemberFun
   ii = cinfo->actions.begin();
   endii = cinfo->actions.end();
 
-  // TODO fix this function
-  // make sure MemberFunction stuf works
-
   for (; ii != endii; ++ii)
     if ((*ii)->mfn == mfn) // found it
       return Context::application()->mountPoint() + cinfo->name + "/" + (*ii)->actionname;
 
   // didnt find anything
-  assertThrow(false);
-  return "";  // will never reach here
+  throw AssertException("Trying to reference unregistered action func in class: " + cinfo->name);
 }
 
-QString wexus::recToIdUrl(wexus::ActiveRecord &rec)
+struct prefix {
+  const QString *name;
+  const prefix *prev;
+
+  prefix(void) : name(0), prev(0) { }
+};
+
+static void fillString(const prefix *p, const QVariantMap &_map, QString &outs)
 {
-  return "?id=" + rec.activeClass()->keyField()->toVariant(&rec).toString();
+  QVariantMap::const_iterator ii=_map.begin(), endii=_map.end();
+
+  for (; ii != endii; ++ii) {
+    if (ii->type() == QVariant::Map) {
+      // map, recurse
+      prefix subp;
+
+      subp.name = &ii.key();
+      subp.prev = p;
+
+      fillString(&subp, asVariantMap(*ii), outs);
+    } else {
+      // not a map, insert it using the prefix stack to build proper [] keys
+      outs += '&';  // the first & will be removed by the caller
+      if (p) {
+        // slow case
+        QString builtkey(ii.key());
+
+        const prefix *curp = p;
+        while (curp) {
+          builtkey = *curp->name + '[' + builtkey + ']';
+          curp = curp->prev;
+        }
+      } else {
+        // fast case
+        outs += ii.key();
+      }
+      outs += '=';
+      outs += ii->toString(); // TODO ENCODE
+    }
+  }
+}
+
+QString wexus::variantParamsToUrl(const QVariant &_params)
+{
+  // TODO add string encoding here
+  if (_params.type() != QVariant::Map)
+    return "?id= " + _params.toString();
+
+  // else returning a map
+  QString r;
+
+  fillString(0, asVariantMap(_params), r);
+
+  // convert the first & to a ? (sneaky :)
+  if (!r.isEmpty())
+    r[0] = '?';
+
+  return r;
 }
 
 void wexus::redirectTo(const QString &rawurl)

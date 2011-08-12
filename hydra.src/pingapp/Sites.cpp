@@ -22,6 +22,7 @@ static wexus::RegisterController<pingapp::App, Sites> r1("sites");
 static wexus::RegisterAction<Sites, &Sites::index> r2("index");
 static wexus::RegisterAction<Sites, &Sites::create> r3("create");
 static wexus::RegisterAction<Sites, &Sites::edit> r4("edit");
+static wexus::RegisterAction<Sites, &Sites::destroy> r5("destroy");
 
 //
 //
@@ -68,8 +69,19 @@ void Sites::edit(void)
     setFlash["notice"] = "Site updated.";
     redirectTo(&Sites::index);
   }
-qDebug() << "HERRO" << dm_site.desc;
 
   editHtml();
+}
+
+void Sites::destroy(void)
+{
+  dm_site.find(params["id"]);
+
+  if (params["sure"] == 1) {
+    dm_site.destroy();
+    setFlash["notice"] = "Site deleted.";
+    redirectTo(&Sites::index);
+  } else
+    destroyHtml();
 }
 

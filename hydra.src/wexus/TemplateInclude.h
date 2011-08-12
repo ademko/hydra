@@ -14,6 +14,7 @@
 #include <wexus/HTMLString.h>
 #include <wexus/Widgets.h>
 #include <wexus/Form.h>
+#include <wexus/VarPath.h>
 
 #include <QDebug>
 

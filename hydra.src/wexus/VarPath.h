@@ -37,7 +37,23 @@ namespace wexus
    * @author Aleksander Demko
    */ 
   const QVariantMap & asVariantMap(const QVariant &v);
+
+  /**
+   * This prodices a simply QVariantMap QVariant
+   * that consists of a key with the given value.
+   *
+   * @author Aleksander Demko
+   */ 
+  QVariantMap key(const QString &k, const QVariant &v);
 }
+
+/**
+ * Merges the two QVariantMap together and returns the new, merged
+ * one. Throws if left or right arent maps.
+ *
+ * @author Aleksander Demko
+ */ 
+QVariant operator + (const QVariant &left, const QVariant &right);
 
 /**
  * A helper to make accessing and setting QVariantMap

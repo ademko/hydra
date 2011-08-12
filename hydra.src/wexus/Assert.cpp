@@ -25,6 +25,16 @@ AssertException::AssertException(const char *msg)
   assert(msg);
 }
 
+AssertException::AssertException(const QString &msg)
+  : dm_buf(msg.toUtf8())
+{
+  dm_msg = dm_buf;
+}
+
+AssertException::~AssertException() throw()
+{
+}
+
 //
 // functions
 //

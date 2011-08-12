@@ -68,6 +68,48 @@ const QVariantMap & wexus::asVariantMap(const QVariant &v)
   return *reinterpret_cast<const AsMap*>(&v)->mapPtr();
 }
 
+QVariantMap wexus::key(const QString &k, const QVariant &v)
+{
+  QVariantMap r;
+
+  r[k] = v;
+
+  return r;
+}
+
+// goofy function that covnerts non-map srcs into id=src maps (within
+// workspace), and returns a ptr based on what it did
+const QVariant * makeIdToMap(const QVariant &src, QVariant &workspace)
+{
+  if (src.type() == QVariant::Map)
+    return &src;
+  else {
+    QVariantMap m;
+    m["id"] = src;
+    workspace = m;
+    return &workspace;
+  }
+}
+
+QVariant operator + (const QVariant &left, const QVariant &right)
+{
+  QVariant leftworkspace, rightworkspace;
+  const QVariant *leftptr, *rightptr;
+
+  leftptr = makeIdToMap(left, leftworkspace);
+  rightptr = makeIdToMap(right, rightworkspace);
+
+  QVariant r(*leftptr);
+
+  QVariantMap &R = asVariantMap(r);
+  const QVariantMap &src = asVariantMap(*rightptr);
+
+  for (QVariantMap::const_iterator ii=src.begin(); ii != src.end(); ++ii)
+    R[ii.key()] = *ii;
+
+  return r;
+}
+
 //
 //
 // VarPath
