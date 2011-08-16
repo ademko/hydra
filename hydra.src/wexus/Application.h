@@ -88,6 +88,12 @@ class wexus::Application
     QSqlDatabase dm_db;
 
     std::shared_ptr<Registry::AppInfo> dm_appinfo;
+
+    class Route;
+    class MatchingRoute;
+    typedef QList<std::shared_ptr<Route> > RouteList;
+
+    RouteList dm_routes;
 };
 
 #endif
