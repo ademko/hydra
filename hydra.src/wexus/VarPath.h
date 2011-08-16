@@ -53,7 +53,7 @@ namespace wexus
  *
  * @author Aleksander Demko
  */ 
-QVariant operator + (const QVariant &left, const QVariant &right);
+QVariantMap operator + (const QVariant &left, const QVariant &right);
 
 /**
  * A helper to make accessing and setting QVariantMap

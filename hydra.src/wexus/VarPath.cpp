@@ -91,7 +91,7 @@ const QVariant * makeIdToMap(const QVariant &src, QVariant &workspace)
   }
 }
 
-QVariant operator + (const QVariant &left, const QVariant &right)
+QVariantMap operator + (const QVariant &left, const QVariant &right)
 {
   QVariant leftworkspace, rightworkspace;
   const QVariant *leftptr, *rightptr;
@@ -99,13 +99,12 @@ QVariant operator + (const QVariant &left, const QVariant &right)
   leftptr = makeIdToMap(left, leftworkspace);
   rightptr = makeIdToMap(right, rightworkspace);
 
-  QVariant r(*leftptr);
+  QVariantMap r(asVariantMap(*leftptr));
 
-  QVariantMap &R = asVariantMap(r);
   const QVariantMap &src = asVariantMap(*rightptr);
 
   for (QVariantMap::const_iterator ii=src.begin(); ii != src.end(); ++ii)
-    R[ii.key()] = *ii;
+    r[ii.key()] = *ii;
 
   return r;
 }
