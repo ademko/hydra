@@ -8,13 +8,13 @@
 #include <wexus/MongooseServer.h>
 
 #include <wexus/Site.h>
-#include <pingapp/App.h>
+#include <pingapp/PingApp.h>
 
 int main(int argc, char **argv)
 {
   wexus::Site s(".");
 
-  s.addApplication("/pinger/", std::shared_ptr<pingapp::App>(new pingapp::App));
+  s.addApplication("/pinger/", std::shared_ptr<pingapp::PingApp>(new pingapp::PingApp));
 
   s.start();
   s.wait();

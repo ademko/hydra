@@ -12,7 +12,7 @@
 
 namespace pingapp
 {
-  class App;
+  class PingApp;
 }
 
 /**
@@ -20,10 +20,10 @@ namespace pingapp
  *
  * @author Aleksander Demko
  */ 
-class pingapp::App : public wexus::Application
+class pingapp::PingApp : public wexus::Application
 {
   public:
-    App(void);
+    PingApp(void);
 };
 
 #endif

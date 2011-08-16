@@ -153,15 +153,15 @@ ADD_EXECUTABLE(wexusserver
     ${THIS_PATH}/wexus/Registry.cpp
 
 #pingapp
-    ${THIS_PATH}/pingapp/App.cpp
-    ${THIS_PATH}/pingapp/Sites.cpp
-    ${THIS_PATH}/pingapp/Hosts.cpp
+    ${THIS_PATH}/pingapp/PingApp.cpp
+    ${THIS_PATH}/pingapp/SitesController.cpp
+    ${THIS_PATH}/pingapp/HostsController.cpp
 #views
-    ${THIS_PATH}/pingapp/Sites/indexHtml.cpp
-    ${THIS_PATH}/pingapp/Sites/createHtml.cpp
-    ${THIS_PATH}/pingapp/Sites/editHtml.cpp
-    ${THIS_PATH}/pingapp/Sites/destroyHtml.cpp
-    ${THIS_PATH}/pingapp/Hosts/indexHtml.cpp
+    ${THIS_PATH}/pingapp/SitesController/indexHtml.cpp
+    ${THIS_PATH}/pingapp/SitesController/createHtml.cpp
+    ${THIS_PATH}/pingapp/SitesController/editHtml.cpp
+    ${THIS_PATH}/pingapp/SitesController/destroyHtml.cpp
+    ${THIS_PATH}/pingapp/HostsController/indexHtml.cpp
 #models
     ${THIS_PATH}/pingapp/Host.cpp ${THIS_PATH}/pingapp/Site.cpp
     )

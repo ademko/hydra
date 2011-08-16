@@ -5,29 +5,29 @@
  * See the accompanying file LICENSE.MIT.txt for details.
  */
 
-#include <pingapp/App.h>
+#include <pingapp/PingApp.h>
 
 #include <wexus/Registry.h>
 #include <wexus/VarPath.h>
 
-#include <pingapp/Sites.h>
-#include <pingapp/Hosts.h>
+#include <pingapp/SitesController.h>
+#include <pingapp/HostsController.h>
 
 using namespace wexus;
 using namespace pingapp;
 
 //
 //
-// App
+// PingApp
 //
 //
 
-App::App(void)
+PingApp::PingApp(void)
 {
   RouteBuilder b(*this);
   b.addDefault();
   b.addMatch("/", key("controller","sites") + key("action","index"));
 }
 
-static RegisterApp<App> r2("pingapp::App");
+static RegisterApp<PingApp> r2("pingapp::PingApp");
 

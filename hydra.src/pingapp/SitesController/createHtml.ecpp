@@ -10,5 +10,5 @@ new form here
   <%= F.submitButton("add"); %>
 <% } %>
 
-<%= linkTo("Back", pathTo(&Sites::index)) %>
+<%= linkTo("Back", pathTo(&SitesController::index)) %>
 

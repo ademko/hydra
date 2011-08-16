@@ -15,13 +15,13 @@
 
 namespace pingapp
 {
-  class Hosts;
+  class HostsController;
 }
 
-class pingapp::Hosts : public wexus::Controller
+class pingapp::HostsController : public wexus::Controller
 {
   public:
-    Hosts(void);
+    HostsController(void);
 
     void index(void);
 

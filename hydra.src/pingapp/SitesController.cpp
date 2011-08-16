@@ -5,36 +5,36 @@
  * See the accompanying file LICENSE.MIT.txt for details.
  */
 
-#include <pingapp/Sites.h>
+#include <pingapp/SitesController.h>
 
 #include <QDebug>
 
 #include <wexus/TemplateInclude.h>    // lazy :)
 #include <wexus/Registry.h>
 
-#include <pingapp/App.h>
+#include <pingapp/PingApp.h>
 
 using namespace wexus;
 using namespace pingapp;
 
-static wexus::RegisterController<pingapp::App, Sites> r1("sites");
+static wexus::RegisterController<pingapp::PingApp, SitesController> r1("sites");
 
-static wexus::RegisterAction<Sites, &Sites::index> r2("index");
-static wexus::RegisterAction<Sites, &Sites::create> r3("create");
-static wexus::RegisterAction<Sites, &Sites::edit> r4("edit");
-static wexus::RegisterAction<Sites, &Sites::destroy> r5("destroy");
+static wexus::RegisterAction<SitesController, &SitesController::index> r2("index");
+static wexus::RegisterAction<SitesController, &SitesController::create> r3("create");
+static wexus::RegisterAction<SitesController, &SitesController::edit> r4("edit");
+static wexus::RegisterAction<SitesController, &SitesController::destroy> r5("destroy");
 
 //
 //
-// Sites
+// SitesController
 //
 //
 
-Sites::Sites(void)
+SitesController::SitesController(void)
 { 
 }
 
-void Sites::index(void)
+void SitesController::index(void)
 {
   // need to put this someplace better!
   // atleast before the migration stuff too
@@ -46,7 +46,7 @@ void Sites::index(void)
   indexHtml();
 }
 
-void Sites::create(void)
+void SitesController::create(void)
 {
   Site S;
   if (S.fromForm()) {
@@ -54,33 +54,33 @@ void Sites::create(void)
     S.create();
 
     setFlash["notice"] = "Site added.";
-    redirectTo(pathTo(&Sites::index));
+    redirectTo(pathTo(&SitesController::index));
   }
 
   createHtml();
 }
 
-void Sites::edit(void)
+void SitesController::edit(void)
 {
   dm_site.find(params["id"]);
 
   Site S;
   if (S.fromForm()) {
     setFlash["notice"] = "Site updated.";
-    redirectTo(pathTo(&Sites::index));
+    redirectTo(pathTo(&SitesController::index));
   }
 
   editHtml();
 }
 
-void Sites::destroy(void)
+void SitesController::destroy(void)
 {
   dm_site.find(params["id"]);
 
   if (params["sure"] == 1) {
     dm_site.destroy();
     setFlash["notice"] = "Site deleted.";
-    redirectTo(pathTo(&Sites::index));
+    redirectTo(pathTo(&SitesController::index));
   } else
     destroyHtml();
 }

@@ -5,27 +5,27 @@
  * See the accompanying file LICENSE.MIT.txt for details.
  */
 
-#include <pingapp/Hosts.h>
+#include <pingapp/HostsController.h>
 
 #include <QDebug>
 
 #include <wexus/TemplateInclude.h>    // lazy :)
 #include <wexus/Registry.h>
 
-#include <pingapp/App.h>
+#include <pingapp/PingApp.h>
 
 using namespace wexus;
 using namespace pingapp;
 
-Hosts::Hosts(void)
+HostsController::HostsController(void)
 {
 }
 
-void Hosts::index(void)
+void HostsController::index(void)
 {
   indexHtml();
 }
 
-static wexus::RegisterController<App, Hosts> r1("hosts");
-static wexus::RegisterAction<Hosts, &Hosts::index> r2("index");
+static wexus::RegisterController<PingApp, HostsController> r1("hosts");
+static wexus::RegisterAction<HostsController, &HostsController::index> r2("index");
 

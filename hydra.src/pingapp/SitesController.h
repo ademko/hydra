@@ -15,13 +15,13 @@
 
 namespace pingapp
 {
-  class Sites;
+  class SitesController;
 }
 
-class pingapp::Sites : public wexus::Controller
+class pingapp::SitesController : public wexus::Controller
 {
   public:
-    Sites(void);
+    SitesController(void);
 
     void index(void);
     void create(void);
