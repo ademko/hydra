@@ -35,14 +35,6 @@ namespace wexus
 class wexus::Application
 {
   public:
-    class ControllerNotFoundException : public wexus::HTTPHandler::Exception
-    {
-      public:
-        ControllerNotFoundException(const QString &usermsg)
-          : wexus::HTTPHandler::Exception(usermsg) { }
-    };
-
-  public:
     /// destructor
     virtual ~Application();
 

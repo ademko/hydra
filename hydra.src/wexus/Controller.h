@@ -119,17 +119,7 @@ class wexus::ControllerContext
 class wexus::Controller : public wexus::ControllerContext
 {
   public:
-    class ActionNotFoundException : public wexus::HTTPHandler::Exception
-    {
-      public:
-        ActionNotFoundException(const QString &usermsg)
-          : wexus::HTTPHandler::Exception(usermsg) { }
-    };
-
-  public:
     virtual ~Controller();
-
-    virtual void handleControllerRequest(const QString &actionname);
 
   protected:
     /// constructor

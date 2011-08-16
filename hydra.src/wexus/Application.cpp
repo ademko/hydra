@@ -86,7 +86,7 @@ Application::MatchingRoute::MatchingRoute(Application *parent, QStringList &slis
       startindex++;
     }
     dm_parts[i].name = instring.mid(startindex);
-qDebug() << "part=" << dm_parts[i].name;
+//qDebug() << "part=" << dm_parts[i].name;
   }
 }
 
@@ -209,60 +209,7 @@ void Application::handleApplicationRequest(QString &filteredRequest, wexus::HTTP
   for (RouteList::iterator ii=dm_routes.begin(); ii != dm_routes.end(); ++ii)
     if ((*ii)->handleApplicationRequest(splitreq, req, reply))
       return;
-  throw ControllerNotFoundException("wexus::Application: not route found for " + filteredRequest);
-
-return;
-  QString controllername(filteredRequest.mid(1));
-  QString action("index");
-
-  if (controllername.isEmpty()) {
-    //controllername = "home";
-    // if no controllername is supplied, redir the user to an explicit default one
-    QString redir_url(req.request());
-
-    if (redir_url[redir_url.size()-1] != '/')
-      redir_url += "/";
-    redir_url += "home/";
-
-    reply.redirectTo(redir_url);
-    return;
-  } else {
-    int index = controllername.indexOf("/");
-
-    // must trail in a /
-    // (this is so simple linkTo()s work nicely
-    if (index == -1) {
-      QString redir_url(req.request());
-
-      redir_url += "/";
-      reply.redirectTo(redir_url);
-      return;
-    }
-
-    assert(index != -1);
-
-    if (index+1 < controllername.size())
-      action = controllername.mid(index+1);
-    controllername = controllername.left(index);
-  }
-
-  // compute the action
-  // find where the action starts
-qDebug() << "Application::handleApplicationRequest" << filteredRequest << "controllername" << controllername << "action" << action;
-
-  // get my own info object
-  // this cant be done in the ctor, as the decendant object isnt built yet
-  // see if we a have controller for this request
-  if (appInfo()->controllers.contains(controllername)) {
-    Context ctx(this, action, req, reply);
-
-    std::shared_ptr<Controller> C( appInfo()->controllers[controllername]->loader() );
-
-    assert(C.get());
-
-    C->handleControllerRequest(action);
-  } else
-    throw ControllerNotFoundException("wexus::Application: Controller not found: " + controllername);
+  throw HTTPHandler::Exception("wexus::Application: not route found for " + filteredRequest);
 }
 
 std::shared_ptr<Registry::AppInfo> Application::appInfo(void)
