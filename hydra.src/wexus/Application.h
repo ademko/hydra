@@ -70,6 +70,55 @@ class wexus::Application
     std::shared_ptr<Registry::AppInfo> appInfo(void);
 
   protected:
+    /**
+     * Decendants can instantite this in their constructors
+     * to build a routing table.
+     *
+     * Route will be matched in order, with the first ones
+     * given first chance/priority.
+     *
+     * @author Aleksander Demko
+     */ 
+    class RouteBuilder
+    {
+      public:
+        /**
+         * Start building a new route for the given app.
+         * Any previous routing table will be destroyed.
+         *
+         * @author Aleksander Demko
+         */ 
+        RouteBuilder(Application &app);
+
+        /// destructor
+        ~RouteBuilder();
+
+        /**
+         * Adds a basic match route.
+         *
+         * It typically looks like /blah/:var/?:id
+         * Where blah would be matched directly, :var will be assigned to
+         * a variable and ? is optional.
+         *
+         * @param matchString the match string
+         * @param defaults the default values for any params. This will be
+         * overriden with matched vars, ofcourse.
+         *
+         * @author Aleksander Demko
+         */ 
+        void addMatch(const QString &matchString, const QVariantMap &defaults = QVariantMap());
+
+        /**
+         * Adds a bunch of default routes.
+         *
+         * @author Aleksander Demko
+         */
+        void addDefault(void);
+
+      protected:
+        Application &dm_app;
+    };
+
     /// inherited constructor
     Application(void);
 

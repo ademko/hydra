@@ -12,6 +12,7 @@
 #include <assert.h>
 
 #include <wexus/VarPath.h>
+#include <wexus/Assert.h>
 
 using namespace wexus;
 
@@ -148,6 +149,12 @@ qDebug() << "MatchingRoute trying controllername=" << controllername << "actionn
   {
     Context ctx(dm_parent, req, reply);
 
+    {
+      // merge my params over the Context params
+      for (QVariantMap::const_iterator ii=callparams.begin(); ii!=callparams.end(); ++ii)
+        ctx.params[ii.key()] = *ii;
+    }
+
     // instantiate the controller
     std::shared_ptr<Controller> C( controllerinfo->loader() );
 
@@ -161,6 +168,33 @@ qDebug() << "MatchingRoute trying controllername=" << controllername << "actionn
   }
 
   return true;
+}
+
+//
+// Application::RouteBuilder
+//
+
+Application::RouteBuilder::RouteBuilder(Application &app)
+  : dm_app(app)
+{
+  dm_app.dm_routes.clear();
+}
+
+Application::RouteBuilder::~RouteBuilder()
+{
+  assertThrow(!dm_app.dm_routes.isEmpty());
+}
+
+void Application::RouteBuilder::addMatch(const QString &matchString, const QVariantMap &defaults)
+{
+  QStringList parts = matchString.split('/', QString::SkipEmptyParts);
+
+  dm_app.dm_routes.push_back(std::shared_ptr<Route>(new MatchingRoute(&dm_app, parts, defaults)));
+}
+
+void Application::RouteBuilder::addDefault(void)
+{
+  addMatch("/?:controller/?:action/", key("controller","home") + key("action","index"));
 }
 
 //
@@ -180,9 +214,8 @@ Application::Application(void)
   assert(good);
 
   // make the default routing table
-  QStringList l;
-  l << "?:controller" << "?:action";
-  dm_routes.push_back(std::shared_ptr<Route>(new MatchingRoute(this, l, key("controller","home") + key("action","index"))));
+  RouteBuilder b(*this);
+  b.addDefault();
 }
 
 Application::~Application()

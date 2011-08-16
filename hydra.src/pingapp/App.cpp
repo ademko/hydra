@@ -8,6 +8,7 @@
 #include <pingapp/App.h>
 
 #include <wexus/Registry.h>
+#include <wexus/VarPath.h>
 
 #include <pingapp/Sites.h>
 #include <pingapp/Hosts.h>
@@ -23,6 +24,9 @@ using namespace pingapp;
 
 App::App(void)
 {
+  RouteBuilder b(*this);
+  b.addDefault();
+  b.addMatch("/", key("controller","sites") + key("action","index"));
 }
 
 static RegisterApp<App> r2("pingapp::App");
