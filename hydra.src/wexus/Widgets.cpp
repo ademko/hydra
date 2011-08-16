@@ -13,6 +13,7 @@
 #include <wexus/Registry.h>
 #include <wexus/Application.h>
 #include <wexus/Assert.h>
+#include <wexus/ActiveRecord.h>
 #include <wexus/VarPath.h>
 
 #include <QDebug>
@@ -58,14 +59,15 @@ static void fillString(const prefix *p, const QVariantMap &_map, QString &outs)
         }
       } else {
         // fast case
-        outs += ii.key();
+        if (ii.key() != "id")   // dont emit id as thats handled specially
+          outs += ii.key();
       }
       outs += '=';
       outs += ii->toString(); // TODO ENCODE
     }
   }
 }
-QString wexus::memberFunctionToUrl(const QString controllertype, const MemberFunction &mfn, const QVariant *_params)
+QString wexus::memberFunctionToUrl(const QString controllertype, const MemberFunction &mfn, const QVariant *_params, ActiveRecord *rec)
 {
   if (!Registry::controllersByType().contains(controllertype))
     assertThrow(false);
@@ -93,27 +95,36 @@ QString wexus::memberFunctionToUrl(const QString controllertype, const MemberFun
   if (!ainfo.get())
     throw AssertException("Trying to reference unregistered action func in class: " + cinfo->name); // didnt find anything
 
-  QString ret = Context::application()->mountPoint() + cinfo->name + "/" + ainfo->actionname;
+  QString idurl;
+  
+  if (rec)
+    idurl = rec->activeClass()->keyField()->toVariant(rec).toString();
+
+  QString ret = Context::application()->mountPoint() + cinfo->name + "/"; // TODO ENCODE
+  
+  if (!idurl.isEmpty())
+    ret += idurl + "/";
+  ret += ainfo->actionname;
 
   // ok, controller and action ready
   // now lets process the params
   if (_params) {
-    // TODO add string encoding here
-    if (_params->type() != QVariant::Map)
-      ret += "?id=" + _params->toString();
-    else {
-      // else returning a map
-      QString r;
+    assertThrow(_params->type() == QVariant::Map);
+    const QVariantMap &paramsmap = asVariantMap(*_params);
 
-      fillString(0, asVariantMap(*_params), r);
+    if (paramsmap.contains("id") && idurl.isEmpty())
+      idurl = paramsmap["id"].toString(); // TODO ENCODE
 
-      // convert the first & to a ? (sneaky :)
-      if (!r.isEmpty())
-        r[0] = '?';
+    QString r;
 
-      ret += r;
-    }
-  }
+    fillString(0, paramsmap, r);
+
+    // convert the first & to a ? (sneaky :)
+    if (!r.isEmpty())
+      r[0] = '?';
+
+    ret += r;
+  }//if
 
   return ret;
 }

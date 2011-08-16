@@ -15,6 +15,8 @@
 
 namespace wexus
 {
+  class ActiveRecord;//fwd
+
   /**
    * Comptes the a url to this location.
    *
@@ -25,7 +27,8 @@ namespace wexus
   // internal function for linkTo
   // throws on errors
   // returns a raw url
-  QString memberFunctionToUrl(const QString controllertype, const MemberFunction &mfn, const QVariant *_params);
+  QString memberFunctionToUrl(const QString controllertype, const MemberFunction &mfn, const QVariant *_params, wexus::ActiveRecord *rec);
+
   // internal function for linkTo
   // throws on errors
   // returns a raw url
@@ -34,12 +37,22 @@ namespace wexus
 
   template <class CONTROLLER>
     QString pathTo(void (CONTROLLER::*mfn)(void)) {
-      return memberFunctionToUrl(typeToString<CONTROLLER>(), MemberFunction(mfn), 0);
+      return memberFunctionToUrl(typeToString<CONTROLLER>(), MemberFunction(mfn), 0, 0);
     }
   template <class CONTROLLER>
     QString pathTo(void (CONTROLLER::*mfn)(void), const QVariant &_params) {
-      return memberFunctionToUrl(typeToString<CONTROLLER>(), MemberFunction(mfn), &_params);
+      return memberFunctionToUrl(typeToString<CONTROLLER>(), MemberFunction(mfn), &_params, 0);
     }
+  template <class CONTROLLER>
+    QString pathTo(void (CONTROLLER::*mfn)(void), ActiveRecord &rec) {
+      return memberFunctionToUrl(typeToString<CONTROLLER>(), MemberFunction(mfn), 0, &rec);
+    }
+
+  template <class CONTROLLER>
+    QString pathTo(void (CONTROLLER::*mfn)(void), ActiveRecord &rec, const QVariant &_params) {
+      return memberFunctionToUrl(typeToString<CONTROLLER>(), MemberFunction(mfn), &_params, &rec);
+    }
+
 
   /**
    * Returns the HTML code for a link to rawurl with the given
