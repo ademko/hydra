@@ -12,5 +12,5 @@ editing a site
   <%= F.submitButton("update"); %>
 <% } %>
 
-<%= linkTo("Back", &Sites::index) %>
+<%= linkTo("Back", pathTo(&Sites::index)) %>
 

@@ -54,7 +54,7 @@ void Sites::create(void)
     S.create();
 
     setFlash["notice"] = "Site added.";
-    redirectTo(&Sites::index);
+    redirectTo(pathTo(&Sites::index));
   }
 
   createHtml();
@@ -67,7 +67,7 @@ void Sites::edit(void)
   Site S;
   if (S.fromForm()) {
     setFlash["notice"] = "Site updated.";
-    redirectTo(&Sites::index);
+    redirectTo(pathTo(&Sites::index));
   }
 
   editHtml();
@@ -80,7 +80,7 @@ void Sites::destroy(void)
   if (params["sure"] == 1) {
     dm_site.destroy();
     setFlash["notice"] = "Site deleted.";
-    redirectTo(&Sites::index);
+    redirectTo(pathTo(&Sites::index));
   } else
     destroyHtml();
 }

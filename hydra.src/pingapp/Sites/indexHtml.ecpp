@@ -8,8 +8,8 @@ Current sites:
 <ul>
 <% while (dm_site.next()) { %>
   <li>id=<%=dm_site.id%> name=<%=dm_site.name%> desc=<%=dm_site.desc%>
-    <%=linkTo("Edit Site", &Sites::edit, dm_site.id)%>
-    <%=linkTo("Delete Site", &Sites::destroy, dm_site.id)%>
+    <%=linkTo("Edit Site", pathTo(&Sites::edit, dm_site.id))%>
+    <%=linkTo("Delete Site", pathTo(&Sites::destroy, dm_site.id))%>
   <% Host subhost = dm_site.host();
      while (subhost.next()) { %>
        host=<%= subhost.hostname %>
@@ -18,6 +18,6 @@ Current sites:
 <% } %>
 </ul>
 
-<%= linkTo("New Site", &Sites::create); %>
+<%= linkTo("New Site", pathTo(&Sites::create)); %>
 <p>
 

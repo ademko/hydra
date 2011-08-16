@@ -20,7 +20,26 @@ namespace wexus
    *
    * @author Aleksander Demko
    */
-  QString urlTo(void);
+  QString pathTo(void);
+
+  // internal function for linkTo
+  // throws on errors
+  // returns a raw url
+  QString memberFunctionToUrl(const QString controllertype, const MemberFunction &mfn, const QVariant *_params);
+  // internal function for linkTo
+  // throws on errors
+  // returns a raw url
+  // _params can be a QVariant (id= assumed) or a map
+  QString variantParamsToUrl(const QVariant &_params);
+
+  template <class CONTROLLER>
+    QString pathTo(void (CONTROLLER::*mfn)(void)) {
+      return memberFunctionToUrl(typeToString<CONTROLLER>(), MemberFunction(mfn), 0);
+    }
+  template <class CONTROLLER>
+    QString pathTo(void (CONTROLLER::*mfn)(void), const QVariant &_params) {
+      return memberFunctionToUrl(typeToString<CONTROLLER>(), MemberFunction(mfn), &_params);
+    }
 
   /**
    * Returns the HTML code for a link to rawurl with the given
@@ -29,29 +48,6 @@ namespace wexus
    * @author Aleksander Demko
    */ 
   wexus::HTMLString linkTo(const QString &desc, const QString &rawurl);
-
-  // internal function for linkTo
-  // throws on errors
-  // returns a raw url
-  QString memberFunctionToUrl(const QString controllertype, const MemberFunction &mfn);
-  // internal function for linkTo
-  // throws on errors
-  // returns a raw url
-  // _params can be a QVariant (id= assumed) or a map
-  QString variantParamsToUrl(const QVariant &_params);
-
-  template <class CONTROLLER>
-    wexus::HTMLString linkTo(const QString &desc, void (CONTROLLER::*mfn)(void)) {
-      // de-inline this function
-      return linkTo(desc, memberFunctionToUrl(typeToString<CONTROLLER>(), MemberFunction(mfn)));
-    }
-
-  template <class CONTROLLER>
-    wexus::HTMLString linkTo(const QString &desc, void (CONTROLLER::*mfn)(void), const QVariant &_params) {
-      // de-inline this function
-      return linkTo(desc, memberFunctionToUrl(typeToString<CONTROLLER>(), MemberFunction(mfn))
-          + variantParamsToUrl(_params));
-    }
 
   /**
    * Redirectst the user to the given url.
@@ -63,11 +59,6 @@ namespace wexus
    * @author Aleksander Demko
    */ 
   void redirectTo(const QString &rawurl = QString());
-
-  template <class CONTROLLER>
-    void redirectTo(void (CONTROLLER::*mfn)(void)) {
-      redirectTo(memberFunctionToUrl(typeToString<CONTROLLER>(), MemberFunction(mfn)));
-    }
 
   /**
    * Renders any errors.

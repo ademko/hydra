@@ -44,14 +44,14 @@ class wexus::Form
      *
      * @author Aleksander Demko
      */ 
-    Form(const QString &formname, const QString &rawurl = urlTo(), int method = Method_Post);
+    Form(const QString &formname, const QString &rawurl = pathTo(), int method = Method_Post);
     /**
      * Constructor that uses the given ActiveRecord for default
      * values.
      *
      * @author Aleksander Demko
      */ 
-    Form(ActiveRecord &rec, const QString &rawurl = urlTo(), int method = Method_Post);
+    Form(ActiveRecord &rec, const QString &rawurl = pathTo(), int method = Method_Post);
     /// destructor
     ~Form();
 

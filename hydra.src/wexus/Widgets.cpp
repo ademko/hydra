@@ -19,42 +19,9 @@
 
 using namespace wexus;
 
-QString wexus::urlTo(void)
+QString wexus::pathTo(void)
 {
   return Context::request().request();
-}
-
-HTMLString wexus::linkTo(const QString &desc, const QString &rawurl)
-{
-  return HTMLString("<A HREF=\"" + rawurl + "\">" + HTMLString::encode(desc) + "</A>");
-}
-
-QString wexus::memberFunctionToUrl(const QString controllertype, const MemberFunction &mfn)
-{
-  if (!Registry::controllersByType().contains(controllertype))
-    assertThrow(false);
-
-  // first, find the controllertype
-  std::shared_ptr<Registry::ControllerInfo> cinfo =
-    Registry::controllersByType()[controllertype];
-
-  assert(cinfo.get());
-
-  // verify that that this controller type is inded part of my application
-  assertThrow(Context::application()->appInfo() == cinfo->application);
-
-  // find the MemberFunction within this controllers member functions
-  Registry::ControllerInfo::ActionMap::const_iterator ii, endii;
-
-  ii = cinfo->actions.begin();
-  endii = cinfo->actions.end();
-
-  for (; ii != endii; ++ii)
-    if ((*ii)->mfn == mfn) // found it
-      return Context::application()->mountPoint() + cinfo->name + "/" + (*ii)->actionname;
-
-  // didnt find anything
-  throw AssertException("Trying to reference unregistered action func in class: " + cinfo->name);
 }
 
 struct prefix {
@@ -98,23 +65,62 @@ static void fillString(const prefix *p, const QVariantMap &_map, QString &outs)
     }
   }
 }
-
-QString wexus::variantParamsToUrl(const QVariant &_params)
+QString wexus::memberFunctionToUrl(const QString controllertype, const MemberFunction &mfn, const QVariant *_params)
 {
-  // TODO add string encoding here
-  if (_params.type() != QVariant::Map)
-    return "?id= " + _params.toString();
+  if (!Registry::controllersByType().contains(controllertype))
+    assertThrow(false);
 
-  // else returning a map
-  QString r;
+  // first, find the controllertype
+  std::shared_ptr<Registry::ControllerInfo> cinfo =
+    Registry::controllersByType()[controllertype];
 
-  fillString(0, asVariantMap(_params), r);
+  assert(cinfo.get());
 
-  // convert the first & to a ? (sneaky :)
-  if (!r.isEmpty())
-    r[0] = '?';
+  // verify that that this controller type is inded part of my application
+  assertThrow(Context::application()->appInfo() == cinfo->application);
 
-  return r;
+  // find the MemberFunction within this controllers member functions
+  Registry::ControllerInfo::ActionMap::const_iterator ii, endii;
+
+  ii = cinfo->actions.begin();
+  endii = cinfo->actions.end();
+
+  std::shared_ptr<Registry::ActionInfo> ainfo;
+
+  for (; ii != endii; ++ii)
+    if ((*ii)->mfn == mfn) // found it
+      ainfo = *ii;
+  if (!ainfo.get())
+    throw AssertException("Trying to reference unregistered action func in class: " + cinfo->name); // didnt find anything
+
+  QString ret = Context::application()->mountPoint() + cinfo->name + "/" + ainfo->actionname;
+
+  // ok, controller and action ready
+  // now lets process the params
+  if (_params) {
+    // TODO add string encoding here
+    if (_params->type() != QVariant::Map)
+      ret += "?id=" + _params->toString();
+    else {
+      // else returning a map
+      QString r;
+
+      fillString(0, asVariantMap(*_params), r);
+
+      // convert the first & to a ? (sneaky :)
+      if (!r.isEmpty())
+        r[0] = '?';
+
+      ret += r;
+    }
+  }
+
+  return ret;
+}
+
+HTMLString wexus::linkTo(const QString &desc, const QString &rawurl)
+{
+  return HTMLString("<A HREF=\"" + rawurl + "\">" + HTMLString::encode(desc) + "</A>");
 }
 
 void wexus::redirectTo(const QString &rawurl)
