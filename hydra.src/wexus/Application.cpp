@@ -47,7 +47,7 @@ class Application::MatchingRoute : public Application::Route
     typedef QVector<Part> PartList;
 
     PartList dm_parts;
-    int dm_reqparts;
+    int dm_minparts, dm_maxparts;
     QVariantMap dm_defaults;
 };
 
@@ -70,15 +70,15 @@ Application::MatchingRoute::MatchingRoute(Application *parent, QStringList &slis
 {
   dm_parts.resize(slist.size());
 
-  dm_reqparts = dm_parts.size();
+  dm_minparts = dm_maxparts = dm_parts.size();
 
   for (int i=0; i<dm_parts.size(); ++i) {
     const QString &instring = slist[i];
     int startindex = 0;
 
     if (instring.size() > startindex && instring[startindex] == '?') {
-      if (i<dm_reqparts)
-        dm_reqparts = i;
+      if (i<dm_minparts)
+        dm_minparts = i;
       dm_parts[i].isOptional = true;
       startindex++;
     }
@@ -97,7 +97,7 @@ bool Application::MatchingRoute::handleApplicationRequest(QStringList &filteredR
   int i;
   int sz = filteredRequest.size();
 
-  if (sz<dm_reqparts)
+  if (sz<dm_minparts || sz>dm_maxparts)
     return false;
 
   if (dm_parts.size() < sz)
@@ -195,6 +195,7 @@ void Application::RouteBuilder::addMatch(const QString &matchString, const QVari
 void Application::RouteBuilder::addDefault(void)
 {
   addMatch("/?:controller/?:action/", key("controller","home") + key("action","index"));
+  addMatch("/:controller/:id/?:action/", key("action","index"));
 }
 
 //
