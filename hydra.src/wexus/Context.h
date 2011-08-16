@@ -38,7 +38,7 @@ class wexus::Context
 {
   public:
     /// constructor
-    Context(wexus::Application *application, const QString &actionname, wexus::HTTPRequest &req, wexus::HTTPReply &reply);
+    Context(wexus::Application *application, wexus::HTTPRequest &req, wexus::HTTPReply &reply);
     /// destructor
     ~Context();
 
@@ -55,12 +55,6 @@ class wexus::Context
      * @author Aleksander Demko
      */ 
     static wexus::Application * application(void) { return threadInstance()->dm_application; }
-    /**
-     * The current action name.
-     *
-     * @author Aleksander Demko
-     */ 
-    static const QString & actionName(void) { return threadInstance()->dm_actionname; }
     /**
      * The wexus::HTTPRequest object that started this request.
      *
@@ -92,7 +86,6 @@ class wexus::Context
 
   private:
     wexus::Application *dm_application;
-    QString dm_actionname;
     wexus::HTTPRequest & dm_req;
     wexus::HTTPReply & dm_reply;
 

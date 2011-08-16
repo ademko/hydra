@@ -22,9 +22,8 @@ typedef Context* ContextPtr;
 
 static QThreadStorage<ContextPtr *> Storage;
 
-Context::Context(wexus::Application *application, const QString &actionname, wexus::HTTPRequest &req, wexus::HTTPReply &reply)
+Context::Context(wexus::Application *application, wexus::HTTPRequest &req, wexus::HTTPReply &reply)
   : dm_application(application),
-    dm_actionname(actionname),
     dm_req(req), dm_reply(reply),
     params(ParamsParser::parse(&dm_req)),
     cookies(&dm_req, &dm_reply),

@@ -146,7 +146,7 @@ qDebug() << "MatchingRoute trying controllername=" << controllername << "actionn
 
   // finally, call the found controller and action
   {
-    Context ctx(dm_parent, actionname, req, reply);
+    Context ctx(dm_parent, req, reply);
 
     // instantiate the controller
     std::shared_ptr<Controller> C( controllerinfo->loader() );
