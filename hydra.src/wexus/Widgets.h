@@ -27,30 +27,51 @@ namespace wexus
   // internal function for linkTo
   // throws on errors
   // returns a raw url
-  QString memberFunctionToUrl(const QString controllertype, const MemberFunction &mfn, const QVariant *_params, wexus::ActiveRecord *rec);
+  QString memberFunctionToUrl(const QString controllertype, const MemberFunction &mfn, const QVariant *_params, wexus::ActiveRecord *idRec, wexus::ActiveRecord *pidRec);
 
-  // internal function for linkTo
-  // throws on errors
-  // returns a raw url
-  // _params can be a QVariant (id= assumed) or a map
-  QString variantParamsToUrl(const QVariant &_params);
+  /**
+   * pathTo returns a rawurl (suitable for linkTo ro redirectTo)
+   * for the given member function (which must be a registered action
+   * of a regisitered controller.
+   * 
+   * _params are optional params, while the ActiveRecords maybe be used
+   * to provide id and pid.
+   *
+   * @author Aleksander Demko
+   */ 
 
   template <class CONTROLLER>
     QString pathTo(void (CONTROLLER::*mfn)(void)) {
-      return memberFunctionToUrl(typeToString<CONTROLLER>(), MemberFunction(mfn), 0, 0);
+      return memberFunctionToUrl(typeToString<CONTROLLER>(), MemberFunction(mfn), 0, 0, 0);
     }
   template <class CONTROLLER>
     QString pathTo(void (CONTROLLER::*mfn)(void), const QVariant &_params) {
-      return memberFunctionToUrl(typeToString<CONTROLLER>(), MemberFunction(mfn), &_params, 0);
+      return memberFunctionToUrl(typeToString<CONTROLLER>(), MemberFunction(mfn), &_params, 0, 0);
     }
   template <class CONTROLLER>
-    QString pathTo(void (CONTROLLER::*mfn)(void), ActiveRecord &rec) {
-      return memberFunctionToUrl(typeToString<CONTROLLER>(), MemberFunction(mfn), 0, &rec);
+    QString pathTo(void (CONTROLLER::*mfn)(void), ActiveRecord &idRec) {
+      return memberFunctionToUrl(typeToString<CONTROLLER>(), MemberFunction(mfn), 0, &idRec, 0);
+    }
+  template <class CONTROLLER>
+    QString pathTo(void (CONTROLLER::*mfn)(void), ActiveRecord &idRec, const QVariant &_params) {
+      return memberFunctionToUrl(typeToString<CONTROLLER>(), MemberFunction(mfn), &_params, &idRec, 0);
     }
 
   template <class CONTROLLER>
-    QString pathTo(void (CONTROLLER::*mfn)(void), ActiveRecord &rec, const QVariant &_params) {
-      return memberFunctionToUrl(typeToString<CONTROLLER>(), MemberFunction(mfn), &_params, &rec);
+    QString pathTo(ActiveRecord &pidRec, void (CONTROLLER::*mfn)(void)) {
+      return memberFunctionToUrl(typeToString<CONTROLLER>(), MemberFunction(mfn), 0, 0, &pidRec);
+    }
+  template <class CONTROLLER>
+    QString pathTo(ActiveRecord &pidRec, void (CONTROLLER::*mfn)(void), const QVariant &_params) {
+      return memberFunctionToUrl(typeToString<CONTROLLER>(), MemberFunction(mfn), &_params, 0, &pidRec);
+    }
+  template <class CONTROLLER>
+    QString pathTo(ActiveRecord &pidRec, void (CONTROLLER::*mfn)(void), ActiveRecord &idRec) {
+      return memberFunctionToUrl(typeToString<CONTROLLER>(), MemberFunction(mfn), 0, &idRec, &pidRec);
+    }
+  template <class CONTROLLER>
+    QString pathTo(ActiveRecord &pidRec, void (CONTROLLER::*mfn)(void), ActiveRecord &idRec, const QVariant &_params) {
+      return memberFunctionToUrl(typeToString<CONTROLLER>(), MemberFunction(mfn), &_params, &idRec, &pidRec);
     }
 
 

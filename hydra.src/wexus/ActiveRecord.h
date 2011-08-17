@@ -82,6 +82,8 @@ class wexus::ActiveRecord
      * Resets the fields to default values... usually -1 for ints
      * and empty strings.
      *
+     * Skips the filter column, if set.
+     *
      * @author Aleksander Demko
      */ 
     void clear(void);
@@ -234,7 +236,7 @@ class wexus::ActiveRecord
      *
      * @author Aleksander Demko
      */ 
-    void destroyRows(const ActiveExpr & whereExpr = ActiveExpr());
+    void destroyAll(const ActiveExpr & whereExpr = ActiveExpr());
 
     /**
      * Returns the number of rows that match the given where query,
@@ -276,7 +278,7 @@ class wexus::ActiveRecord
 
   private:
     ActiveClass *dm_class;
-    int dm_filtercol;
+    int dm_filtercol; // the filter column, or -1 if none is set
     ActiveExpr dm_orderByExpr;
     std::shared_ptr<QSqlQuery> dm_query;
 };

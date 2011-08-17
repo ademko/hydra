@@ -67,7 +67,7 @@ static void fillString(const prefix *p, const QVariantMap &_map, QString &outs)
     }
   }
 }
-QString wexus::memberFunctionToUrl(const QString controllertype, const MemberFunction &mfn, const QVariant *_params, ActiveRecord *rec)
+QString wexus::memberFunctionToUrl(const QString controllertype, const MemberFunction &mfn, const QVariant *_params, ActiveRecord *idRec, ActiveRecord *pidRec)
 {
   if (!Registry::controllersByType().contains(controllertype))
     assertThrow(false);
@@ -95,12 +95,31 @@ QString wexus::memberFunctionToUrl(const QString controllertype, const MemberFun
   if (!ainfo.get())
     throw AssertException("Trying to reference unregistered action func in class: " + cinfo->name); // didnt find anything
 
-  QString idurl;
+  QString idurl, pidurl;
   
-  if (rec)
-    idurl = rec->activeClass()->keyField()->toVariant(rec).toString();
+  if (idRec)
+    idurl = idRec->activeClass()->keyField()->toVariant(idRec).toString();
+  if (pidRec) {
+    // find the first fkey
+    // (this can perhaps be moved into ActiveClass eventually
+    /*int findex = -1;
+    for (int c=0; c<pidRec->activeClass()->fieldsVec().size(); ++c)
+      if (pidRec->activeClass()->fieldsVec()[c]->style() == ActiveClass::fKeyStyle) {
+        findex = c;   // found it
+        break;
+      }
+    assertThrowMsg(findex != -1, "pathTo called with a ActiveRecord who doesn't have a foreign key");
 
-  QString ret = Context::application()->mountPoint() + cinfo->name + "/"; // TODO ENCODE
+    pidurl = pidRec->activeClass()->fieldsVec()[findex]->toVariant(pidRec).toString();*/
+    pidurl = pidRec->activeClass()->keyField()->toVariant(pidRec).toString();
+  }
+
+  QString ret = Context::application()->mountPoint();
+  
+  if (!pidurl.isEmpty())
+    ret += pidurl + "/";  // TODO ENCODE
+
+  ret += cinfo->name + "/"; // TODO ENCODE
   
   if (!idurl.isEmpty())
     ret += idurl + "/";

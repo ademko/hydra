@@ -195,7 +195,9 @@ void Application::RouteBuilder::addMatch(const QString &matchString, const QVari
 void Application::RouteBuilder::addDefault(void)
 {
   addMatch("/?:controller/?:action/", key("controller","home") + key("action","index"));
-  addMatch("/:controller/:id/?:action/", key("action","index"));
+  addMatch("/:controller/:id/?:action/", key("action","show"));
+  addMatch("/:pid/:controller/?:action/", key("action","index"));
+  addMatch("/:pid/:controller/:id/?:action/", key("action","show"));
 }
 
 //

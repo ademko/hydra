@@ -85,7 +85,8 @@ void ActiveRecord::clear(void)
   ActiveClass * klass = activeClass();
 
   for (int i=0; i<klass->fieldsVec().size(); ++i)
-    klass->fieldsVec()[i]->setVariant(this, klass->fieldsVec()[i]->initVal());
+    if (i != dm_filtercol)
+      klass->fieldsVec()[i]->setVariant(this, klass->fieldsVec()[i]->initVal());
 }
 
 void ActiveRecord::test(Context::Errors *outerrors) const
@@ -349,17 +350,17 @@ void ActiveRecord::destroy(void)
 {
   ActiveClass * klass = activeClass();
 
-  destroyRows(ActiveExpr::fromColumn(klass->keyColumn()) == klass->fieldsVec()[klass->keyColumn()]->toVariant(this));
+  destroyAll(ActiveExpr::fromColumn(klass->keyColumn()) == klass->fieldsVec()[klass->keyColumn()]->toVariant(this));
 }
 
 void ActiveRecord::destroy(const QVariant &keyVal)
 {
   ActiveClass * klass = activeClass();
 
-  destroyRows(ActiveExpr::fromColumn(klass->keyColumn()) == keyVal);
+  destroyAll(ActiveExpr::fromColumn(klass->keyColumn()) == keyVal);
 }
 
-void ActiveRecord::destroyRows(const ActiveExpr & _whereExpr)
+void ActiveRecord::destroyAll(const ActiveExpr & _whereExpr)
 {
   QSqlQuery q(database());
   ActiveClass * klass = activeClass();
@@ -374,7 +375,7 @@ void ActiveRecord::destroyRows(const ActiveExpr & _whereExpr)
   }
 
 qDebug() << s;
-  check( q.prepare(s) , "ActiveRecord::destroyRows() prepare() failed");
+  check( q.prepare(s) , "ActiveRecord::destroyAll() prepare() failed");
 
   if (!whereExpr.isNull())
     whereExpr.buildBinds(*klass, *this, q);
