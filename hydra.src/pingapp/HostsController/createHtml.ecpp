@@ -1,0 +1,11 @@
+
+<% renderErrors(); %>
+
+<% renderNotice(); %>
+
+<% { Form F(dm_host); %>
+  Hostname: <%=F.textField("hostname")%> <p>
+  Description: <%=F.textField("description")%>
+  <%=F.submitButton("Add Host")%>
+<% } %>
+

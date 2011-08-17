@@ -10,7 +10,10 @@ Current sites:
   <li>id=<%=dm_site.id%> name=<%=dm_site.name%> desc=<%=dm_site.desc%>
     <%=linkTo("Edit Site", pathTo(&SitesController::edit, dm_site))%>
     <%=linkTo("Delete Site", pathTo(&SitesController::destroy, dm_site))%>
+    <%=linkTo("Add Host", pathTo(dm_site, &HostsController::create))%>
   <% Host subhost = dm_site.host();
+     subhost.order(Host::Hostname);
+     subhost.all();
      while (subhost.next()) { %>
        host=<%= subhost.hostname %>
   <% } %>

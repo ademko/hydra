@@ -162,6 +162,7 @@ ADD_EXECUTABLE(wexusserver
     ${THIS_PATH}/pingapp/SitesController/editHtml.cpp
     ${THIS_PATH}/pingapp/SitesController/destroyHtml.cpp
     ${THIS_PATH}/pingapp/HostsController/indexHtml.cpp
+    ${THIS_PATH}/pingapp/HostsController/createHtml.cpp
 #models
     ${THIS_PATH}/pingapp/Host.cpp ${THIS_PATH}/pingapp/Site.cpp
     )

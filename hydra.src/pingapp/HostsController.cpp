@@ -14,6 +14,8 @@
 
 #include <pingapp/PingApp.h>
 
+#include <pingapp/SitesController.h>
+
 using namespace wexus;
 using namespace pingapp;
 
@@ -26,6 +28,24 @@ void HostsController::index(void)
   indexHtml();
 }
 
+void HostsController::create(void)
+{
+  Site S;
+  S.find(params["pid"]);
+
+  Host H = S.host();
+  if (H.fromForm()) {
+    H.create();
+
+    setFlash["notice"] = "Host added.";
+    redirectTo(pathTo(&SitesController::index));
+  }
+
+  createHtml();
+}
+
 static wexus::RegisterController<PingApp, HostsController> r1("hosts");
+
 static wexus::RegisterAction<HostsController, &HostsController::index> r2("index");
+static wexus::RegisterAction<HostsController, &HostsController::create> r3("create");
 

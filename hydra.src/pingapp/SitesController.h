@@ -13,6 +13,8 @@
 #include <pingapp/Site.h>
 #include <pingapp/Host.h>
 
+#include <pingapp/HostsController.h>
+
 namespace pingapp
 {
   class SitesController;

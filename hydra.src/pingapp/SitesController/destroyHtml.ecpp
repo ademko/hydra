@@ -5,6 +5,6 @@
 
 Are you sure you want to destroy <%=dm_site.name%>?
 
-<%=linkTo("Delete", pathTo(&SitesController::destroy, params + key("sure",1)))%>
+<%=linkTo("Delete", pathTo(&SitesController::destroy, dm_site, key("sure",1)))%>
 <%=linkTo("Cancel", pathTo(&SitesController::index))%>
 

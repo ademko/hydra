@@ -24,8 +24,10 @@ class pingapp::HostsController : public wexus::Controller
     HostsController(void);
 
     void index(void);
+    void create(void);
 
     void indexHtml(void);
+    void createHtml(void);
 
   protected:
     Host dm_host;

@@ -78,7 +78,11 @@ void SitesController::destroy(void)
   dm_site.find(params["id"]);
 
   if (params["sure"] == 1) {
+    Host H = dm_site.host();
+    H.destroyAll();
+
     dm_site.destroy();
+
     setFlash["notice"] = "Site deleted.";
     redirectTo(pathTo(&SitesController::index));
   } else
