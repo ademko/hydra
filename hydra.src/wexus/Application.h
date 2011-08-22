@@ -41,9 +41,11 @@ class wexus::Application
     /**
      * Called by wexus::Site during addApplication
      *
+     * Decendants may overide this to add additional functionality.
+     *
      * @author Aleksander Demko
      */
-    void setMountPoint(const QString &mountPoint);
+    virtual void setMountPoint(const QString &mountPoint);
 
     /**
      * Returns the mount point.
@@ -56,9 +58,11 @@ class wexus::Application
     /**
      * Called shortly after creation
      *
+     * Decendants may overide this to add additional functionality.
+     *
      * @author Aleksander Demko
      */
-    void setSettings(const QVariantMap &settings);
+    virtual void setSettings(const QVariantMap &settings);
 
     /**
      * Returns the current settings
@@ -141,6 +145,9 @@ class wexus::Application
 
     /// inherited constructor
     Application(void);
+
+    /// called by setSettings to open (or reopen) the db
+    void openDB(void);
 
   private:
     QString dm_mountpoint;

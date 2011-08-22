@@ -208,14 +208,6 @@ void Application::RouteBuilder::addDefault(void)
 
 Application::Application(void)
 {
-  // setup DB
-  dm_db = QSqlDatabase::addDatabase("QSQLITE", "C1");
-  assert(dm_db.isValid());
-
-  dm_db.setDatabaseName("/tmp/one.sqlite");
-  bool good = dm_db.open();
-  assert(good);
-
   // make the default routing table
   RouteBuilder b(*this);
   b.addDefault();
@@ -225,11 +217,13 @@ Application::~Application()
 {
   // tear down DB
   if (dm_db.isOpen()) {
+    QString connname(dm_db.connectionName());
+
     dm_db.close();
 
     dm_db = QSqlDatabase(); // we need to "null" dm_db otherwise removeDatabasew ill think its open
 
-    QSqlDatabase::removeDatabase("C1");
+    QSqlDatabase::removeDatabase(connname);
   }
 }
 
@@ -241,6 +235,8 @@ void Application::setMountPoint(const QString &mountPoint)
 void Application::setSettings(const QVariantMap &settings)
 {
   dm_settings = settings;
+
+  openDB();
 }
 
 void Application::handleApplicationRequest(QString &filteredRequest, wexus::HTTPRequest &req, wexus::HTTPReply &reply)
@@ -262,5 +258,19 @@ std::shared_ptr<Registry::AppInfo> Application::appInfo(void)
   }
 
   return dm_appinfo;
+}
+
+void Application::openDB(void)
+{
+  QString dbpath = settings()["appdir"].toString() + "/database.sqlite";
+
+  // setup DB
+  dm_db = QSqlDatabase::addDatabase("QSQLITE", dbpath);
+  assert(dm_db.isValid());
+
+  dm_db.setDatabaseName(dbpath);
+  bool good = dm_db.open();
+  assert(good);
+
 }
 
