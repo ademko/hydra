@@ -35,7 +35,7 @@ std::shared_ptr<Registry::AppInfo> Registry::newAppInfo(const char *_appname, co
     Registry::appsByName()[appname] = ai;
 
   ai->classtype = _typename;
-  ai->classname = appname;
+  ai->appname = appname;
   ai->loader = loader;
 
   return ai;

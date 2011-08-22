@@ -54,6 +54,26 @@ class wexus::Application
     const QString &mountPoint(void) const { return dm_mountpoint; }
 
     /**
+     * Called shortly after creation
+     *
+     * @author Aleksander Demko
+     */
+    void setSettings(const QVariantMap &settings);
+
+    /**
+     * Returns the current settings
+     *
+     * Some interesting fields, assigned at boot:
+     *   app= the appname of the started class
+     *   mountpoint= the url mount point, same as mountPoint()
+     *   sitedir= the directory (on disk) of the site
+     *   appdir= the directory (on disk) of the app within the site
+     *
+     * @author Aleksander Demko
+     */ 
+    const QVariantMap & settings(void) const { return dm_settings; }
+
+    /**
      * A enhanced handleApplicationRequest() call from the wexus::Site to wexus::Application.
      * filteredRequest contains just the action call. It always starts with atleast a /
      *
@@ -124,6 +144,7 @@ class wexus::Application
 
   private:
     QString dm_mountpoint;
+    QVariantMap dm_settings;
 
     SessionManager dm_sessionmanager;
     QSqlDatabase dm_db;

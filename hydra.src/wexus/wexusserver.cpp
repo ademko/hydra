@@ -7,14 +7,101 @@
 
 #include <wexus/MongooseServer.h>
 
+#include <QCoreApplication>
+#include <QDirIterator>
+#include <QSettings>
+#include <QDebug>
+
 #include <wexus/Site.h>
+#include <wexus/Registry.h>
 #include <pingapp/PingApp.h>
+
+using namespace wexus;
 
 int main(int argc, char **argv)
 {
-  wexus::Site s(".");
+  QCoreApplication coreapp(argc, argv);
+  QString sitepath;
 
-  s.addApplication("/pinger/", std::shared_ptr<pingapp::PingApp>(new pingapp::PingApp));
+  // find the site dir
+  {
+    QStringList args = coreapp.arguments();
+
+    if (args.size() < 2) {
+      //sitepath = ".";
+      qDebug() << "You must provide a site directory as a parameter.";
+      return -1;
+    } else
+      sitepath = QFileInfo(args[1]).canonicalFilePath();;
+  }
+
+  // test the dir
+  if (!QFileInfo(sitepath).isDir()) {
+    qDebug() << sitepath << "is not a directory.";
+    return -1;
+  }
+
+  wexus::Site s(sitepath);
+
+  // load all the app files
+  {
+    QDirIterator dd(sitepath, QDirIterator::Subdirectories);
+
+    while (dd.hasNext()) {
+      QString fullfilename(dd.next());
+      //QString fullfilename(QFileInfo(sitepath + "/" + relfilename).canonicalFilePath());
+      QFileInfo info(fullfilename);
+
+//qDebug() << fullfilename;
+      if (info.isFile() && info.fileName() == "app.ini") {
+        qDebug() << "parsing INI " << fullfilename;
+
+        // load the ini file
+        QSettings settings(fullfilename, QSettings::IniFormat);
+
+        // convert the settings object to a variant map
+        QStringList allkeys = settings.allKeys();
+        QVariantMap vmap;
+        for (QStringList::const_iterator ii=allkeys.begin(); ii != allkeys.end(); ++ii)
+          vmap[*ii] = settings.value(*ii);
+
+        if (!vmap.contains("app")) {
+          qDebug() << "no app= line in the .ini file";
+          return -1;
+        }
+
+        QString appname = vmap["app"].toString();
+
+        // find the app
+        if (!Registry::appsByName().contains(appname)) {
+          qDebug() << "app not found:" << appname;
+          return -1;
+        }
+
+        std::shared_ptr<Registry::AppInfo> appinfo = Registry::appsByName()[appname];
+        assert(appinfo.get());
+
+        QString mountpoint(info.path().mid(sitepath.size()) + "/");
+
+        qDebug() << "launching" << appinfo->appname << "@" << mountpoint;
+
+        std::shared_ptr<Application> app(appinfo->loader());
+        assert(app.get());
+
+        vmap["mountpoint"] = mountpoint;
+        vmap["sitedir"] = sitepath;
+        vmap["appdir"] = info.path();
+
+//qDebug() << vmap;
+        // config the app
+        app->setSettings(vmap);
+        // add it to the site
+        s.addApplication(mountpoint, app);
+      }
+    }
+  }
+
+  //s.addApplication("/pinger/", std::shared_ptr<pingapp::PingApp>(new pingapp::PingApp));
 
   s.start();
   s.wait();

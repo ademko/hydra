@@ -29,5 +29,5 @@ PingApp::PingApp(void)
   b.addMatch("/", key("controller","sites") + key("action","index"));
 }
 
-static RegisterApp<PingApp> r2("pingapp::PingApp");
+static RegisterApp<PingApp> r2("ca.demko.pingapp");
 

@@ -238,6 +238,11 @@ void Application::setMountPoint(const QString &mountPoint)
   dm_mountpoint = mountPoint;
 }
 
+void Application::setSettings(const QVariantMap &settings)
+{
+  dm_settings = settings;
+}
+
 void Application::handleApplicationRequest(QString &filteredRequest, wexus::HTTPRequest &req, wexus::HTTPReply &reply)
 {
   QStringList splitreq = filteredRequest.split('/', QString::SkipEmptyParts);

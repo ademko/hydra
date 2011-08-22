@@ -28,9 +28,11 @@ namespace wexus
   class Application;  // fwd
   class Controller; //fwd
 
+  // convert this to return shared_ptr<>?
   typedef Application* (*ApplicationLoader)(void);
   template <class SUB> Application* ApplicationLoaderType(void) { return new SUB(); } // cant seem to nest this in ControllerInfo
 
+  // convert this to return shared_ptr<>?
   typedef Controller* (*ControllerLoader)(void);
   template <class SUB> Controller* ControllerLoaderType(void) { return new SUB(); } // cant seem to nest this in ControllerInfo
 
@@ -53,7 +55,7 @@ class wexus::Registry
         typedef QMap<QString, std::shared_ptr<ControllerInfo>  > ControllerMap; // controllers by their name
       public:
         QString classtype; // the type string (from typeid)
-        QString classname; // the application name
+        QString appname; // the application name
 
         ApplicationLoader loader;
 
