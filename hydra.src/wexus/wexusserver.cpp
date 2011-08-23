@@ -18,6 +18,14 @@
 
 using namespace wexus;
 
+static void settingsToMap(const QSettings &settings, QVariantMap &out)
+{
+  QStringList allkeys = settings.allKeys();
+
+  for (QStringList::const_iterator ii=allkeys.begin(); ii != allkeys.end(); ++ii)
+    out[*ii] = settings.value(*ii);
+}
+
 int main(int argc, char **argv)
 {
   QCoreApplication coreapp(argc, argv);
@@ -41,7 +49,30 @@ int main(int argc, char **argv)
     return -1;
   }
 
-  wexus::Site s(sitepath);
+  QVariantMap siteoptions;
+
+  // load  the site.ini, if any
+  {
+    QString sitefilename(sitepath + "/site.ini");
+    QFileInfo info(sitefilename);
+qDebug() << sitefilename;
+
+    if (info.isFile()) {
+      qDebug() << "parsing INI " << sitefilename;
+      QSettings settings(sitefilename, QSettings::IniFormat);
+
+      settingsToMap(settings, siteoptions);
+    }
+  }
+
+  HTTPParams httpparams;
+
+  // convert some options into httpparams for Site
+  if (siteoptions.contains("httpport"))
+    httpparams.setPort(siteoptions["httpport"].toInt());
+
+  // in the future, pass siteoptions directly to Site too?
+  wexus::Site s(sitepath, httpparams);
 
   // load all the app files
   {
@@ -60,10 +91,9 @@ int main(int argc, char **argv)
         QSettings settings(fullfilename, QSettings::IniFormat);
 
         // convert the settings object to a variant map
-        QStringList allkeys = settings.allKeys();
-        QVariantMap vmap;
-        for (QStringList::const_iterator ii=allkeys.begin(); ii != allkeys.end(); ++ii)
-          vmap[*ii] = settings.value(*ii);
+        QVariantMap vmap = siteoptions;
+
+        settingsToMap(settings, vmap);
 
         if (!vmap.contains("app")) {
           qDebug() << "no app= line in the .ini file";
@@ -88,6 +118,7 @@ int main(int argc, char **argv)
         std::shared_ptr<Application> app(appinfo->loader());
         assert(app.get());
 
+        // the computed versions always override what's in the file
         vmap["mountpoint"] = mountpoint;
         vmap["sitedir"] = sitepath;
         vmap["appdir"] = info.path();
