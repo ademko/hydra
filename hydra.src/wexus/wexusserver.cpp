@@ -55,7 +55,6 @@ int main(int argc, char **argv)
   {
     QString sitefilename(sitepath + "/site.ini");
     QFileInfo info(sitefilename);
-qDebug() << sitefilename;
 
     if (info.isFile()) {
       qDebug() << "parsing INI " << sitefilename;

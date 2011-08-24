@@ -25,7 +25,7 @@ using namespace pingapp;
 PingApp::PingApp(void)
 {
   RouteBuilder b(*this);
-  b.addDefault();
+  b.addStandardRoutes();
   b.addMatch("/", key("controller","sites") + key("action","index"));
 }
 

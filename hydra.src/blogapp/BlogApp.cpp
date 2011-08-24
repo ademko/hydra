@@ -7,10 +7,17 @@
 
 #include <blogapp/BlogApp.h>
 
+#include <wexus/VarPath.h>
+
+using namespace wexus;
+
 blogapp::BlogApp::BlogApp(void)
 {
-}
+  RouteBuilder b(*this);
 
+  b.addStandardRoutes();
+  b.addMatch("/", key("controller","posts") + key("action","index"));
+}
 
 static wexus::RegisterApp<blogapp::BlogApp> r1("ca.demko.blogapp");
 

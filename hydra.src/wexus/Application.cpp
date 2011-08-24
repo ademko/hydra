@@ -192,7 +192,7 @@ void Application::RouteBuilder::addMatch(const QString &matchString, const QVari
   dm_app.dm_routes.push_back(std::shared_ptr<Route>(new MatchingRoute(&dm_app, parts, defaults)));
 }
 
-void Application::RouteBuilder::addDefault(void)
+void Application::RouteBuilder::addStandardRoutes(void)
 {
   addMatch("/?:controller/?:action/", key("controller","home") + key("action","index"));
   addMatch("/:controller/:id/?:action/", key("action","show"));
@@ -210,7 +210,7 @@ Application::Application(void)
 {
   // make the default routing table
   RouteBuilder b(*this);
-  b.addDefault();
+  b.addStandardRoutes();
 }
 
 Application::~Application()

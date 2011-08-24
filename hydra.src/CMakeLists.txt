@@ -151,6 +151,7 @@ ADD_EXECUTABLE(wexusserver
     ${THIS_PATH}/wexus/Widgets.cpp ${THIS_PATH}/wexus/Form.cpp ${THIS_PATH}/wexus/ValidationExpr.cpp
     ${THIS_PATH}/wexus/Assert.cpp ${THIS_PATH}/wexus/MemberFunction.cpp
     ${THIS_PATH}/wexus/Registry.cpp
+    ${THIS_PATH}/wexus/ActiveFile.cpp
 
 #pingapp
     ${THIS_PATH}/pingapp/PingApp.cpp
@@ -168,6 +169,9 @@ ADD_EXECUTABLE(wexusserver
 
 #blogapp
     ${THIS_PATH}/blogapp/BlogApp.cpp
+    ${THIS_PATH}/blogapp/Post.cpp
+    ${THIS_PATH}/blogapp/PostsController.cpp
+    ${THIS_PATH}/blogapp/PostsController/indexHtml.cpp
     )
 TARGET_LINK_LIBRARIES(wexusserver hydra)
 ADD_EXECUTABLE(wexusmake

@@ -1,0 +1,7 @@
+
+<ul>
+<% while (dm_post.next()) { %>
+  <li><%=dm_post.filename%></li>
+<% } %>
+</ul>
+

@@ -137,7 +137,7 @@ class wexus::Application
          *
          * @author Aleksander Demko
          */
-        void addDefault(void);
+        void addStandardRoutes(void);
 
       protected:
         Application &dm_app;
