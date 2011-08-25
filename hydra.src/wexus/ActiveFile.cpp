@@ -10,7 +10,7 @@
 #include <QFile>
 #include <QVariant>
 
-#include <wexus/Assert.h>
+#include <wexus/AssertException.h>
 
 using namespace wexus;
 

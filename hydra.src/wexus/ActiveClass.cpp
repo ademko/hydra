@@ -12,6 +12,7 @@
 
 #include <wexus/ActiveRecord.h>
 #include <wexus/StringUtil.h>
+#include <wexus/AssertException.h>
 
 using namespace wexus;
 
@@ -38,7 +39,7 @@ QString ActiveClass::toSqlType(const QString &t)
     return "TEXT";
   if (t == "double")
     return "REAL";
-  throw ActiveRecord::Exception("Unkown C type: " + t);
+  throw AssertException("Unkown C type: " + t);
 }
 
 ActiveClass::ActiveClass(const QString &_className)
@@ -90,7 +91,7 @@ void ActiveClass::doneConstruction(void)
   int num = dm_vec.size();
 
   if (num == 0)
-    throw ActiveRecord::Exception("ActiveClass::doneConstruction: no fields?");
+    throw AssertException("ActiveClass::doneConstruction: no fields?");
 
   for (int i=0; i<num; ++i) {
     if (i>0) {

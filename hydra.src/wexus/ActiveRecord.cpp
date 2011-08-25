@@ -18,31 +18,9 @@
 #include <wexus/Context.h>
 #include <wexus/Application.h>
 #include <wexus/VarPath.h>
+#include <wexus/AssertException.h>
 
 using namespace wexus;
-
-//
-// ActiveRecord::Exception
-//
-
-ActiveRecord::Exception::Exception(const QString &_what) throw()
-  : dm_what(_what.toUtf8())
-{
-  //assert(false);//optional, useful during debugging
-}
-
-ActiveRecord::Exception::~Exception() throw()
-{
-}
-
-//
-// ActiveRecord::RecordNotFound
-//
-
-ActiveRecord::RecordNotFound::RecordNotFound(void)
-  : Exception("Record not found")
-{
-}
 
 //
 //
@@ -67,7 +45,7 @@ QSqlDatabase & ActiveRecord::database(void)
   QSqlDatabase &db = Context::application()->database();
 
   if (!db.isOpen())
-    throw Exception("DB is closed");
+    throw AssertException("DB is closed");
 
   return db;
 }
@@ -76,7 +54,7 @@ void ActiveRecord::check(const QSqlQuery &qy)
 {
   if (qy.lastError().isValid()) {
 //assert(false);
-    throw Exception("query error: " + qy.lastError().text());
+    throw AssertException("query error: " + qy.lastError().text());
   }
 }
 
@@ -171,7 +149,7 @@ void ActiveRecord::setFilterColumn(int colindex)
 void ActiveRecord::check(bool b, const QString &exceptionMsg)
 {
   if (!b) {
-    throw Exception(exceptionMsg);
+    throw AssertException(exceptionMsg);
   }
 }
 
@@ -222,7 +200,7 @@ void ActiveRecord::find(const QVariant &keyVal)
   internalWhere(ActiveExpr::fromColumn(klass->keyColumn()) == keyVal, 1);
 
   if (!next())
-    throw RecordNotFound();
+    throw AssertException("Record not found: " + keyVal.toString());
 }
 
 bool ActiveRecord::exists(const QVariant &keyVal)
@@ -413,7 +391,7 @@ qDebug() << s;
   check(q);
 
   if (!q.next())
-    throw Exception("ActiveRecord::count next() called failed");
+    throw AssertException("ActiveRecord::count next() called failed");
 
   return q.value(0).toInt();
 }

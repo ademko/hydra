@@ -8,7 +8,7 @@
 #include <wexus/ActiveExpr.h>
 
 #include <wexus/ActiveClass.h>
-#include <wexus/ActiveRecord.h>   // for exceptions
+#include <wexus/AssertException.h>
 
 using namespace wexus;
 
@@ -172,7 +172,7 @@ int ActiveExpr::columnIndex(void) const
   ColumnIndex *c = dynamic_cast<ColumnIndex*>(dm_imp.get());
 
   if (!c)
-    throw ActiveRecord::Exception("ActiveExpr::columnIndex() called on a non-columnIndex expression");
+    throw AssertException("ActiveExpr::columnIndex() called on a non-columnIndex expression");
 
   return c->columnIndex();
 }

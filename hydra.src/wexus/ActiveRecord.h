@@ -30,37 +30,6 @@ namespace wexus
 class wexus::ActiveRecord : public wexus::IDAble
 {
   public:
-    /**
-     * General wexus::ActiveRecord exception.
-     *
-     * @author Aleksander Demko
-     */ 
-    class Exception : public std::exception
-    {
-      public:
-        /// constructor
-        Exception(const QString &_what) throw();
-        virtual ~Exception() throw();
-
-        virtual const char* what() const throw() { return dm_what; }
-
-      private:
-        // cant be a QString as then what() will return a * to a temporary
-        QByteArray dm_what;
-    };
-    /**
-     * A record that was expected to exist does not.
-     *
-     * @author Aleksander Demko
-     */ 
-    class RecordNotFound : public Exception
-    {
-      public:
-        /// constructor
-        RecordNotFound(void);
-    };
-
-  public:
     // helper functions
     // retutrns the DB, throwing an exception on failure
     static QSqlDatabase & database(void);

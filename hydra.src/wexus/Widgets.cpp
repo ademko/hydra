@@ -12,7 +12,7 @@
 #include <wexus/Context.h>
 #include <wexus/Registry.h>
 #include <wexus/Application.h>
-#include <wexus/Assert.h>
+#include <wexus/AssertException.h>
 #include <wexus/IDAble.h>
 #include <wexus/VarPath.h>
 

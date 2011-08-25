@@ -12,7 +12,7 @@
 #include <assert.h>
 
 #include <wexus/VarPath.h>
-#include <wexus/Assert.h>
+#include <wexus/AssertException.h>
 
 using namespace wexus;
 

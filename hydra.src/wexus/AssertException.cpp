@@ -5,7 +5,7 @@
  * See the accompanying file LICENSE.MIT.txt for details.
  */
 
-#include <wexus/Assert.h>
+#include <wexus/AssertException.h>
 
 #include <assert.h>
 
