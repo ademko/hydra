@@ -22,19 +22,20 @@ ActiveFile::ActiveFile(const QString &dirname, const QRegExp &regexp)
 
 QByteArray & ActiveFile::asByteArray(void)
 {
-  if (dm_data.get())
-    return *dm_data;
+  if (dm_data.get() && dm_data->filename == filename)
+    return dm_data->bytearray;
 
-  dm_data.reset(new QByteArray);
+  dm_data.reset(new DataSpec);
 
-  QFile infile(filename);
+  QString fullfilename(dm_dirspec->dirname + "/" + filename);
+  QFile infile(fullfilename);
 
   if (!infile.open(QIODevice::ReadOnly))
-    throw AssertException("ActiveFile::asByteArray(): Can't open: " + filename);
+    throw AssertException("ActiveFile::asByteArray(): Can't open: " + fullfilename);
 
-  *dm_data = infile.readAll(); // doesnt do any error checking, should probably do some
+  dm_data->bytearray = infile.readAll(); // doesnt do any error checking, should probably do some
 
-  return *dm_data;
+  return dm_data->bytearray;
 }
 
 void ActiveFile::all(void)

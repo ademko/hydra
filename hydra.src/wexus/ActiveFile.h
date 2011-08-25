@@ -83,9 +83,14 @@ class wexus::ActiveFile
 
     std::shared_ptr<DirSpec> dm_dirspec;
 
+    struct DataSpec
+    {
+      QString filename;
+      QByteArray bytearray;
+    };
     // the data, if any
     // for multi-types, this will have to be a union-like thing
-    std::shared_ptr<QByteArray> dm_data;
+    std::shared_ptr<DataSpec> dm_data;
 
     // current iteration, if any
     std::shared_ptr<QDirIterator> dm_iterator;

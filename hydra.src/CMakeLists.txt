@@ -152,6 +152,7 @@ ADD_EXECUTABLE(wexusserver
     ${THIS_PATH}/wexus/Assert.cpp ${THIS_PATH}/wexus/MemberFunction.cpp
     ${THIS_PATH}/wexus/Registry.cpp
     ${THIS_PATH}/wexus/ActiveFile.cpp
+    ${THIS_PATH}/wexus/MarkDown.cpp
 
 #pingapp
     ${THIS_PATH}/pingapp/PingApp.cpp

@@ -9,6 +9,7 @@
 #define __INCLUDED_BLOGAPP_POSTSCONTROLLER_H__
 
 #include <wexus/Controller.h>
+#include <wexus/MarkDown.h>
 
 #include <blogapp/Post.h>
 

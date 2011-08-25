@@ -1,7 +1,9 @@
 
 <ul>
 <% while (dm_post.next()) { %>
-  <li><%=dm_post.filename%></li>
+  <li><%=dm_post.filename%> <p>
+  <% output() << MarkDown::process(dm_post.asByteArray(), MarkDown::Format_Post); %>
+  </li>
 <% } %>
 </ul>
 
