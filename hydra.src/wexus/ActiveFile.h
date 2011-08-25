@@ -92,8 +92,14 @@ class wexus::ActiveFile
     // for multi-types, this will have to be a union-like thing
     std::shared_ptr<DataSpec> dm_data;
 
+    struct IteratorSpec
+    {
+      QStringList filenames;
+      QStringList::const_iterator iterator;
+    };
+
     // current iteration, if any
-    std::shared_ptr<QDirIterator> dm_iterator;
+    std::shared_ptr<IteratorSpec> dm_iterator;
 };
 
 #endif

@@ -40,28 +40,40 @@ QByteArray & ActiveFile::asByteArray(void)
 
 void ActiveFile::all(void)
 {
-  dm_iterator.reset(new QDirIterator(dm_dirspec->dirname));
+  std::shared_ptr<IteratorSpec> ii(new IteratorSpec);
+
+  QDirIterator dd(dm_dirspec->dirname);
+  // find all the qualify records
+  while (dd.hasNext()) {
+    QString fpath = dd.next();
+    QString fname = dd.fileName();
+
+    if (!QFileInfo(fpath).isFile())
+      continue;
+
+    if (dm_dirspec->regexp.exactMatch(fname))
+      ii->filenames.push_back(fname);
+  }
+
+  // sort the list
+  ii->filenames.sort();
+
+  ii->iterator = ii->filenames.begin();
+
+  dm_iterator = ii;
 }
 
 bool ActiveFile::next(void)
 {
   assertThrow(dm_iterator.get());
 
-  // find the next record
-  while (dm_iterator->hasNext()) {
-    QString fpath = dm_iterator->next();
-    QString fname = dm_iterator->fileName();
-
-    if (!QFileInfo(fpath).isFile())
-      continue;
-
-    if (dm_dirspec->regexp.exactMatch(fname)) {
-      filename = fname;
-      return true;
-    }
+  if (dm_iterator->iterator != dm_iterator->filenames.end()) {
+    filename = *dm_iterator->iterator;
+    dm_iterator->iterator++;
+    return true;
   }
 
-  // ran out of QDirIterator entries
+  // ran out of entries
   dm_iterator.reset();
 
   return false;
