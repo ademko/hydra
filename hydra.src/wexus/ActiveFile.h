@@ -8,11 +8,12 @@
 #ifndef __INCLUDED_WEXUS_FILERECORD_H__
 #define __INCLUDED_WEXUS_FILERECORD_H__
 
-#include <wexus/TR1.h>
-
 #include <QString>
 #include <QRegExp>
 #include <QDirIterator>
+
+#include <wexus/TR1.h>
+#include <wexus/IDAble.h>
 
 namespace wexus
 {
@@ -39,10 +40,10 @@ namespace wexus
   *
   * @author Aleksander Demko
   */ 
-class wexus::ActiveFile
+class wexus::ActiveFile : public wexus::IDAble
 {
   public:
-    QString filename;       /// just the filename, no directory
+    QString id;       /// just the filename, no directory
 
   public:
     /**
@@ -51,6 +52,45 @@ class wexus::ActiveFile
      * @author Aleksander Demko
      */ 
     ActiveFile(const QString &dirname, const QRegExp &regexp);
+
+    /// implementation
+    virtual QVariant getIDAsVariant(void);
+
+    /**
+     * Security routine.
+     * throws if the filename:
+     *  - is empty
+     *  - contains bad chars, like / or \
+     *  - starts with a .
+     *  - doesnt pass the reg ex
+     *
+     * @author Aleksander Demko
+     */ 
+    void checkFileName(const QString &filename);
+
+    /**
+     * Runs checkFileName on id
+     *
+     * @author Aleksander Demko
+     */
+    void checkFileName(void) { checkFileName(id); }
+
+    /**
+     * Finds the record that that has the given
+     * value as its primary key.
+     * Throws an exception on not-found.
+     *
+     * @author Aleksander Demko
+     */
+    void find(const QVariant &keyVal);
+
+    /**
+     * Same as find(), except returns false on failure.
+     * find() raises an exception.
+     *
+     * @author Aleksander Demko
+     */
+    bool exists(const QVariant &keyVal);
 
     /**
      * Demand load the curren file. Throws on errors.

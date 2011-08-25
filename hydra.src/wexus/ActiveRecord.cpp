@@ -80,6 +80,11 @@ void ActiveRecord::check(const QSqlQuery &qy)
   }
 }
 
+QVariant ActiveRecord::getIDAsVariant(void)
+{
+  return activeClass()->keyField()->toVariant(this);
+}
+
 void ActiveRecord::clear(void)
 {
   ActiveClass * klass = activeClass();

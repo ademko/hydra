@@ -22,8 +22,10 @@ class blogapp::PostsController : public wexus::Controller
 {
   public:
     void index(void);
-
     void indexHtml(void);
+
+    void show(void);
+    void showHtml(void);
 
   protected:
     Post dm_post;

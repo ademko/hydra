@@ -173,6 +173,7 @@ ADD_EXECUTABLE(wexusserver
     ${THIS_PATH}/blogapp/Post.cpp
     ${THIS_PATH}/blogapp/PostsController.cpp
     ${THIS_PATH}/blogapp/PostsController/indexHtml.cpp
+    ${THIS_PATH}/blogapp/PostsController/showHtml.cpp
     )
 TARGET_LINK_LIBRARIES(wexusserver hydra)
 ADD_EXECUTABLE(wexusmake

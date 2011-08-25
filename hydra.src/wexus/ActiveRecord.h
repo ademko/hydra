@@ -14,6 +14,7 @@
 #include <wexus/ActiveClass.h>
 #include <wexus/ValidationExpr.h>
 #include <wexus/Context.h>
+#include <wexus/IDAble.h>
 
 namespace wexus
 {
@@ -26,7 +27,7 @@ namespace wexus
  *
  * @author Aleksander Demko
  */ 
-class wexus::ActiveRecord
+class wexus::ActiveRecord : public wexus::IDAble
 {
   public:
     /**
@@ -69,6 +70,9 @@ class wexus::ActiveRecord
     static void check(bool b, const QString &exceptionMsg = "ActiveRecord::check(bool) failed");
 
   public:
+    /// implementation
+    virtual QVariant getIDAsVariant(void);
+
     /**
      * Returns the active class for this
      * record.

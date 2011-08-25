@@ -8,6 +8,7 @@
 #include <wexus/ActiveFile.h>
 
 #include <QFile>
+#include <QVariant>
 
 #include <wexus/Assert.h>
 
@@ -20,14 +21,45 @@ ActiveFile::ActiveFile(const QString &dirname, const QRegExp &regexp)
   dm_dirspec->regexp = regexp;
 }
 
+QVariant ActiveFile::getIDAsVariant(void)
+{
+  return id;
+}
+
+void ActiveFile::checkFileName(const QString &filename)
+{
+  if (filename.isEmpty() || filename.indexOf('/') != -1
+      || filename.indexOf('\\') != -1
+      || filename[0] == '.'
+      || !dm_dirspec->regexp.exactMatch(filename))
+    throw AssertException("checkFileName failure");
+}
+
+void ActiveFile::find(const QVariant &keyVal)
+{
+  if (exists(keyVal))
+    id = keyVal.toString();
+  else
+    throw AssertException("ActiveFile: file not found: " + keyVal.toString());
+}
+
+bool ActiveFile::exists(const QVariant &keyVal)
+{
+  QString fname(keyVal.toString());
+
+  checkFileName(fname);
+
+  return QFileInfo(dm_dirspec->dirname + "/" + fname).isFile();
+}
+
 QByteArray & ActiveFile::asByteArray(void)
 {
-  if (dm_data.get() && dm_data->filename == filename)
+  if (dm_data.get() && dm_data->filename == id)
     return dm_data->bytearray;
 
   dm_data.reset(new DataSpec);
 
-  QString fullfilename(dm_dirspec->dirname + "/" + filename);
+  QString fullfilename(dm_dirspec->dirname + "/" + id);
   QFile infile(fullfilename);
 
   if (!infile.open(QIODevice::ReadOnly))
@@ -68,7 +100,7 @@ bool ActiveFile::next(void)
   assertThrow(dm_iterator.get());
 
   if (dm_iterator->iterator != dm_iterator->filenames.end()) {
-    filename = *dm_iterator->iterator;
+    id = *dm_iterator->iterator;
     dm_iterator->iterator++;
     return true;
   }

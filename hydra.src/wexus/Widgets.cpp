@@ -13,7 +13,7 @@
 #include <wexus/Registry.h>
 #include <wexus/Application.h>
 #include <wexus/Assert.h>
-#include <wexus/ActiveRecord.h>
+#include <wexus/IDAble.h>
 #include <wexus/VarPath.h>
 
 #include <QDebug>
@@ -67,7 +67,7 @@ static void fillString(const prefix *p, const QVariantMap &_map, QString &outs)
     }
   }
 }
-QString wexus::memberFunctionToUrl(const QString controllertype, const MemberFunction &mfn, const QVariant *_params, ActiveRecord *idRec, ActiveRecord *pidRec)
+QString wexus::memberFunctionToUrl(const QString controllertype, const MemberFunction &mfn, const QVariant *_params, IDAble *idRec, IDAble *pidRec)
 {
   if (!Registry::controllersByType().contains(controllertype))
     assertThrow(false);
@@ -98,7 +98,7 @@ QString wexus::memberFunctionToUrl(const QString controllertype, const MemberFun
   QString idurl, pidurl;
   
   if (idRec)
-    idurl = idRec->activeClass()->keyField()->toVariant(idRec).toString();
+    idurl = idRec->getIDAsVariant().toString();
   if (pidRec) {
     // find the first fkey
     // (this can perhaps be moved into ActiveClass eventually
@@ -108,10 +108,10 @@ QString wexus::memberFunctionToUrl(const QString controllertype, const MemberFun
         findex = c;   // found it
         break;
       }
-    assertThrowMsg(findex != -1, "pathTo called with a ActiveRecord who doesn't have a foreign key");
+    assertThrowMsg(findex != -1, "pathTo called with a IDAble who doesn't have a foreign key");
 
     pidurl = pidRec->activeClass()->fieldsVec()[findex]->toVariant(pidRec).toString();*/
-    pidurl = pidRec->activeClass()->keyField()->toVariant(pidRec).toString();
+    pidurl = pidRec->getIDAsVariant().toString();
   }
 
   QString ret = Context::application()->mountPoint();

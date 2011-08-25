@@ -1,7 +1,7 @@
 
 <ul>
 <% while (dm_post.next()) { %>
-  <li><%=dm_post.filename%> <p>
+  <li><%=linkTo(dm_post.id, pathTo(&PostsController::show, dm_post))%> <p>
   <% output() << MarkDown::process(dm_post.asByteArray(), MarkDown::Format_Post); %>
   </li>
 <% } %>

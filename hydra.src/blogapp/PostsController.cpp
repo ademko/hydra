@@ -22,7 +22,14 @@ void PostsController::index(void)
   indexHtml();
 }
 
+void PostsController::show(void)
+{
+  dm_post.find(params["id"]);
+  showHtml();
+}
+
 static wexus::RegisterController<BlogApp, PostsController> r1("posts");
 
 static wexus::RegisterAction<PostsController, &PostsController::index> r100("index");
+static wexus::RegisterAction<PostsController, &PostsController::show> r101("show");
 
