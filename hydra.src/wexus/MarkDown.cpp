@@ -24,7 +24,7 @@ namespace { class markdown
     bool linkJumped(int returnState);
 
     void encodedPushBack(void) { encodedPushBack(c); }
-    void encodedPushBack(char ccc);
+    void encodedPushBack(char ccc, QByteArray *out = 0);
 
     void flushPara(void);
 
@@ -44,6 +44,9 @@ namespace { class markdown
       Link_Start,
       Link_Processing,
       Link_Ending,
+      Title_Hashing,
+      Title_GettingName,
+      Title_EndHashes,
     };
     int state;
     char c;
@@ -57,6 +60,9 @@ namespace { class markdown
     int link_returnstate;
     int link_index;
     bool link_havetwoparen;
+
+    int title_level;
+    int title_index;
 }; }
 
 static char styleToHtml(char style_c)
@@ -97,13 +103,16 @@ bool markdown::linkJumped(int returnState)
     return false;
 }
 
-void markdown::encodedPushBack(char ccc)
+void markdown::encodedPushBack(char ccc, QByteArray *buf)
 {
+  if (!buf)
+    buf = &para_buf;
   switch (ccc) {
-    case '<': para_buf += "&lt;"; break;
-    case '>': para_buf += "&gt;"; break;
-    case '"': para_buf += "&quot;"; break;
-    default: para_buf.push_back(ccc); break;
+    case '<': *buf += "&lt;"; break;
+    case '>': *buf += "&gt;"; break;
+    case '"': *buf += "&quot;"; break;
+    case '&': *buf += "&amp;"; break;
+    default: (*buf).push_back(ccc); break;
   }
 }
 
@@ -135,6 +144,11 @@ retry_c:
                    if (QChar(c).isSpace())
                      continue;
                    // para start char, go!
+                   if (c == '#' && flags & MarkDown::Format_Titles) {
+                     state = Title_Hashing;
+                     title_level = 0;
+                     goto retry_c;
+                   }
                    para_buf.clear();
                    state = InPara;
                    goto retry_c;
@@ -237,6 +251,38 @@ retry_c:
                             goto retry_c;
                           break;
                         }
+      case Title_Hashing: {
+                            if (c == '#')
+                              title_level++;
+                            else {
+                              title_index = index;
+                              state = Title_GettingName;
+                              goto retry_c;
+                            }
+                            break;
+                          }
+      case Title_GettingName: {
+                                if (c == '#' || c == '\n') {
+                                  // done the title
+                                  QByteArray title=input.mid(title_index-1, index-title_index);
+                                  ret += "<H" + QString::number(title_level) + ">";
+                                  for (int i=0; i<title.size(); ++i)
+                                    encodedPushBack(title[i], &ret);
+                                  ret += "</H" + QString::number(title_level) + ">\n";
+                                  if (c == '#')
+                                    state = Title_EndHashes;
+                                  else
+                                    state = FindingStart;
+                                }
+                                break;
+                              }
+      case Title_EndHashes: {
+                              if (c != '#') {
+                                state = FindingStart;
+                                goto retry_c;
+                              }
+                              break;
+                            }
     }
   }
 
