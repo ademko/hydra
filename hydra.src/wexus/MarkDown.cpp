@@ -7,466 +7,194 @@
 
 #include <wexus/MarkDown.h>
 
+#include <QDebug>
+
 #include <wexus/Widgets.h>
 
 using namespace wexus;
 
-namespace { class markup
+namespace { class markdown
 {
   public:
-    markup(const QByteArray &_input, QByteArray &_output, unsigned int _flags);
+    QByteArray process(const QByteArray &input, int flags);
 
-    void go(void);
+  protected:
+    bool styleJumped(int returnState);
+    bool ampJumped(int returnState);
 
-  private:
-    void do_para(void);
-    void do_bold(void);
-    void do_italic(void);
-    void do_link(void);
-    void do_list(void);
-    void do_numlist(void);
-    void do_title(void);
-    void do_codequote(void);
-    void do_quote(void);
+    void encodedPushBack(void) { encodedPushBack(c); }
+    void encodedPushBack(char c);
 
-    void get_token(void);
-    void process_token(bool recur = true);
-
-    void token_next_char(void) {
-      token.push_back(*ii);
-
-      ++ii;
-      while (*ii == '\r' && ii != endii)
-        ++ii;
-    }
-
-  private:
-    typedef void (markup::*handler_t)(void);
-
+  protected:
+    const QByteArray *input;
+    QByteArray ret;
+    QByteArray para_buf;
+    int index;
     enum {
-      token_none_c,
-      token_star_c,
-      token_underscore_c,
-      token_title_c,
-      token_newline_c,
-      token_2newline_c,
-      token_openbracket_c,
-      token_closebracket_c,
-      token_bullet_c,
-      token_hash_c,
-      token_code_c,
-      token_beginquote_c,
-      token_endquote_c,
+      FindingStart,
+      InPara,
+      InPara_OnNewLine,
+      Style_Start,
+      Style_Processing,
+      Amp_Processing,
     };
+    int state;
+    char c;
 
-    QByteArray token;
-    short token_type;
-    const QByteArray &input;
-    QByteArray::const_iterator ii, endii;
-    QByteArray &output;
-    unsigned int flags;
-    bool isalive;
+    char style_c;
+    int style_returnstate;
+
+    int amp_returnstate;
+    int amp_index;
 }; }
 
-markup::markup(const QByteArray &_input, QByteArray &_output, unsigned int _flags)
-  : input(_input), output(_output), flags(_flags)
+static char styleToHtml(char style_c)
 {
-  token.reserve(8);
-  token_type = token_none_c;
-
-  ii = input.begin();
-  endii = input.end();
-  isalive = true;
-
-  while (*ii == '\r' && ii != endii)
-    ++ii;
+  return style_c == '*' ? 'B' : 'I';
 }
 
-void markup::do_para(void)
+bool markdown::styleJumped(int returnState)
 {
-  output += "<P>";
-
-  while (isalive) {
-    get_token();
-
-    if (token_type == token_2newline_c)
-      break;
-
-    process_token();
-  }
-
-  output += "</P>";
+  if ((c == '*' || c == '_') && (index == 0 || (*input)[index-1] != ' ')) {
+    style_c = c;
+    style_returnstate = returnState;
+    state = Style_Start;
+    return true;
+  } else
+    return false;
 }
 
-void markup::do_bold(void)
+bool markdown::ampJumped(int returnState)
 {
-  bool morethanone = false;
-
-  while (isalive) {
-    get_token();
-
-    if (token_type == token_star_c)
-      break;
-
-    if (!morethanone) {
-      morethanone = true;
-      output += "<B>";
-    }
-    process_token();
-  }
-
-  if (morethanone)
-    output += "</B>";
-  else
-    output += "*";
+  if (c == '&') {
+    amp_returnstate = returnState;
+    state = Amp_Processing;
+    amp_index = index;
+    return true;
+  } else
+    return false;
 }
 
-void markup::do_italic(void)
+void markdown::encodedPushBack(char ccc)
 {
-  bool morethanone = false;
-
-  while (isalive) {
-    get_token();
-
-    if (token_type == token_underscore_c)
-      break;
-
-    if (!morethanone) {
-      morethanone = true;
-      output += "<I>";
-    }
-    process_token();
-  }
-
-  if (morethanone)
-    output += "</I>";
-  else
-    output += "_";
-}
-
-void markup::do_link(void)
-{
-  QByteArray thelink;
-  bool wikilink;
-
-  thelink.reserve(64);
-
-  while (isalive) {
-    get_token();
-
-    if (token_type == token_closebracket_c)
-      break;
-
-    thelink += token;
-  }
-
-  if (thelink.isEmpty())
-    return;
-  wikilink = (flags & MarkDown::Format_Wiki) && thelink.indexOf('.') == -1;
-
-  if (wikilink) {
-    output += linkTo(thelink, thelink); // in the future, make this link to the "wiki" component or something
-  } else {
-    output += linkTo(thelink, thelink);
+  switch (ccc) {
+    case '<': para_buf += "&lt;"; break;
+    case '>': para_buf += "&gt;"; break;
+    case '"': para_buf += "&quot;"; break;
+    default: para_buf.push_back(ccc); break;
   }
 }
 
-void markup::do_list(void)
+QByteArray markdown::process(const QByteArray &input, int flags)
 {
-  int level = 1;
-  int wantedlevel = 1;
-
-  output += "<UL><LI>";
-
-  while (isalive) {
-    get_token();
-
-    if ((token_type != token_none_c && token[0] == '\n') || token_type == token_bullet_c) {
-      if (token_type == token_bullet_c)
-        wantedlevel = token.size() - 1;   // we do not count the newline in there
-      else
-        wantedlevel = 0;
-
-      output += "</LI>\n";
-
-      while (level > wantedlevel) {
-        output += "</UL>\n";
-        --level;
-      }
-      while (level < wantedlevel) {
-        output += "<UL>\n";
-        ++level;
-      }
-
-      if (wantedlevel == 0)
-        return;
-      else
-        output += "<LI>";
-    } else
-      process_token();
-  }//while
-
-  while (level > 0) {
-    output += "</UL>\n";
-    --level;
-  }
-}
-
-void markup::do_numlist(void)
-{
-  int level = 1;
-  int wantedlevel = 1;
-
-  output += "<OL><LI>";
-
-  while (isalive) {
-    get_token();
-
-    if ((token_type != token_none_c && token[0] == '\n') || token_type == token_hash_c) {
-      if (token_type == token_hash_c)
-        wantedlevel = token.size() - 1;   // we do not count the newline in there
-      else
-        wantedlevel = 0;
-
-      output += "</LI>\n";
-
-      while (level > wantedlevel) {
-        output += "</OL>\n";
-        --level;
-      }
-      while (level < wantedlevel) {
-        output += "<OL>\n";
-        ++level;
-      }
-
-      if (wantedlevel == 0)
-        return;
-      else
-        output += "<LI>";
-    } else
-      process_token();
-  }//while
-
-  while (level > 0) {
-    output += "</OL>\n";
-    --level;
-  }
-}
-
-void markup::do_title(void)
-{
-  short level;
-
-  level = token.size();
-
-  if (level < 2)
-    level = 2;
-  if (level > 4)
-    level = 4;
-
-  output += "<H" + QByteArray::number(level) + ">";
-
-  while (isalive) {
-    get_token();
-
-    if (token_type == token_title_c)
-      break;
-
-    process_token(false);
-  }
-
-  output += "</H" + QByteArray::number(level) + ">";
-}
-
-void markup::do_codequote(void)
-{
-  output += "<PRE>\n";
-  process_token(false);
-  while (isalive) {
-    get_token();
-
-    if ((token_type != token_none_c && token[0] == '\n') && token_type != token_code_c)
-      break;
-
-    process_token(false);
-  }
-  output += "\n</PRE>\n";
-}
-
-void markup::do_quote(void)
-{
-  output += "<BLOCKQUOTE><P>\n";
-
-  while (isalive) {
-    get_token();
-
-    if (token_type == token_endquote_c)
-      break;
-    if (token_type == token_2newline_c)
-      output += "</P><P>\n";
-    else
-      process_token();
-  }
-
-  output += "</P></BLOCKQUOTE>\n";
-}
-
-void markup::get_token(void)
-{
-  token.clear();
-  char readchar;
-
-  if (ii == endii) {
-    isalive = false;
-    return;
-  }
-
-  readchar = *ii;
-  token_next_char();
-
-  // readchar == current char, *ii is now the look-ahead char
-
-  switch (readchar) {
-    case '*': token_type = token_star_c; return;
-    case '_': token_type = token_underscore_c; return;
-    case '[': token_type = token_openbracket_c; return;
-    case ']': token_type = token_closebracket_c; return;
-    case '\n':
-      if (ii != endii) {
-        // only certain \nX combos are tokens
-        switch (*ii) {
-          case '\n':
-            //token_next_char();    // dont ask, but i dont actually consume the 2nd \n in a \n pair
-            token_type = token_2newline_c;
-            return;
-          case '*':
-            while (*ii == '*')
-              token_next_char();
-            token_type = token_bullet_c;
-            return;
-          case '#':
-            while (*ii == '#')
-              token_next_char();
-            token_type = token_hash_c;
-            return;
-          case ' ':
-            token_next_char();
-            token_type = token_code_c;
-            return;
-          case 'b':
-            if (input.mid(ii-input.begin(), 10) == "beginquote") {
-              token += input.mid(ii-input.begin(), 10);
-              ii += 10;
-              token_type = token_beginquote_c;
-              return;
-            }
-            break;
-          case 'e':
-            if (input.mid(ii-input.begin(), 8) == "endquote") {
-              token += input.mid(ii-input.begin(), 8);
-              ii += 8;
-              token_type = token_endquote_c;
-              return;
-            }
-            break;
-        }
-      }
-      token_type = token_newline_c;
-      return;
-    case '=':
-      while (*ii == '=' && ii != endii)
-        token_next_char();
-      token_type = token_title_c;
-      return;
-  }//switch
-
-  token_type = token_none_c;
-}
-
-void markup::process_token(bool recur)
-{
-  // check for new commands
-
-  if (recur)
-    switch (token_type) {
-      case token_star_c:
-        if (flags & MarkDown::Format_Bold_italics) {
-          do_bold();
-          return;
-        }
-        break;
-      case token_underscore_c:
-        if (flags & MarkDown::Format_Bold_italics) {
-          do_italic();
-          return;
-        }
-        break;
-      case token_openbracket_c:
-        if (flags & (MarkDown::Format_Links|MarkDown::Format_Wiki)) {
-          do_link();
-          return;
-        }
-        break;
-      case token_bullet_c:
-        if (flags & MarkDown::Format_Lists) {
-          do_list();
-          return;
-        }
-        break;
-      case token_hash_c:
-        if (flags & MarkDown::Format_Lists) {
-          do_numlist();
-          return;
-        }
-        break;
-      case token_title_c:
-        if (flags & MarkDown::Format_Titles) {
-          do_title();
-          return;
-        }
-        break;
-      case token_code_c:
-        if (flags & MarkDown::Format_Codequotes) {
-          do_codequote();
-          return;
-        }
-        break;
-      case token_beginquote_c:
-        if (flags & MarkDown::Format_Quotes) {
-          do_quote();
-          return;
-        }
-        break;
-    }
-
-  // ok then, just render the token then
-  for (int x=0; x<token.size(); ++x) {
-    switch (token[x])
-    {
-        case '"': output += "&quot;"; break;
-        case '&': output += "&amp;"; break;
-        case '<': output += "&lt;"; break;
-        case '>': output += "&gt;"; break;
-        default: output += token[x];
-    }
-  }
-}
-
-void markup::go(void)
-{
-  while (isalive)
-    do_para();
-}
-
-QByteArray MarkDown::process(const QByteArray &input, unsigned int flags)
-{
-  QByteArray ret;
+  this->input = &input;
+  index = 0;
+  state = FindingStart;
 
   ret.reserve(input.size()*2);
+  para_buf.reserve(1024);
 
-  markup M(input, ret, flags);
-  M.go();
+  while (index < input.size()) {
+    c = input[index];
+    index++;
+retry_c:
+    if (c == '\r')    // we completely filter these out
+      continue;
+    switch (state) {
+      case FindingStart: {
+                   if (QChar(c).isSpace())
+                     continue;
+                   // para start char, go!
+                   para_buf.clear();
+                   state = InPara;
+                   goto retry_c;
+                   break;
+                 }
+      case InPara: {
+                     if (c == '\n')
+                       state = InPara_OnNewLine;
+                     else if (styleJumped(InPara)) {
+                       // nothing needed
+                     } else if (ampJumped(InPara)) {
+                       // nothing needed
+                     } else
+                       encodedPushBack();
+                     break;
+                   }
+      case InPara_OnNewLine: {
+                               if (c == '\n') {
+                                 // done this paragraph
+                                 ret += "<P>";
+                                 ret += para_buf;
+                                 ret += "</P>\n";
+                                 state = FindingStart;
+                               } else {
+                                 state = InPara;
+                                 goto retry_c;
+                               }
+                               break;
+                             }
+      case Style_Start: {
+                          if (QChar(c).isSpace() || c == style_c) {
+                            // abort the styling, as there is a space after the style char
+                            para_buf.push_back(style_c);
+                            state = style_returnstate;
+                            goto retry_c;
+                          } else {
+                            para_buf += QString("<") + styleToHtml(style_c) + ">";
+                            if (ampJumped(Style_Processing))
+                              ;// do nothing
+                            else {
+                              encodedPushBack();
+                              state = Style_Processing;
+                            }
+                          }
+                          break;
+                        }
+      case Style_Processing: {
+                               if (c == style_c) {
+                                 // done styling
+                                 para_buf += QString("</") + styleToHtml(style_c) + ">";
+                                 state = style_returnstate;
+                               } else if (ampJumped(Style_Processing)) {
+                                 // do nothing
+                               } else
+                                 encodedPushBack();
+                               break;
+                             }
+      case Amp_Processing: {
+                        if (c >= 'a' && c <= 'z' && (index - amp_index) < 5) {
+                          // do nothing
+                        } else {
+                          // exiting
+                          // emit this code verbatim
+                          if (c == ';')
+                            para_buf += '&';  // &code; thing TODO future, precheck this so that only accepted codes are ok?
+                          else
+                            para_buf += "&amp;";
+                          c = input[amp_index];
+                          index = amp_index+1;
+                          state = amp_returnstate;
+                          goto retry_c;
+                        }
+                        break;
+                      }
+    }
+  }
+
+  if (!para_buf.isEmpty()) {
+    // finish off the last para
+    ret += "<P>";
+    ret += para_buf;
+    ret += "</P>";
+  }
 
   return ret;
+}
+
+QByteArray MarkDown::process(const QByteArray &input, int flags)
+{
+  markdown md;
+  return md.process(input, flags);
 }
 

@@ -25,25 +25,29 @@ namespace wexus
  * [wikilink] [[reallink]]
  * *list item
  *
- * TODO reclean this function, support more MarkDown, etc
- *
  * @author Aleksander Demko
  */ 
 class wexus::MarkDown
 {
   public:
     enum {
-      Format_Links= 1,   // normal links
-      Format_Wikilinks= 2,
-      Format_Bold_italics= 4,
-      Format_Titles= 8,   // headings/titles
-      Format_Lists= 16,    // numeric and non-numeric lists
-      Format_Quotes= 32,   // post quoting and code quote
-      Format_Codequotes= 64,   // newline+space == fixed width quotes
+      Format_Lists = 1,    // numeric and non-numeric lists
+      Format_Quotes = 2,   // post quoting and code quote
 
-      Format_Basic= 0,      // html encoding and paragraph coding is ALWAYS ON
-      Format_Post= Format_Links|Format_Bold_italics|Format_Quotes,
-      Format_Wiki= 0x7F, // ALL flags
+      Format_Links = 4,   // normal and wiki links
+
+      Format_Titles = 8,   // headings/titles
+
+      Format_None = 0,      // html encoding and paragraph coding is ALWAYS ON
+      Format_Basic = Format_Lists|Format_Quotes,
+      Format_BlogPost = 0x7F, // ALL flags
+      Format_Comment = Format_Basic,
+      Format_WikiPage = Format_BlogPost, // ALL flags
+
+      // FUTURE TODO
+      // Return_All = 0
+      // Return_FirstTitle =
+      // Return_FirstPara
     };
 
     /**
@@ -54,7 +58,8 @@ class wexus::MarkDown
      *
      * @author Aleksander Demko
      */ 
-    static QByteArray process(const QByteArray &input, unsigned int flags = Format_Basic);
+    static QByteArray process(const QByteArray &input, int flags = Format_Basic);
 };
+
 #endif
 

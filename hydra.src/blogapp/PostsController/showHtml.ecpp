@@ -4,5 +4,5 @@ showing
 id=<%=dm_post.id%>
 <p>
 post=<p>
-<% output() << MarkDown::process(dm_post.asByteArray(), MarkDown::Format_Post); %>
+<% output() << MarkDown::process(dm_post.asByteArray(), MarkDown::Format_BlogPost); %>
 
