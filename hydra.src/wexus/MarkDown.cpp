@@ -47,9 +47,12 @@ namespace { class markdown
       Title_Hashing,
       Title_GettingName,
       Title_EndHashes,
+      Underlining,
     };
     int state;
     char c;
+
+    int newlines;
 
     char style_c;
     int style_returnstate;
@@ -151,13 +154,15 @@ retry_c:
                    }
                    para_buf.clear();
                    state = InPara;
+                   newlines = 0;
                    goto retry_c;
                    break;
                  }
       case InPara: {
-                     if (c == '\n')
+                     if (c == '\n') {
+                       newlines++;
                        state = InPara_OnNewLine;
-                     else if (styleJumped(InPara)) {
+                     } else if (styleJumped(InPara)) {
                        // nothing needed
                      } else if (ampJumped(InPara)) {
                        // nothing needed
@@ -172,7 +177,11 @@ retry_c:
                                  // done this paragraph
                                  flushPara();
                                  state = FindingStart;
+                               } else if ((c == '=' || c == '-') && newlines == 1) {
+                                 title_level = (c == '=') ? 1 : 2;
+                                 state = Underlining;
                                } else {
+                                 para_buf.push_back('\n');
                                  state = InPara;
                                  goto retry_c;
                                }
@@ -283,6 +292,16 @@ retry_c:
                               }
                               break;
                             }
+      case Underlining: {
+                          if (c == '\n') {
+                            ret += "<H" + QString::number(title_level) + ">";
+                            for (int i=0; i<para_buf.size(); ++i)
+                              encodedPushBack(para_buf[i], &ret);
+                            ret += "</H" + QString::number(title_level) + ">\n";
+                            state = FindingStart;
+                          }
+                          break;
+                        }
     }
   }
 
