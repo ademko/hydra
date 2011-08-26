@@ -21,15 +21,19 @@ namespace { class markdown
   protected:
     bool styleJumped(int returnState);
     bool ampJumped(int returnState);
+    bool linkJumped(int returnState);
 
     void encodedPushBack(void) { encodedPushBack(c); }
-    void encodedPushBack(char c);
+    void encodedPushBack(char ccc);
+
+    void flushPara(void);
 
   protected:
     const QByteArray *input;
     QByteArray ret;
     QByteArray para_buf;
     int index;
+    int flags;
     enum {
       FindingStart,
       InPara,
@@ -37,6 +41,9 @@ namespace { class markdown
       Style_Start,
       Style_Processing,
       Amp_Processing,
+      Link_Start,
+      Link_Processing,
+      Link_Ending,
     };
     int state;
     char c;
@@ -46,6 +53,10 @@ namespace { class markdown
 
     int amp_returnstate;
     int amp_index;
+
+    int link_returnstate;
+    int link_index;
+    bool link_havetwoparen;
 }; }
 
 static char styleToHtml(char style_c)
@@ -68,8 +79,19 @@ bool markdown::ampJumped(int returnState)
 {
   if (c == '&') {
     amp_returnstate = returnState;
-    state = Amp_Processing;
     amp_index = index;
+    state = Amp_Processing;
+    return true;
+  } else
+    return false;
+}
+
+bool markdown::linkJumped(int returnState)
+{
+  if (c == '[' && flags & MarkDown::Format_Links) {
+    link_returnstate = returnState;
+    link_index = index;
+    state = Link_Start;
     return true;
   } else
     return false;
@@ -85,9 +107,17 @@ void markdown::encodedPushBack(char ccc)
   }
 }
 
+void markdown::flushPara(void)
+{
+  ret += "<P>";
+  ret += para_buf;
+  ret += "</P>\n";
+}
+
 QByteArray markdown::process(const QByteArray &input, int flags)
 {
   this->input = &input;
+  this->flags = flags;
   index = 0;
   state = FindingStart;
 
@@ -117,6 +147,8 @@ retry_c:
                        // nothing needed
                      } else if (ampJumped(InPara)) {
                        // nothing needed
+                     } else if (linkJumped(InPara)) {
+                       // nothing needed
                      } else
                        encodedPushBack();
                      break;
@@ -124,9 +156,7 @@ retry_c:
       case InPara_OnNewLine: {
                                if (c == '\n') {
                                  // done this paragraph
-                                 ret += "<P>";
-                                 ret += para_buf;
-                                 ret += "</P>\n";
+                                 flushPara();
                                  state = FindingStart;
                                } else {
                                  state = InPara;
@@ -179,14 +209,40 @@ retry_c:
                         }
                         break;
                       }
+      case Link_Start: {
+                         link_havetwoparen = c == '[';
+                         state = Link_Processing;
+                         if (link_havetwoparen)
+                           link_index = index;
+                         else
+                           goto retry_c; // reprocess this char NOW
+                         break;
+                       }
+      case Link_Processing: {
+                              if (c == ']') {
+                                // ending
+                                QByteArray linkaddr=input.mid(link_index, index-link_index-1);
+                                para_buf += "<A HREF=\"" + linkaddr + "\">" + linkaddr + "</A>";
+
+                                if (link_havetwoparen)
+                                  state = Link_Ending;
+                                else
+                                  state = link_returnstate;
+                              }//else, stay in this state
+                              break;
+                            }
+      case Link_Ending: {
+                          state = link_returnstate;
+                          if (c != ']')
+                            goto retry_c;
+                          break;
+                        }
     }
   }
 
   if (!para_buf.isEmpty()) {
     // finish off the last para
-    ret += "<P>";
-    ret += para_buf;
-    ret += "</P>";
+    flushPara();
   }
 
   return ret;
