@@ -13,6 +13,25 @@
 
 using namespace wexus;
 
+// repsents a nesting of paragraph contexts
+namespace { class ParaContext {
+  public:
+    /**
+     * Given the paragraph line, parse out a line and return the paragraph stack representation
+     *
+     * @author Aleksander Demko
+     */ 
+    static ParaContext parseLineStart(QByteArray::const_iterator ii, QByteArray::const_iterator endii);
+
+    bool operator ==(const ParaContext &rhs) const { return dm_contexts == rhs.dm_contexts; }
+    bool operator !=(const ParaContext &rhs) const { return dm_contexts != rhs.dm_contexts; }
+
+    void emitDifference(const ParaContext &next, QByteArray &output);
+
+  protected:
+    QByteArray dm_contexts;     // types are '>' (quote) ' ' (code) '*' (list) 
+}; }
+
 namespace { class markdown
 {
   public:
@@ -28,6 +47,8 @@ namespace { class markdown
 
     void flushPara(void);
 
+    static char styleToHtml(char style_c);
+
   protected:
     const QByteArray *input;
     QByteArray ret;
@@ -37,6 +58,7 @@ namespace { class markdown
     enum {
       FindingStart,
       InPara,
+      InPara_StartOfLine,
       InPara_OnNewLine,
       Style_Start,
       Style_Processing,
@@ -66,12 +88,76 @@ namespace { class markdown
 
     int title_level;
     int title_index;
+
+    ParaContext paracontext;
+    int line_startindex;
 }; }
 
-static char styleToHtml(char style_c)
+//
+//
+// ParaContext
+//
+//
+
+ParaContext ParaContext::parseLineStart(QByteArray::const_iterator ii, QByteArray::const_iterator endii)
 {
-  return style_c == '*' ? 'B' : 'I';
+  ParaContext ret;
+  char c;
+  int spacecount = 0;
+
+  while (ii != endii) {
+    c = *ii;
+    ++ii;
+
+    if (c == ' ') {
+      spacecount++;
+      if (spacecount == 4) {
+        ret.dm_contexts.push_back(' ');
+        spacecount = 0;
+      }
+    } else if (c == '>') {
+      ret.dm_contexts.push_back('>');
+      spacecount = 0;
+    } else
+      break;
+  }//while
+
+  return ret;
 }
+
+void ParaContext::emitDifference(const ParaContext &next, QByteArray &output)
+{
+  int commonsize;
+  int i;
+
+  // find the comment segment length
+  commonsize = 0;
+  while (commonsize < dm_contexts.size() && commonsize < next.dm_contexts.size()
+      && dm_contexts[commonsize] == next.dm_contexts[commonsize]) {
+    commonsize++;
+  }
+
+  // unwindow the current context
+  for (i=dm_contexts.size()-1; i>=commonsize; --i)
+    switch (dm_contexts[i]) {
+      case ' ': output += "</PRE>\n"; break;
+      case '>': output += "</BLOCKQUOTE>\n"; break;
+    }
+
+  // window up to the next context
+
+  for (i=commonsize; i<next.dm_contexts.size(); ++i)
+    switch (next.dm_contexts[i]) {
+      case ' ': output += "<PRE>"; break;
+      case '>': output += "<BLOCKQUOTE>"; break;
+    }
+}
+
+//
+//
+// markdown
+//
+//
 
 bool markdown::styleJumped(int returnState)
 {
@@ -121,9 +207,21 @@ void markdown::encodedPushBack(char ccc, QByteArray *buf)
 
 void markdown::flushPara(void)
 {
+  ParaContext nextctx;
+
+  paracontext.emitDifference(nextctx, para_buf);
+  paracontext = nextctx;
+
   ret += "<P>";
   ret += para_buf;
   ret += "</P>\n";
+
+  para_buf.clear();
+}
+
+char markdown::styleToHtml(char style_c)
+{
+  return style_c == '*' ? 'B' : 'I';
 }
 
 QByteArray markdown::process(const QByteArray &input, int flags)
@@ -144,7 +242,7 @@ retry_c:
       continue;
     switch (state) {
       case FindingStart: {
-                   if (QChar(c).isSpace())
+                   if (c == '\n')
                      continue;
                    // para start char, go!
                    if (c == '#' && flags & MarkDown::Format_Titles) {
@@ -153,11 +251,24 @@ retry_c:
                      goto retry_c;
                    }
                    para_buf.clear();
-                   state = InPara;
                    newlines = 0;
+
+                   state = InPara_StartOfLine;
+                   line_startindex = index;
                    goto retry_c;
                    break;
                  }
+      case InPara_StartOfLine: {
+                                 if (!(c == ' ' || c == '>')) {
+                                   ParaContext nextctx = ParaContext::parseLineStart(input.begin() + line_startindex - 1,
+                                       input.begin() + index);
+                                   paracontext.emitDifference(nextctx, para_buf);
+                                   paracontext = nextctx;
+                                   state = InPara;
+                                   goto retry_c;
+                                 }
+                                 break;
+                               }
       case InPara: {
                      if (c == '\n') {
                        newlines++;
@@ -182,7 +293,8 @@ retry_c:
                                  state = Underlining;
                                } else {
                                  para_buf.push_back('\n');
-                                 state = InPara;
+                                 state = InPara_StartOfLine;
+                                 line_startindex = index;
                                  goto retry_c;
                                }
                                break;
@@ -312,6 +424,12 @@ retry_c:
 
   return ret;
 }
+
+//
+//
+// MarkDown
+//
+//
 
 QByteArray MarkDown::process(const QByteArray &input, int flags)
 {
