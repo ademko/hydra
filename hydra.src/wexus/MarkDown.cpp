@@ -16,20 +16,28 @@ using namespace wexus;
 // repsents a nesting of paragraph contexts
 namespace { class ParaContext {
   public:
+    ParaContext(void);
+
     /**
      * Given the paragraph line, parse out a line and return the paragraph stack representation
      *
      * @author Aleksander Demko
      */ 
-    static ParaContext parseLineStart(QByteArray::const_iterator ii, QByteArray::const_iterator endii);
+    static ParaContext parseLineStart(const QByteArray &input, int &index);
+
+    static bool isBulletChar(char c) { return c == '*' || c == '+' || c== '-'; }
 
     bool operator ==(const ParaContext &rhs) const { return dm_contexts == rhs.dm_contexts; }
     bool operator !=(const ParaContext &rhs) const { return dm_contexts != rhs.dm_contexts; }
 
     void emitDifference(const ParaContext &next, QByteArray &output);
 
+    const QByteArray & contexts(void) const { return dm_contexts; }
+    int numChars(void) const { return dm_numchars; }
+
   protected:
     QByteArray dm_contexts;     // types are '>' (quote) ' ' (code) '*' (list) 
+    int dm_numchars;
 }; }
 
 namespace { class markdown
@@ -90,7 +98,8 @@ namespace { class markdown
     int title_index;
 
     ParaContext paracontext;
-    int line_startindex;
+
+    int line_prefixcount;
 }; }
 
 //
@@ -99,28 +108,99 @@ namespace { class markdown
 //
 //
 
-ParaContext ParaContext::parseLineStart(QByteArray::const_iterator ii, QByteArray::const_iterator endii)
+ParaContext::ParaContext(void)
+  : dm_numchars(0)
+{
+}
+
+ParaContext ParaContext::parseLineStart(const QByteArray &input, int &index)
 {
   ParaContext ret;
+  enum {
+    Start,
+    Need4Space,
+    Ready,
+    GotSpace,
+    GotDigit,
+    DoneState,
+  };
+  int startindex = index;
+  int state=Start;
   char c;
-  int spacecount = 0;
+  int spacecount;
 
-  while (ii != endii) {
-    c = *ii;
-    ++ii;
+  while (index < input.size() && state != DoneState) {
+    c = input[index];
+    ++index;
+retry_c:
 
-    if (c == ' ') {
-      spacecount++;
-      if (spacecount == 4) {
-        ret.dm_contexts.push_back(' ');
-        spacecount = 0;
-      }
-    } else if (c == '>') {
-      ret.dm_contexts.push_back('>');
-      spacecount = 0;
-    } else
-      break;
+    switch (state) {
+      case Start:
+        {
+          if (c == ' ') {
+            state = Need4Space;
+            spacecount = 1;
+          } else {
+            state = Ready;
+            goto retry_c;
+          }
+          break;
+        }
+      case Need4Space:
+        {
+          if (c == ' ') {
+            spacecount++;
+            if (spacecount == 4) {
+              ret.dm_contexts.push_back(' ');
+              state = Ready;
+            }
+          } else
+            state = DoneState;
+          break;
+        }
+      case Ready:
+        {
+          if (c == ' ') {
+            spacecount = 1;
+            state = GotSpace;
+          } else if (c == '>') {
+            ret.dm_contexts.push_back('>');
+          } else if (isBulletChar(c)) {
+            ret.dm_contexts.push_back('-');
+          } else
+            state = DoneState;
+          break;
+        }
+      case GotSpace:
+        {
+          if (c == ' ') {
+            spacecount++;
+            if (spacecount == 4) {
+              ret.dm_contexts.push_back(' ');
+              state = Ready;
+            }
+          } else {
+            state = Ready;
+            goto retry_c;
+          }
+          break;
+        }
+    }
   }//while
+
+  index--; // back track up one so that we're back at the current c that failed the machine
+
+  /*if (ret.dm_contexts.size() >= 2 && isBulletChar(ret.dm_contexts[0])
+      && ret.dm_contexts[0] == ret.dm_contexts[1]) {
+    // two list items in a row, this is not allowed
+    // and is probably a titleunderline or horizontal rule
+    // lets quick abort now
+    index = startindex;
+    ret = ParaContext();
+    return Result_Bar;
+  }*/
+
+  ret.dm_numchars = index - startindex;
 
   return ret;
 }
@@ -254,19 +334,20 @@ retry_c:
                    newlines = 0;
 
                    state = InPara_StartOfLine;
-                   line_startindex = index;
                    goto retry_c;
                    break;
                  }
       case InPara_StartOfLine: {
-                                 if (!(c == ' ' || c == '>')) {
-                                   ParaContext nextctx = ParaContext::parseLineStart(input.begin() + line_startindex - 1,
-                                       input.begin() + index);
-                                   paracontext.emitDifference(nextctx, para_buf);
-                                   paracontext = nextctx;
-                                   state = InPara;
-                                   goto retry_c;
-                                 }
+                                 index--; // backtrack
+                                 ParaContext nextctx = ParaContext::parseLineStart(input, index);
+                                 paracontext.emitDifference(nextctx, para_buf);
+                                 paracontext = nextctx;
+
+                                 paracontext.emitDifference(nextctx, para_buf);
+                                 paracontext = nextctx;
+
+                                 state = InPara;
+
                                  break;
                                }
       case InPara: {
@@ -294,7 +375,6 @@ retry_c:
                                } else {
                                  para_buf.push_back('\n');
                                  state = InPara_StartOfLine;
-                                 line_startindex = index;
                                  goto retry_c;
                                }
                                break;
