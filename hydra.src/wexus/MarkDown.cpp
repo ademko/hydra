@@ -23,17 +23,25 @@ namespace { class ParaContext {
      */ 
     static ParaContext parseLineStart(const QByteArray &input, int &index);
 
+    /**
+     * Creates a special null ParaContext that could be used a paragraph
+     * seperator. (it always unwinds)
+     *
+     * @author Aleksander Demko
+     */ 
+    void appendEndPara(void);
+
     static bool isBulletChar(char c) { return c == '*' || c == '+' || c== '-'; }
 
     bool operator ==(const ParaContext &rhs) const { return dm_contexts == rhs.dm_contexts; }
     bool operator !=(const ParaContext &rhs) const { return dm_contexts != rhs.dm_contexts; }
 
-    ParaContext emitDifference(const ParaContext &next, QByteArray &output, bool *haddiff = 0);
+    ParaContext emitDifference(const ParaContext &next, QByteArray &output);
 
     const QByteArray & contexts(void) const { return dm_contexts; }
 
   protected:
-    QByteArray dm_contexts;     // types are '>' (quote) ' ' (code) '*' (list) 
+    QByteArray dm_contexts;     // types are '>' (quote) ' ' (code) '*' (list) or 'P' (endpara)
 }; }
 
 namespace { class markdown
@@ -150,13 +158,13 @@ retry_c:
             if (spacecount == 4) {
               ret.dm_contexts.push_back(' ');
               lastokindex = index;
-              state = EatSpaces;
+              state = DoneState;
             }
           } else
             state = DoneState;
           break;
         }
-      case EatSpaces: {
+      case EatSpaces: { // TODO remove this state?
                         if (c != ' ') {
                           state = Ready;
                           goto retry_c;
@@ -175,6 +183,11 @@ retry_c:
             lastBulletChar = c;
             ret.dm_contexts.push_back('*');
             lastokindex = index;
+          } else if (c == '\n') {
+            // blank line
+            ret.dm_contexts.push_back('P');
+            // dont update lastokindex
+            state = DoneState;
           } else
             state = DoneState;
           break;
@@ -186,7 +199,7 @@ retry_c:
             if (spacecount == 4) {
               ret.dm_contexts.push_back(' ');
               lastokindex = index;
-              state = EatSpaces;
+              state = DoneState;
             }
           } else {
             state = Ready;
@@ -212,45 +225,83 @@ retry_c:
   return ret;
 }
 
-ParaContext ParaContext::emitDifference(const ParaContext &next, QByteArray &output, bool *haddiff)
+void ParaContext::appendEndPara(void)
 {
-  int commonsize;
+  dm_contexts.push_back('P');
+}
+
+ParaContext ParaContext::emitDifference(const ParaContext &next, QByteArray &output)
+{
   int i;
+  int canceled_i, canceled_next;
 
-  // find the comment segment length
-  commonsize = 0;
-  while (commonsize < dm_contexts.size() && commonsize < next.dm_contexts.size()
-      && dm_contexts[commonsize] == next.dm_contexts[commonsize]) {
-    commonsize++;
-  }
+  bool alive = next.dm_contexts.isEmpty() || next.dm_contexts[0] != 'P';
 
-  if (commonsize == dm_contexts.size() && commonsize == next.dm_contexts.size()) {
-    if (haddiff)
-      *haddiff = false;
-    return *this;
-  }
+qDebug() << __FUNCTION__ << dm_contexts << "vs." << next.dm_contexts;
+
+  canceled_i = 0;
+  canceled_next = 0;
+  while (alive && canceled_i < dm_contexts.size()) {
+    switch (dm_contexts[canceled_i]) {
+      case ' ': {
+                  // code prefix must have another code prefix
+                  if (canceled_next < next.dm_contexts.size() &&
+                      next.dm_contexts[canceled_next] == ' ')
+                    canceled_next++;
+                  else
+                    alive = false;
+                  break;
+                }
+      case '>': {
+                  // quote prefix CAN match another code prefix
+                  if (canceled_next < next.dm_contexts.size() &&
+                      next.dm_contexts[canceled_next] == '>')
+                    canceled_next++;
+                  // no else
+                }
+      case '*': {
+                  // nothing here, list never cancels anything
+                  // and is always different
+                  alive = false;
+                  break;
+                }
+
+    }//switch
+    if (alive)
+      canceled_i++;
+    if (canceled_next < next.dm_contexts.size() && next.dm_contexts[canceled_next] == 'P')
+      alive = false;
+  }//while
 
   // unwindow the current context
-  for (i=dm_contexts.size()-1; i>=commonsize; --i)
+  for (i=dm_contexts.size()-1; i>=canceled_i; --i)
     switch (dm_contexts[i]) {
       case ' ': output += "</PRE>\n"; break;
       case '>': output += "</BLOCKQUOTE>\n"; break;
       case '*': output += "</UL>\n"; break;
+      case 'X': assert(false); break; // you can never unwindow from the null ParaContext!
     }
 
   // window up to the next context
 
-  for (i=commonsize; i<next.dm_contexts.size(); ++i)
+  for (i=canceled_next; i<next.dm_contexts.size(); ++i)
     switch (next.dm_contexts[i]) {
       case ' ': output += "<PRE>"; break;
       case '>': output += "<BLOCKQUOTE>"; break;
       case '*': output += "<UL>"; break;
     }
 
-  if (haddiff)
-    *haddiff = true;
+  ParaContext ret;
 
-  return next;
+  // the return context is everything that we didnt cancel
+  // here vs everything that is new there
+  for (i=0; i<canceled_i; ++i)
+    ret.dm_contexts.push_back(dm_contexts[i]);
+  for (i=canceled_next; i<next.dm_contexts.size() && next.dm_contexts[i] != 'P'; ++i)
+    ret.dm_contexts.push_back(next.dm_contexts[i]);
+
+qDebug() << __FUNCTION__ << "returning" << ret.dm_contexts;
+  return ret;
 }
 
 //
@@ -309,7 +360,10 @@ void markdown::flushPara(void)
 {
   ParaContext nextctx;
 
-  nextctx = paracontext.emitDifference(nextctx, para_buf);
+  nextctx.appendEndPara();
+
+  paracontext.emitDifference(nextctx, para_buf);
+  paracontext = ParaContext();
 
   ret += "<P>";
   ret += para_buf;
