@@ -16,8 +16,6 @@ using namespace wexus;
 // repsents a nesting of paragraph contexts
 namespace { class ParaContext {
   public:
-    ParaContext(void);
-
     /**
      * Given the paragraph line, parse out a line and return the paragraph stack representation
      *
@@ -30,14 +28,12 @@ namespace { class ParaContext {
     bool operator ==(const ParaContext &rhs) const { return dm_contexts == rhs.dm_contexts; }
     bool operator !=(const ParaContext &rhs) const { return dm_contexts != rhs.dm_contexts; }
 
-    void emitDifference(const ParaContext &next, QByteArray &output);
+    ParaContext emitDifference(const ParaContext &next, QByteArray &output, bool *haddiff = 0);
 
     const QByteArray & contexts(void) const { return dm_contexts; }
-    int numChars(void) const { return dm_numchars; }
 
   protected:
     QByteArray dm_contexts;     // types are '>' (quote) ' ' (code) '*' (list) 
-    int dm_numchars;
 }; }
 
 namespace { class markdown
@@ -108,30 +104,31 @@ namespace { class markdown
 //
 //
 
-ParaContext::ParaContext(void)
-  : dm_numchars(0)
-{
-}
-
 ParaContext ParaContext::parseLineStart(const QByteArray &input, int &index)
 {
   ParaContext ret;
   enum {
     Start,
     Need4Space,
+    EatSpaces,
     Ready,
     GotSpace,
     GotDigit,
     DoneState,
   };
-  int startindex = index;
+  //int startindex = index;
+  int lastokindex = index;
   int state=Start;
   char c;
   int spacecount;
+  char lastBulletChar = ' ';
 
-  while (index < input.size() && state != DoneState) {
-    c = input[index];
-    ++index;
+  while (state != DoneState) {
+    if (index < input.size()) {
+      c = input[index];
+      ++index;
+    } else
+      state = DoneState;
 retry_c:
 
     switch (state) {
@@ -152,12 +149,20 @@ retry_c:
             spacecount++;
             if (spacecount == 4) {
               ret.dm_contexts.push_back(' ');
-              state = Ready;
+              lastokindex = index;
+              state = EatSpaces;
             }
           } else
             state = DoneState;
           break;
         }
+      case EatSpaces: {
+                        if (c != ' ') {
+                          state = Ready;
+                          goto retry_c;
+                        }
+                        break;
+                      }
       case Ready:
         {
           if (c == ' ') {
@@ -165,8 +170,11 @@ retry_c:
             state = GotSpace;
           } else if (c == '>') {
             ret.dm_contexts.push_back('>');
-          } else if (isBulletChar(c)) {
-            ret.dm_contexts.push_back('-');
+            lastokindex = index;
+          } else if (isBulletChar(c) && c != lastBulletChar) {  // cant have ** etc beside each other in a list
+            lastBulletChar = c;
+            ret.dm_contexts.push_back('*');
+            lastokindex = index;
           } else
             state = DoneState;
           break;
@@ -177,7 +185,8 @@ retry_c:
             spacecount++;
             if (spacecount == 4) {
               ret.dm_contexts.push_back(' ');
-              state = Ready;
+              lastokindex = index;
+              state = EatSpaces;
             }
           } else {
             state = Ready;
@@ -188,7 +197,7 @@ retry_c:
     }
   }//while
 
-  index--; // back track up one so that we're back at the current c that failed the machine
+  index = lastokindex;
 
   /*if (ret.dm_contexts.size() >= 2 && isBulletChar(ret.dm_contexts[0])
       && ret.dm_contexts[0] == ret.dm_contexts[1]) {
@@ -200,12 +209,10 @@ retry_c:
     return Result_Bar;
   }*/
 
-  ret.dm_numchars = index - startindex;
-
   return ret;
 }
 
-void ParaContext::emitDifference(const ParaContext &next, QByteArray &output)
+ParaContext ParaContext::emitDifference(const ParaContext &next, QByteArray &output, bool *haddiff)
 {
   int commonsize;
   int i;
@@ -217,11 +224,18 @@ void ParaContext::emitDifference(const ParaContext &next, QByteArray &output)
     commonsize++;
   }
 
+  if (commonsize == dm_contexts.size() && commonsize == next.dm_contexts.size()) {
+    if (haddiff)
+      *haddiff = false;
+    return *this;
+  }
+
   // unwindow the current context
   for (i=dm_contexts.size()-1; i>=commonsize; --i)
     switch (dm_contexts[i]) {
       case ' ': output += "</PRE>\n"; break;
       case '>': output += "</BLOCKQUOTE>\n"; break;
+      case '*': output += "</UL>\n"; break;
     }
 
   // window up to the next context
@@ -230,7 +244,13 @@ void ParaContext::emitDifference(const ParaContext &next, QByteArray &output)
     switch (next.dm_contexts[i]) {
       case ' ': output += "<PRE>"; break;
       case '>': output += "<BLOCKQUOTE>"; break;
+      case '*': output += "<UL>"; break;
     }
+
+  if (haddiff)
+    *haddiff = true;
+
+  return next;
 }
 
 //
@@ -289,8 +309,7 @@ void markdown::flushPara(void)
 {
   ParaContext nextctx;
 
-  paracontext.emitDifference(nextctx, para_buf);
-  paracontext = nextctx;
+  nextctx = paracontext.emitDifference(nextctx, para_buf);
 
   ret += "<P>";
   ret += para_buf;
@@ -340,10 +359,7 @@ retry_c:
       case InPara_StartOfLine: {
                                  index--; // backtrack
                                  ParaContext nextctx = ParaContext::parseLineStart(input, index);
-                                 paracontext.emitDifference(nextctx, para_buf);
-                                 paracontext = nextctx;
-
-                                 paracontext.emitDifference(nextctx, para_buf);
+                                 nextctx = paracontext.emitDifference(nextctx, para_buf);
                                  paracontext = nextctx;
 
                                  state = InPara;
