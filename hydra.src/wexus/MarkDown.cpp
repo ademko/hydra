@@ -41,7 +41,7 @@ namespace { class ParaContext {
     const QByteArray & contexts(void) const { return dm_contexts; }
 
   protected:
-    QByteArray dm_contexts;     // types are '>' (quote) ' ' (code) '*' (list) or 'P' (endpara)
+    QByteArray dm_contexts;     // types are '>' (quote) ' ' (code) '*' (list) 'H' (horizrule) 'P' (endpara)
 }; }
 
 namespace { class markdown
@@ -122,6 +122,8 @@ ParaContext ParaContext::parseLineStart(const QByteArray &input, int &index, con
     GotSpace,
     GotDigit,
     GotIndent,
+    GotEquals,
+    EatRule,
     DoneState,
   };
   //int startindex = index;
@@ -176,6 +178,8 @@ retry_c:
           if (c == ' ') {
             spacecount = 1;
             state = GotSpace;
+          } else if (c == '=') {
+            state = GotEquals;
           } else if (c == '\t') {
             state = GotIndent;
             goto retry_c;
@@ -188,6 +192,11 @@ retry_c:
             ret.dm_contexts.push_back('*');
             prevctx_index++;
             lastokindex = index;
+          } else if (isBulletChar(c) && c == lastBulletChar) {
+            // what was a bullet is really a horiz rule
+            ret.dm_contexts[ret.dm_contexts.size()-1] = 'H';
+            lastokindex = index;
+            state = EatRule;
           } else if (c == '\n') {
             // blank line
             ret.dm_contexts.push_back('P');
@@ -222,6 +231,27 @@ retry_c:
           } else if (prevctx == ' ' || prevctx == 0) {
             ret.dm_contexts.push_back(' ');
             state = DoneState;
+            lastokindex = index;
+          } else
+            state = DoneState;
+          break;
+        }
+      case GotEquals:
+        {
+          if (c == '=') {
+            // got a rule, end
+            ret.dm_contexts.push_back('H');
+            lastokindex = index;
+            state = EatRule;
+          } else if (c == ' ') {
+            // nothing
+          } else
+            state = DoneState;
+          break;
+        }
+      case EatRule:
+        {
+          if (c == ' ' || isBulletChar(c) || c == '=') {
             lastokindex = index;
           } else
             state = DoneState;
@@ -308,8 +338,7 @@ qDebug() << __FUNCTION__ << dm_contexts << "vs." << next.dm_contexts;
 
   // if the two were the same and we are in a list, it must mean we are
   // between list items
-  if (canceled_i >= dm_contexts.size() && canceled_next >= next.dm_contexts.size()
-      && dm_contexts.size() == next.dm_contexts.size() && dm_contexts[dm_contexts.size()-1] == '*')
+  if (dm_contexts == next.dm_contexts && dm_contexts.size() > 0 && dm_contexts[dm_contexts.size()-1] == '*')
     output += "</LI>\n<LI>";
 
   // window up to the next context
@@ -319,6 +348,7 @@ qDebug() << __FUNCTION__ << dm_contexts << "vs." << next.dm_contexts;
       case ' ': output += "<PRE>"; break;
       case '>': output += "<BLOCKQUOTE>"; break;
       case '*': output += "<UL><LI>"; break;
+      case 'H': output += "<HR />\n"; break;
     }
 
   ParaContext ret;
