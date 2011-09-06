@@ -302,9 +302,15 @@ qDebug() << __FUNCTION__ << dm_contexts << "vs." << next.dm_contexts;
     switch (dm_contexts[i]) {
       case ' ': output += "</PRE>\n"; break;
       case '>': output += "</BLOCKQUOTE>\n"; break;
-      case '*': output += "</UL>\n"; break;
+      case '*': output += "</LI></UL>\n"; break;
       case 'P': assert(false); break; // you can never unwindow from the null ParaContext!
     }
+
+  // if the two were the same and we are in a list, it must mean we are
+  // between list items
+  if (canceled_i >= dm_contexts.size() && canceled_next >= next.dm_contexts.size()
+      && dm_contexts.size() == next.dm_contexts.size() && dm_contexts[dm_contexts.size()-1] == '*')
+    output += "</LI>\n<LI>";
 
   // window up to the next context
 
@@ -312,7 +318,7 @@ qDebug() << __FUNCTION__ << dm_contexts << "vs." << next.dm_contexts;
     switch (next.dm_contexts[i]) {
       case ' ': output += "<PRE>"; break;
       case '>': output += "<BLOCKQUOTE>"; break;
-      case '*': output += "<UL>"; break;
+      case '*': output += "<UL><LI>"; break;
     }
 
   ParaContext ret;
