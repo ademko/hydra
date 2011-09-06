@@ -118,10 +118,10 @@ ParaContext ParaContext::parseLineStart(const QByteArray &input, int &index)
   enum {
     Start,
     Need4Space,
-    EatSpaces,
     Ready,
     GotSpace,
     GotDigit,
+    GotIndent,
     DoneState,
   };
   //int startindex = index;
@@ -156,26 +156,21 @@ retry_c:
           if (c == ' ') {
             spacecount++;
             if (spacecount == 4) {
-              ret.dm_contexts.push_back(' ');
-              lastokindex = index;
-              state = DoneState;
+              state = GotIndent;
+              goto retry_c;
             }
           } else
             state = DoneState;
           break;
         }
-      case EatSpaces: { // TODO remove this state?
-                        if (c != ' ') {
-                          state = Ready;
-                          goto retry_c;
-                        }
-                        break;
-                      }
       case Ready:
         {
           if (c == ' ') {
             spacecount = 1;
             state = GotSpace;
+          } else if (c == '\t') {
+            state = GotIndent;
+            goto retry_c;
           } else if (c == '>') {
             ret.dm_contexts.push_back('>');
             lastokindex = index;
@@ -197,14 +192,20 @@ retry_c:
           if (c == ' ') {
             spacecount++;
             if (spacecount == 4) {
-              ret.dm_contexts.push_back(' ');
-              lastokindex = index;
-              state = DoneState;
+              state = GotIndent;
+              goto retry_c;
             }
           } else {
             state = Ready;
             goto retry_c;
           }
+          break;
+        }
+      case GotIndent:
+        {
+          ret.dm_contexts.push_back(' ');
+          lastokindex = index;
+          state = DoneState;
           break;
         }
     }
@@ -260,9 +261,12 @@ qDebug() << __FUNCTION__ << dm_contexts << "vs." << next.dm_contexts;
                   // no else
                 }
       case '*': {
-                  // nothing here, list never cancels anything
-                  // and is always different
-                  alive = false;
+                  // quote prefix CAN match another code prefix
+                  if (canceled_next < next.dm_contexts.size() &&
+                      (next.dm_contexts[canceled_next] == '*'
+                       || next.dm_contexts[canceled_next] == ' '))
+                    canceled_next++;
+                  // no else
                   break;
                 }
 
