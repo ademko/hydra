@@ -21,7 +21,7 @@ namespace { class ParaContext {
      *
      * @author Aleksander Demko
      */ 
-    static ParaContext parseLineStart(const QByteArray &input, int &index);
+    static ParaContext parseLineStart(const QByteArray &input, int &index, const ParaContext &previous_context);
 
     /**
      * Creates a special null ParaContext that could be used a paragraph
@@ -112,7 +112,7 @@ namespace { class markdown
 //
 //
 
-ParaContext ParaContext::parseLineStart(const QByteArray &input, int &index)
+ParaContext ParaContext::parseLineStart(const QByteArray &input, int &index, const ParaContext &previous_context)
 {
   ParaContext ret;
   enum {
@@ -130,6 +130,8 @@ ParaContext ParaContext::parseLineStart(const QByteArray &input, int &index)
   char c;
   int spacecount;
   char lastBulletChar = ' ';
+  int prevctx_index = 0;
+  char prevctx = 0;
 
   while (state != DoneState) {
     if (index < input.size()) {
@@ -137,6 +139,12 @@ ParaContext ParaContext::parseLineStart(const QByteArray &input, int &index)
       ++index;
     } else
       state = DoneState;
+    if (prevctx_index < previous_context.dm_contexts.size()) {
+      prevctx = previous_context.dm_contexts[prevctx_index];
+      if (prevctx == 'P')
+        prevctx = 0;    // simplifies things
+    } else
+      prevctx = 0;
 retry_c:
 
     switch (state) {
@@ -171,12 +179,14 @@ retry_c:
           } else if (c == '\t') {
             state = GotIndent;
             goto retry_c;
-          } else if (c == '>') {
+          } else if (c == '>' && (prevctx == '>' || prevctx == 0)) { // can only start a new quote or continue an existing one
             ret.dm_contexts.push_back('>');
+            prevctx_index++;
             lastokindex = index;
-          } else if (isBulletChar(c) && c != lastBulletChar) {  // cant have ** etc beside each other in a list
+          } else if (isBulletChar(c) && c != lastBulletChar && (prevctx =='*' || prevctx == 0)) {  // cant have ** etc beside each other in a list
             lastBulletChar = c;
             ret.dm_contexts.push_back('*');
+            prevctx_index++;
             lastokindex = index;
           } else if (c == '\n') {
             // blank line
@@ -203,9 +213,18 @@ retry_c:
         }
       case GotIndent:
         {
-          ret.dm_contexts.push_back(' ');
-          lastokindex = index;
-          state = DoneState;
+          if (prevctx == '*') {
+            // currently in a list context, so this indent can count as a continuous
+            ret.dm_contexts.push_back('*');
+            prevctx_index++;
+            state = Ready;
+            lastokindex = index;
+          } else if (prevctx == ' ' || prevctx == 0) {
+            ret.dm_contexts.push_back(' ');
+            state = DoneState;
+            lastokindex = index;
+          } else
+            state = DoneState;
           break;
         }
     }
@@ -259,6 +278,7 @@ qDebug() << __FUNCTION__ << dm_contexts << "vs." << next.dm_contexts;
                       next.dm_contexts[canceled_next] == '>')
                     canceled_next++;
                   // no else
+                  break;
                 }
       case '*': {
                   // quote prefix CAN match another code prefix
@@ -283,7 +303,7 @@ qDebug() << __FUNCTION__ << dm_contexts << "vs." << next.dm_contexts;
       case ' ': output += "</PRE>\n"; break;
       case '>': output += "</BLOCKQUOTE>\n"; break;
       case '*': output += "</UL>\n"; break;
-      case 'X': assert(false); break; // you can never unwindow from the null ParaContext!
+      case 'P': assert(false); break; // you can never unwindow from the null ParaContext!
     }
 
   // window up to the next context
@@ -416,7 +436,7 @@ retry_c:
                  }
       case InPara_StartOfLine: {
                                  index--; // backtrack
-                                 ParaContext nextctx = ParaContext::parseLineStart(input, index);
+                                 ParaContext nextctx = ParaContext::parseLineStart(input, index, paracontext);
                                  nextctx = paracontext.emitDifference(nextctx, para_buf);
                                  paracontext = nextctx;
 
