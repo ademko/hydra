@@ -75,6 +75,7 @@ namespace { class markdown
   protected:
     bool styleJumped(int returnState);
     bool ampJumped(int returnState);
+    bool escapeJumped(int returnState);
     bool linkJumped(int returnState);
 
     void encodedPushBack(void) { encodedPushBack(c); }
@@ -96,6 +97,7 @@ namespace { class markdown
       Style_Start,
       Style_Processing,
       Amp_Processing,
+      Escape_Processing,
       Link_Start,
       Link_Processing,
       Link_Ending,
@@ -111,6 +113,9 @@ namespace { class markdown
 
     int amp_returnstate;
     int amp_index;
+
+    int escape_returnstate;
+    int escape_index;
 
     int link_returnstate;
     int link_index;
@@ -571,6 +576,17 @@ bool markdown::ampJumped(int returnState)
     return false;
 }
 
+bool markdown::escapeJumped(int returnState)
+{
+  if (c == '\\') {
+    escape_returnstate = returnState;
+    escape_index = index;
+    state = Escape_Processing;
+    return true;
+  } else
+    return false;
+}
+
 bool markdown::linkJumped(int returnState)
 {
   if (c == '[' && flags & MarkDown::Format_Links) {
@@ -659,6 +675,8 @@ retry_c:
                        // nothing needed
                      } else if (ampJumped(InPara)) {
                        // nothing needed
+                     } else if (escapeJumped(InPara)) {
+                       // nothing needed
                      } else if (linkJumped(InPara)) {
                        // nothing needed
                      } else
@@ -710,6 +728,33 @@ retry_c:
                         }
                         break;
                       }
+      case Escape_Processing: {
+                                state = escape_returnstate;
+                                switch (c) {
+                                  case '\\':
+                                  case '`':
+                                  case '*':
+                                  case '_':
+                                  case '{':
+                                  case '}':
+                                  case '[':
+                                  case ']':
+                                  case '(':
+                                  case ')':
+                                  case '#':
+                                  case '+':
+                                  case '-':
+                                  case '.':
+                                  case '!':
+                                    para_buf += c;
+                                    break;
+                                  default:
+                                    para_buf += '/';
+                                    // no idea what this was, reprocess it
+                                    goto retry_c;
+                                }
+                                break;
+                              }
       case Link_Start: {
                          link_havetwoparen = c == '[';
                          state = Link_Processing;
