@@ -64,6 +64,7 @@ namespace { class ParaContext {
 
   protected:
     QByteArray dm_contexts;     // types are '>' (quote) ' ' (code) '*' (list) 'H' 'h' (horizrule) 'X' (endpara)
+    // internal codes 'c' list contination
 }; }
 
 namespace { class markdown
@@ -272,7 +273,7 @@ retry_c:
         {
           if (prevctx == '*') {
             // currently in a list context, so this indent can count as a continuous
-            ret.dm_contexts.push_back('*');
+            ret.dm_contexts.push_back('c');
             prevctx_index++;
             state = Ready;
             lastokindex = index;
@@ -320,6 +321,47 @@ retry_c:
         }
     }//switch
   }//while
+
+  // special case
+  // if we have list continous (that is, 4-spaces), just eliminate them all or covnert them to '*'
+  {
+    enum {
+      FindingFirstOne,
+      Replacing,
+      Done
+    };
+    int state = FindingFirstOne;
+    int j_of_c;
+    int j=ret.dm_contexts.size()-1;
+    bool found_cont = false;
+    int nukefrom = ret.dm_contexts.size();
+    while (j>=0 && state != Done) {
+      j_of_c = j;
+      char c = ret.dm_contexts[j_of_c];
+      j--;
+retry_j:
+      switch (state) {
+        case FindingFirstOne:
+          state = Replacing;
+          if (c == 'c') {
+            found_cont = true;
+            goto retry_j;
+          }
+          break;
+        case Replacing:
+          if (c == 'c') {
+            if (found_cont)
+              nukefrom = j;
+            else
+              ret.dm_contexts[j_of_c] = '*';  // switch it back to a continuation
+          } else
+            state = Done;
+          break;
+      }//switch
+    }//while
+    if (nukefrom < ret.dm_contexts.size())
+      ret.dm_contexts.truncate(nukefrom);
+  }
 
   index = lastokindex;
 
