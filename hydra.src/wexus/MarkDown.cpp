@@ -91,7 +91,9 @@ namespace { class markdown
     int flags;
     enum {
       FindingStart,
-      InPara,
+      InPara_Basic,
+      InPara_WithStyleChecking,
+      InPara_GotASpace,
       InPara_HashCheck,
       InPara_StartOfLine,
       Style_Start,
@@ -483,8 +485,8 @@ ParaContext ParaContext::emitDifference(const ParaContext &next, ParaBuffer &out
       case ' ': output.sourceOutput() += "<PRE><CODE>"; break;
       case '>': output.sourceOutput() += "<BLOCKQUOTE>"; break;
       case '*': output.sourceOutput() += "<UL><LI>"; break;
-      case 'H': havearule = 2; break;
-      case 'h': havearule = 1; break;
+      case 'H': havearule = 1; break;
+      case 'h': havearule = 2; break;
       //case 'H': output.sourceOutput() += "<HR />\n"; break;
       case 'X': endedpara = true ; break;
     }
@@ -660,29 +662,51 @@ retry_c:
                                  para_buf.flushPara();
                                  title_level = 0;
                                  state = Title_Hashing;
-                               } else
-                                 state = InPara;
+                               } else {
+                                 if (paracontext.isTop(' '))
+                                   state = InPara_Basic;
+                                 else
+                                   state = InPara_WithStyleChecking;
+                               }
                                goto retry_c;
                                break;
                              }
-      case InPara: {
+      case InPara_WithStyleChecking: {
+                                       bool skipbreak = false;
+                                       if (c == ' ') {
+                                         state = InPara_GotASpace;
+                                       } else if (escapeJumped(InPara_WithStyleChecking)) {
+                                         // nothing needed
+                                       } else if (ampJumped(InPara_WithStyleChecking)) {
+                                         // nothing needed
+                                       } else 
+                                         skipbreak = true;
+
+                                       if (!skipbreak)
+                                         break;
+                                     }
+      case InPara_Basic: {
                      if (c == '\n') {
                        if (paracontext.isTop(' ') ||
                            (!para_buf.isEmpty() && para_buf[para_buf.size()-1] != '\n'))
                          para_buf.push_back('\n');
                        state = InPara_StartOfLine;
-                     } else if (styleJumped(InPara)) {
-                       // nothing needed
-                     } else if (ampJumped(InPara)) {
-                       // nothing needed
-                     } else if (escapeJumped(InPara)) {
-                       // nothing needed
-                     } else if (linkJumped(InPara)) {
-                       // nothing needed
                      } else
                        encodedPushBack();
                      break;
                    }
+      case InPara_GotASpace: {
+                               para_buf.push_back(' ');
+                               if (styleJumped(InPara_WithStyleChecking)) {
+                                 // nothing needed
+                               } else if (linkJumped(InPara_WithStyleChecking)) {
+                                 // nothing needed
+                               } else {
+                                 state = InPara_WithStyleChecking;
+                                 goto retry_c;
+                               }
+                               break;
+                             }
       case Style_Start: {
                           if (QChar(c).isSpace() || c == style_c) {
                             // abort the styling, as there is a space after the style char
