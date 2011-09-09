@@ -13,6 +13,28 @@
 
 using namespace wexus;
 
+namespace { class ParaBuffer : public QByteArray {
+  public:
+    ParaBuffer(QByteArray *output = 0);
+    ~ParaBuffer();
+
+    void resetOutput(QByteArray *output) { dm_output = output; }
+    QByteArray & sourceOutput(void) const { return *dm_output; }
+
+    void setType(const QString &type) { dm_para_type = type; }
+    void switchPara(const QString &type);   // will nuke
+    void endPara(void); // will rename?
+
+  private:
+    /*enum {
+      ParaType = 100,
+      NoType = 101,
+    };*/
+
+    QString dm_para_type;  // future: use a code: 1-10 Horizontal rule, otherwise of the Para codes
+    QByteArray *dm_output;
+}; }
+
 // repsents a nesting of paragraph contexts
 namespace { class ParaContext {
   public:
@@ -36,12 +58,19 @@ namespace { class ParaContext {
     bool operator ==(const ParaContext &rhs) const { return dm_contexts == rhs.dm_contexts; }
     bool operator !=(const ParaContext &rhs) const { return dm_contexts != rhs.dm_contexts; }
 
-    ParaContext emitDifference(const ParaContext &next, QByteArray &output);
+    ParaContext emitDifference(const ParaContext &next, ParaBuffer &output);
 
     const QByteArray & contexts(void) const { return dm_contexts; }
 
+    /**
+     * returns true if the top normal state is c
+     *
+     * @author Aleksander Demko
+     */ 
+    bool isTop(char c) const;
+
   protected:
-    QByteArray dm_contexts;     // types are '>' (quote) ' ' (code) '*' (list) 'H' (horizrule) 'P' (endpara)
+    QByteArray dm_contexts;     // types are '>' (quote) ' ' (code) '*' (list) 'H' (horizrule) 'X' (endpara)
 }; }
 
 namespace { class markdown
@@ -57,19 +86,18 @@ namespace { class markdown
     void encodedPushBack(void) { encodedPushBack(c); }
     void encodedPushBack(char ccc, QByteArray *out = 0);
 
-    void flushPara(void);
-
     static char styleToHtml(char style_c);
 
   protected:
     const QByteArray *input;
-    QByteArray ret;
-    QByteArray para_buf;
+    QByteArray output; // this is the return array
+    ParaBuffer para_buf;  // para_buf feeds into output
     int index;
     int flags;
     enum {
       FindingStart,
       InPara,
+      InPara_ParaCheck,
       InPara_StartOfLine,
       InPara_OnNewLine,
       Style_Start,
@@ -104,7 +132,56 @@ namespace { class markdown
     ParaContext paracontext;
 
     int line_prefixcount;
+
 }; }
+
+//
+//
+// ParaBuffer
+//
+//
+
+ParaBuffer::ParaBuffer(QByteArray *output)
+  : dm_output(output)
+{
+  reserve(1024);
+}
+
+ParaBuffer::~ParaBuffer()
+{
+}
+
+void ParaBuffer::switchPara(const QString &type)
+{
+  endPara();
+  setType(type);
+}
+
+void ParaBuffer::endPara(void)
+{
+qDebug() << "endPara w/ size=" << size() << "type=" << dm_para_type << "data:" << *this;
+  if (isEmpty()) {    // do nothing on empties
+    dm_para_type.clear();   // still need to clear this, though
+    return;
+  }
+
+  /*ParaContext nextctx;
+
+  nextctx.appendEndPara();
+
+  paracontext.emitDifference(nextctx, para_buf);
+  paracontext = ParaContext();*/
+
+  if (!dm_para_type.isEmpty())
+    *dm_output += "<" + dm_para_type + ">";
+  *dm_output += *this;
+  if (!dm_para_type.isEmpty())
+    *dm_output += "</" + dm_para_type + ">\n";
+
+  dm_para_type.clear();
+
+  clear();
+}
 
 //
 //
@@ -124,6 +201,7 @@ ParaContext ParaContext::parseLineStart(const QByteArray &input, int &index, con
     GotIndent,
     GotEquals,
     EatRule,
+    GotEnd,
     DoneState,
   };
   //int startindex = index;
@@ -139,11 +217,13 @@ ParaContext ParaContext::parseLineStart(const QByteArray &input, int &index, con
     if (index < input.size()) {
       c = input[index];
       ++index;
-    } else
-      state = DoneState;
+    } else {
+      c = '\n';
+      state = GotEnd;
+    }
     if (prevctx_index < previous_context.dm_contexts.size()) {
       prevctx = previous_context.dm_contexts[prevctx_index];
-      if (prevctx == 'P')
+      if (prevctx == 'X')
         prevctx = 0;    // simplifies things
     } else
       prevctx = 0;
@@ -169,8 +249,10 @@ retry_c:
               state = GotIndent;
               goto retry_c;
             }
-          } else
-            state = DoneState;
+          } else {
+            state = GotEnd;
+            goto retry_c;
+          }
           break;
         }
       case Ready:
@@ -197,13 +279,10 @@ retry_c:
             ret.dm_contexts[ret.dm_contexts.size()-1] = 'H';
             lastokindex = index;
             state = EatRule;
-          } else if (c == '\n') {
-            // blank line
-            ret.dm_contexts.push_back('P');
-            // dont update lastokindex
-            state = DoneState;
-          } else
-            state = DoneState;
+          } else {
+            state = GotEnd;
+            goto retry_c;
+          }
           break;
         }
       case GotSpace:
@@ -229,11 +308,12 @@ retry_c:
             state = Ready;
             lastokindex = index;
           } else if (prevctx == ' ' || prevctx == 0) {
+            // starting a code segment, exit after the next char too
             ret.dm_contexts.push_back(' ');
-            state = DoneState;
             lastokindex = index;
+            state = GotEnd;
           } else
-            state = DoneState;
+            state = GotEnd;
           break;
         }
       case GotEquals:
@@ -245,47 +325,49 @@ retry_c:
             state = EatRule;
           } else if (c == ' ') {
             // nothing
-          } else
-            state = DoneState;
+          } else {
+            state = GotEnd;
+            goto retry_c;
+          }
           break;
         }
       case EatRule:
         {
           if (c == ' ' || isBulletChar(c) || c == '=') {
             lastokindex = index;
-          } else
-            state = DoneState;
+          } else {
+            state = GotEnd;
+            goto retry_c;
+          }
           break;
         }
-    }
+      case GotEnd:
+        {
+          if (c == '\n') { // blank line
+            ret.dm_contexts.push_back('X');
+          }
+          state = DoneState;
+          break;
+        }
+    }//switch
   }//while
 
   index = lastokindex;
-
-  /*if (ret.dm_contexts.size() >= 2 && isBulletChar(ret.dm_contexts[0])
-      && ret.dm_contexts[0] == ret.dm_contexts[1]) {
-    // two list items in a row, this is not allowed
-    // and is probably a titleunderline or horizontal rule
-    // lets quick abort now
-    index = startindex;
-    ret = ParaContext();
-    return Result_Bar;
-  }*/
 
   return ret;
 }
 
 void ParaContext::appendEndPara(void)
 {
-  dm_contexts.push_back('P');
+  dm_contexts.push_back('X');
 }
 
-ParaContext ParaContext::emitDifference(const ParaContext &next, QByteArray &output)
+ParaContext ParaContext::emitDifference(const ParaContext &next, ParaBuffer &output)
 {
   int i;
   int canceled_i, canceled_next;
-
-  bool alive = next.dm_contexts.isEmpty() || next.dm_contexts[0] != 'P';
+  bool alive = next.dm_contexts.isEmpty() || next.dm_contexts[0] != 'X';
+  bool seensecondarystar = false;
 
 qDebug() << __FUNCTION__ << dm_contexts << "vs." << next.dm_contexts;
 
@@ -295,8 +377,8 @@ qDebug() << __FUNCTION__ << dm_contexts << "vs." << next.dm_contexts;
     switch (dm_contexts[canceled_i]) {
       case ' ': {
                   // code prefix must have another code prefix
-                  if (canceled_next < next.dm_contexts.size() &&
-                      next.dm_contexts[canceled_next] == ' ')
+                  if (canceled_next < next.dm_contexts.size())
+                      // &&next.dm_contexts[canceled_next] == ' ')
                     canceled_next++;
                   else
                     alive = false;
@@ -311,45 +393,107 @@ qDebug() << __FUNCTION__ << dm_contexts << "vs." << next.dm_contexts;
                   break;
                 }
       case '*': {
-                  // quote prefix CAN match another code prefix
+                  // list prefix must match another list prefix
                   if (canceled_next < next.dm_contexts.size() &&
-                      (next.dm_contexts[canceled_next] == '*'
-                       || next.dm_contexts[canceled_next] == ' '))
+                      (next.dm_contexts[canceled_next] == '*')) {
                     canceled_next++;
-                  // no else
+                    seensecondarystar = true;
+                  } else if (seensecondarystar)   // this seensecondarystar stuff we need to properly match continuations
+                    alive = false;
                   break;
                 }
 
     }//switch
+    if (canceled_next < next.dm_contexts.size() && next.dm_contexts[canceled_next] == 'X')
+      alive = false;
     if (alive)
       canceled_i++;
-    if (canceled_next < next.dm_contexts.size() && next.dm_contexts[canceled_next] == 'P')
-      alive = false;
   }//while
+
+  // we need to precount our operations
+  int downshifts = 0;
+  int upshifts = 0;
+
+  for (i=dm_contexts.size()-1; i>=canceled_i; --i)
+    if (dm_contexts[i] == ' ' || dm_contexts[i] == '>' || dm_contexts[i] == '*')
+    {qDebug() << "D"; downshifts++;}
+  for (i=canceled_next; i<next.dm_contexts.size(); ++i)
+    if (next.dm_contexts[i] == ' ' || next.dm_contexts[i] == '>' || next.dm_contexts[i] == '*')
+    {qDebug() << "U"; upshifts++;}
+
+qDebug() << "STATUS" << "downshifts" << downshifts << "upshifts" << upshifts << "canceled_i" << canceled_i << "canceled_next" << canceled_next;
+
+  bool nowatcode = next.isTop(' ');
+  // if the two were the same and we are in a list, it must mean we are
+  // between list items
+  bool listitemchange = false;
+  
+  {
+    bool left = isTop('*');
+    bool right = next.isTop('*');
+
+    if (left && right && downshifts == 0 && upshifts == 0)
+      listitemchange = true;
+    if (left && right && downshifts > 0 && upshifts == 0)
+      listitemchange = true;
+    // can easily merge those two cases
+  }
+
+  if (downshifts>0 || upshifts>0) {
+    if (downshifts == 0)
+      output.setType("P");    // upshifts must be >0
+    output.endPara();
+  } else if (listitemchange)
+    output.endPara();
 
   // unwindow the current context
   for (i=dm_contexts.size()-1; i>=canceled_i; --i)
     switch (dm_contexts[i]) {
-      case ' ': output += "</PRE>\n"; break;
-      case '>': output += "</BLOCKQUOTE>\n"; break;
-      case '*': output += "</LI></UL>\n"; break;
-      case 'P': assert(false); break; // you can never unwindow from the null ParaContext!
+      case ' ': output.sourceOutput() += "</CODE></PRE>\n"; break;
+      case '>': output.sourceOutput() += "</BLOCKQUOTE>\n"; break;
+      case '*': output.sourceOutput() += "</LI></UL>\n"; break;
+      case 'X': assert(false); break; // you can never unwindow from the null ParaContext!
     }
 
-  // if the two were the same and we are in a list, it must mean we are
-  // between list items
-  if (dm_contexts == next.dm_contexts && dm_contexts.size() > 0 && dm_contexts[dm_contexts.size()-1] == '*')
-    output += "</LI>\n<LI>";
+  if (listitemchange)
+    output.sourceOutput() += "</LI>\n<LI>";
+
+  bool endedpara = false;
 
   // window up to the next context
-
   for (i=canceled_next; i<next.dm_contexts.size(); ++i)
     switch (next.dm_contexts[i]) {
-      case ' ': output += "<PRE>"; break;
-      case '>': output += "<BLOCKQUOTE>"; break;
-      case '*': output += "<UL><LI>"; break;
-      case 'H': output += "<HR />\n"; break;
+      case ' ': output.sourceOutput() += "<PRE><CODE>"; break;
+      case '>': output.sourceOutput() += "<BLOCKQUOTE>"; break;
+      case '*': output.sourceOutput() += "<UL><LI>"; break;
+      case 'H': output.sourceOutput() += "<HR />\n"; break;
+      case 'X': endedpara = true ; break;
     }
+
+  if (endedpara) {
+    // see if we just need a para change without any level change
+qDebug() << "ENDEDPARA?" << downshifts << "upshifts" << upshifts << "nowatcode" << nowatcode;
+    if (downshifts == 0 && upshifts == 0 && !nowatcode)
+      output.setType("P");
+    output.endPara();
+    if (downshifts == 0 && upshifts == 0 && !nowatcode)
+      output.setType("P");
+  }
+
+  if (downshifts>0 && upshifts == 0 && !nowatcode) {
+    // see if we shifted down into a previous level
+qDebug() << "SHIFT_DOWN_TO_PREV" << downshifts << "upshifts" << upshifts;
+    output.setType("P");
+  }
+
+  if (upshifts>0) {
+    // see if we shifted into a new level
+    output.setType("");
+  }
+
+  //if (canceled_next < next.dm_contexts.size())
+  //if (willdownshift)
+    //output.setType("P");
 
   ParaContext ret;
 
@@ -357,11 +501,25 @@ qDebug() << __FUNCTION__ << dm_contexts << "vs." << next.dm_contexts;
   // here vs everything that is new there
   for (i=0; i<canceled_i; ++i)
     ret.dm_contexts.push_back(dm_contexts[i]);
-  for (i=canceled_next; i<next.dm_contexts.size() && next.dm_contexts[i] != 'P'; ++i)
-    ret.dm_contexts.push_back(next.dm_contexts[i]);
+  for (i=canceled_next; i<next.dm_contexts.size(); ++i)
+    if (next.dm_contexts[i] != 'X' && next.dm_contexts[i] != 'H')
+      ret.dm_contexts.push_back(next.dm_contexts[i]);
 
 qDebug() << __FUNCTION__ << "returning" << ret.dm_contexts;
   return ret;
+}
+
+bool ParaContext::isTop(char c) const
+{
+  for (int i=dm_contexts.size()-1; i>=0; --i) {
+    int cur = dm_contexts[i];
+    if (cur == c)
+      return true;
+    if (cur == ' ' || cur == '>' || cur == '*')
+      return false;
+    // must be a X or H, which we can skip down
+  }
+  return false;
 }
 
 //
@@ -416,22 +574,6 @@ void markdown::encodedPushBack(char ccc, QByteArray *buf)
   }
 }
 
-void markdown::flushPara(void)
-{
-  ParaContext nextctx;
-
-  nextctx.appendEndPara();
-
-  paracontext.emitDifference(nextctx, para_buf);
-  paracontext = ParaContext();
-
-  ret += "<P>";
-  ret += para_buf;
-  ret += "</P>\n";
-
-  para_buf.clear();
-}
-
 char markdown::styleToHtml(char style_c)
 {
   return style_c == '*' ? 'B' : 'I';
@@ -444,11 +586,14 @@ QByteArray markdown::process(const QByteArray &input, int flags)
   index = 0;
   state = FindingStart;
 
-  ret.reserve(input.size()*2);
-  para_buf.reserve(1024);
+  output.reserve(input.size()*2);
+  para_buf.resetOutput(&output);
 
-  while (index < input.size()) {
-    c = input[index];
+  while (index <= input.size()) {
+    if (index < input.size())
+      c = input[index];
+    else
+      c = '\n'; // fake eof
     index++;
 retry_c:
     if (c == '\r')    // we completely filter these out
@@ -458,13 +603,14 @@ retry_c:
                    if (c == '\n')
                      continue;
                    // para start char, go!
-                   if (c == '#' && flags & MarkDown::Format_Titles) {
+                   //para_buf.switchPara("");
+                   /*if (c == '#' && flags & MarkDown::Format_Titles) {
                      state = Title_Hashing;
                      title_level = 0;
                      goto retry_c;
                    }
                    para_buf.clear();
-                   newlines = 0;
+                   newlines = 0;*/
 
                    state = InPara_StartOfLine;
                    goto retry_c;
@@ -476,14 +622,47 @@ retry_c:
                                  nextctx = paracontext.emitDifference(nextctx, para_buf);
                                  paracontext = nextctx;
 
+                                 //state = InPara_ParaCheck;
                                  state = InPara;
 
                                  break;
                                }
+      case InPara_ParaCheck: {
+                               if (c == '\n') {
+                                 //if (!para_buf.isEmpty())
+                                   //para_buf.push_back('\n');
+                                 // empty line
+                                 //ParaContext endctx(paracontext);
+                                 //endctx.appendEndPara();
+
+                                 // do para seperations for anything but code blocks
+                                 if (paracontext.isTop(' '))
+                                   para_buf.push_back('\n');
+                                 /*else {
+                                   if (!para_buf.isEmpty()) {
+//qDebug() << "SWITCHING" << "size=" << para_buf.size();
+                                     para_buf.setType("P");
+                                     para_buf.endPara();
+                                     //paracontext.emitDifference(endctx, para_buf);
+                                     //para_buf.setType("P");
+                                   }*/
+                                 //}
+
+                                 state = InPara_StartOfLine;
+                               } else {
+                                 state = InPara;
+                                 goto retry_c;
+                               }
+                               break;
+                             }
       case InPara: {
                      if (c == '\n') {
+                       if (paracontext.isTop(' ') ||
+                           (!para_buf.isEmpty() && para_buf[para_buf.size()-1] != '\n'))
+                         para_buf.push_back('\n');
                        newlines++;
-                       state = InPara_OnNewLine;
+                       //state = InPara_OnNewLine;
+                       state = InPara_StartOfLine;
                      } else if (styleJumped(InPara)) {
                        // nothing needed
                      } else if (ampJumped(InPara)) {
@@ -497,7 +676,7 @@ retry_c:
       case InPara_OnNewLine: {
                                if (c == '\n') {
                                  // done this paragraph
-                                 flushPara();
+                                 para_buf.endPara();
                                  state = FindingStart;
                                } else if ((c == '=' || c == '-') && newlines == 1) {
                                  title_level = (c == '=') ? 1 : 2;
@@ -596,10 +775,10 @@ retry_c:
                                 if (c == '#' || c == '\n') {
                                   // done the title
                                   QByteArray title=input.mid(title_index-1, index-title_index);
-                                  ret += "<H" + QString::number(title_level) + ">";
+                                  para_buf.switchPara("H" + QString::number(title_level));
                                   for (int i=0; i<title.size(); ++i)
-                                    encodedPushBack(title[i], &ret);
-                                  ret += "</H" + QString::number(title_level) + ">\n";
+                                    encodedPushBack(title[i], &para_buf);
+                                  para_buf.endPara();
                                   if (c == '#')
                                     state = Title_EndHashes;
                                   else
@@ -616,10 +795,10 @@ retry_c:
                             }
       case Underlining: {
                           if (c == '\n') {
-                            ret += "<H" + QString::number(title_level) + ">";
+                            para_buf.switchPara("H" + QString::number(title_level));
                             for (int i=0; i<para_buf.size(); ++i)
-                              encodedPushBack(para_buf[i], &ret);
-                            ret += "</H" + QString::number(title_level) + ">\n";
+                              encodedPushBack(para_buf[i], &para_buf);
+                            para_buf.endPara();
                             state = FindingStart;
                           }
                           break;
@@ -629,10 +808,10 @@ retry_c:
 
   if (!para_buf.isEmpty()) {
     // finish off the last para
-    flushPara();
+    para_buf.endPara();
   }
 
-  return ret;
+  return output;
 }
 
 //
