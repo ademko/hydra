@@ -70,7 +70,7 @@ namespace { class ParaContext {
     bool isTop(char c) const;
 
   protected:
-    QByteArray dm_contexts;     // types are '>' (quote) ' ' (code) '*' (list) 'H' (horizrule) 'X' (endpara)
+    QByteArray dm_contexts;     // types are '>' (quote) ' ' (code) '*' (list) 'H' 'h' (horizrule) 'X' (endpara)
 }; }
 
 namespace { class markdown
@@ -97,7 +97,7 @@ namespace { class markdown
     enum {
       FindingStart,
       InPara,
-      InPara_ParaCheck,
+      InPara_HashCheck,
       InPara_StartOfLine,
       InPara_OnNewLine,
       Style_Start,
@@ -127,7 +127,6 @@ namespace { class markdown
     bool link_havetwoparen;
 
     int title_level;
-    int title_index;
 
     ParaContext paracontext;
 
@@ -276,7 +275,7 @@ retry_c:
             lastokindex = index;
           } else if (isBulletChar(c) && c == lastBulletChar) {
             // what was a bullet is really a horiz rule
-            ret.dm_contexts[ret.dm_contexts.size()-1] = 'H';
+            ret.dm_contexts[ret.dm_contexts.size()-1] = 'h';
             lastokindex = index;
             state = EatRule;
           } else {
@@ -459,6 +458,7 @@ qDebug() << "STATUS" << "downshifts" << downshifts << "upshifts" << upshifts << 
     output.sourceOutput() += "</LI>\n<LI>";
 
   bool endedpara = false;
+  int havearule = 0;  // 1 or 2 is the rule leve
 
   // window up to the next context
   for (i=canceled_next; i<next.dm_contexts.size(); ++i)
@@ -466,10 +466,23 @@ qDebug() << "STATUS" << "downshifts" << downshifts << "upshifts" << upshifts << 
       case ' ': output.sourceOutput() += "<PRE><CODE>"; break;
       case '>': output.sourceOutput() += "<BLOCKQUOTE>"; break;
       case '*': output.sourceOutput() += "<UL><LI>"; break;
-      case 'H': output.sourceOutput() += "<HR />\n"; break;
+      case 'H': havearule = 2; break;
+      case 'h': havearule = 1; break;
+      //case 'H': output.sourceOutput() += "<HR />\n"; break;
       case 'X': endedpara = true ; break;
     }
 
+  if (havearule > 0) {
+qDebug() << "HAVEARULE";
+    if (output.isEmpty())
+      output.sourceOutput() += "<HR />\n";
+    else {
+      output.setType("H" + QString::number(havearule));
+      output.endPara();
+    }
+    endedpara = true;
+  } 
+  
   if (endedpara) {
     // see if we just need a para change without any level change
 qDebug() << "ENDEDPARA?" << downshifts << "upshifts" << upshifts << "nowatcode" << nowatcode;
@@ -602,15 +615,6 @@ retry_c:
       case FindingStart: {
                    if (c == '\n')
                      continue;
-                   // para start char, go!
-                   //para_buf.switchPara("");
-                   /*if (c == '#' && flags & MarkDown::Format_Titles) {
-                     state = Title_Hashing;
-                     title_level = 0;
-                     goto retry_c;
-                   }
-                   para_buf.clear();
-                   newlines = 0;*/
 
                    state = InPara_StartOfLine;
                    goto retry_c;
@@ -622,37 +626,19 @@ retry_c:
                                  nextctx = paracontext.emitDifference(nextctx, para_buf);
                                  paracontext = nextctx;
 
-                                 //state = InPara_ParaCheck;
-                                 state = InPara;
+                                 state = InPara_HashCheck;
 
                                  break;
                                }
-      case InPara_ParaCheck: {
-                               if (c == '\n') {
-                                 //if (!para_buf.isEmpty())
-                                   //para_buf.push_back('\n');
-                                 // empty line
-                                 //ParaContext endctx(paracontext);
-                                 //endctx.appendEndPara();
-
-                                 // do para seperations for anything but code blocks
-                                 if (paracontext.isTop(' '))
-                                   para_buf.push_back('\n');
-                                 /*else {
-                                   if (!para_buf.isEmpty()) {
-//qDebug() << "SWITCHING" << "size=" << para_buf.size();
-                                     para_buf.setType("P");
-                                     para_buf.endPara();
-                                     //paracontext.emitDifference(endctx, para_buf);
-                                     //para_buf.setType("P");
-                                   }*/
-                                 //}
-
-                                 state = InPara_StartOfLine;
-                               } else {
+      case InPara_HashCheck: {
+                               if (c == '#') {
+                                 para_buf.setType("P");
+                                 para_buf.endPara();
+                                 title_level = 0;
+                                 state = Title_Hashing;
+                               } else
                                  state = InPara;
-                                 goto retry_c;
-                               }
+                               goto retry_c;
                                break;
                              }
       case InPara: {
@@ -765,7 +751,7 @@ retry_c:
                             if (c == '#')
                               title_level++;
                             else {
-                              title_index = index;
+                              para_buf.setType("H" + QString::number(title_level));
                               state = Title_GettingName;
                               goto retry_c;
                             }
@@ -773,17 +759,13 @@ retry_c:
                           }
       case Title_GettingName: {
                                 if (c == '#' || c == '\n') {
-                                  // done the title
-                                  QByteArray title=input.mid(title_index-1, index-title_index);
-                                  para_buf.switchPara("H" + QString::number(title_level));
-                                  for (int i=0; i<title.size(); ++i)
-                                    encodedPushBack(title[i], &para_buf);
                                   para_buf.endPara();
                                   if (c == '#')
                                     state = Title_EndHashes;
                                   else
                                     state = FindingStart;
-                                }
+                                } else
+                                  encodedPushBack();
                                 break;
                               }
       case Title_EndHashes: {
