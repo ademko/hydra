@@ -18,7 +18,15 @@ namespace blogapp
 class blogapp::Post : public wexus::ActiveFile
 {
   public:
+    int year;
+    int month;
+    int day;
+    QString title;
+
+  public:
     Post(void);
+
+    virtual bool onLoad(void);
 };
 
 #endif

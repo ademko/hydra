@@ -26,6 +26,11 @@ QVariant ActiveFile::getIDAsVariant(void)
   return id;
 }
 
+bool ActiveFile::onLoad(void)
+{
+  return true;
+}
+
 void ActiveFile::checkFileName(const QString &filename)
 {
   if (filename.isEmpty() || filename.indexOf('/') != -1
@@ -37,10 +42,12 @@ void ActiveFile::checkFileName(const QString &filename)
 
 void ActiveFile::find(const QVariant &keyVal)
 {
-  if (exists(keyVal))
+  if (exists(keyVal)) {
     id = keyVal.toString();
-  else
-    throw AssertException("ActiveFile: file not found: " + keyVal.toString());
+    if (!onLoad())
+      throw AssertException("ActiveFile::find: onLoad failed: " + keyVal.toString());
+  } else
+    throw AssertException("ActiveFile::find: file not found: " + keyVal.toString());
 }
 
 bool ActiveFile::exists(const QVariant &keyVal)
@@ -102,7 +109,7 @@ bool ActiveFile::next(void)
   if (dm_iterator->iterator != dm_iterator->filenames.end()) {
     id = *dm_iterator->iterator;
     dm_iterator->iterator++;
-    return true;
+    return onLoad();
   }
 
   // ran out of entries

@@ -57,6 +57,25 @@ class wexus::ActiveFile : public wexus::IDAble
     virtual QVariant getIDAsVariant(void);
 
     /**
+     * This is called after loading a record.
+     * Typicall, you can parse the id (filename)
+     * into more fields, etc.
+     *
+     * Decendants should be able to work with empty-string ids
+     * and can throw exceptions on errors.
+     *
+     * TODO in the future, this might be implemented
+     * in a more automatic/regex manner using .eh-like files.
+     *
+     * The default implementation does nothing but return true;
+     *
+     * @return true on success (false causes this record to not
+     * be loaded)
+     * @author Aleksander Demko
+     */ 
+    virtual bool onLoad(void);
+
+    /**
      * Security routine.
      * throws if the filename:
      *  - is empty

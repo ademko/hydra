@@ -1,7 +1,8 @@
 
 <ul>
 <% while (dm_post.next()) { %>
-  <li><%=linkTo(dm_post.id, pathTo(&PostsController::show, dm_post))%> <p>
+  <li>(<%=dm_post.year%>-<%=dm_post.month%>-<%=dm_post.day%>) 
+      <%=linkTo(dm_post.id, pathTo(&PostsController::show, dm_post))%> <p>
   <% output() << MarkDown::process(dm_post.asByteArray(), MarkDown::Format_BlogPost); %>
   </li>
 <% } %>
