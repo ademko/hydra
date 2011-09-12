@@ -665,8 +665,10 @@ retry_c:
                                } else {
                                  if (paracontext.isTop(' '))
                                    state = InPara_Basic;
-                                 else
-                                   state = InPara_WithStyleChecking;
+                                 else {
+                                   para_buf.push_back(' ');
+                                   state = InPara_GotASpace;// we actually want style and link checking at the start of the line too
+                                 }
                                }
                                goto retry_c;
                                break;
@@ -674,6 +676,7 @@ retry_c:
       case InPara_WithStyleChecking: {
                                        bool skipbreak = false;
                                        if (c == ' ') {
+                                         para_buf.push_back(' ');
                                          state = InPara_GotASpace;
                                        } else if (escapeJumped(InPara_WithStyleChecking)) {
                                          // nothing needed
@@ -696,7 +699,6 @@ retry_c:
                      break;
                    }
       case InPara_GotASpace: {
-                               para_buf.push_back(' ');
                                if (styleJumped(InPara_WithStyleChecking)) {
                                  // nothing needed
                                } else if (linkJumped(InPara_WithStyleChecking)) {
