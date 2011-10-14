@@ -3,7 +3,8 @@
 <% while (dm_post.next()) { %>
   <li>(<%=dm_post.year%>-<%=dm_post.month%>-<%=dm_post.day%>) 
       <%=linkTo(dm_post.id, pathTo(&PostsController::show, dm_post))%> <p>
-  <% output() << MarkDown::process(dm_post.asByteArray(), MarkDown::Format_BlogPost); %>
+  <H2><%= MarkDown::title(dm_post.asByteArray()) %></H2>
+  <BLOCKQUOTE><%= MarkDown::firstPara(dm_post.asByteArray()) %></BLOCKQUOTE>
   </li>
 <% } %>
 </ul>

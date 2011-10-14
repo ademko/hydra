@@ -13,11 +13,27 @@
 
 using namespace wexus;
 
+namespace { class MatchTerm {
+  public:
+    enum {
+      Want_Title = 1,
+      Want_FirstPara = 2,
+    };
+  public:
+    const int wantType;
+    HTMLString htmlString;
+    bool foundIt;
+
+  public:
+    MatchTerm(int _wantType) : wantType(_wantType), foundIt(false) { }
+}; }
+
 namespace { class ParaBuffer : public QByteArray {
   public:
-    ParaBuffer(QByteArray *output = 0);
+    ParaBuffer(QByteArray *output = 0, MatchTerm *mterm = 0);
 
     void resetOutput(QByteArray *output) { dm_output = output; }
+    void resetPartialOutput(MatchTerm *mterm) { dm_matchterm = mterm; }
     QByteArray & sourceOutput(void) const { return *dm_output; }
 
     void setType(const QString &type) { dm_para_type = type; }
@@ -26,6 +42,7 @@ namespace { class ParaBuffer : public QByteArray {
   private:
     QString dm_para_type;
     QByteArray *dm_output;
+    MatchTerm *dm_matchterm;
 }; }
 
 // repsents a nesting of paragraph contexts
@@ -70,7 +87,7 @@ namespace { class ParaContext {
 namespace { class markdown
 {
   public:
-    QByteArray process(const QByteArray &input, int flags);
+    QByteArray process(const QByteArray &input, int flags, MatchTerm *mterm = 0);
 
   protected:
     bool styleJumped(int returnState);
@@ -84,6 +101,8 @@ namespace { class markdown
     static char styleToHtml(char style_c);
 
   protected:
+    MatchTerm *matchterm;
+
     const QByteArray *input;
     QByteArray output; // this is the return array
     ParaBuffer para_buf;  // para_buf feeds into output
@@ -134,8 +153,8 @@ namespace { class markdown
 //
 //
 
-ParaBuffer::ParaBuffer(QByteArray *output)
-  : dm_output(output)
+ParaBuffer::ParaBuffer(QByteArray *output, MatchTerm *mterm)
+  : dm_output(output), dm_matchterm(mterm)
 {
   reserve(1024);
   dm_para_type.reserve(4);
@@ -147,6 +166,19 @@ void ParaBuffer::flushPara(void)
   if (isEmpty()) {    // do nothing on empties
     dm_para_type.clear();   // still need to clear this, though
     return;
+  }
+
+  // TIE THIS IN
+  // DO FULL ABORTING (exception based? or flags?)
+  if (dm_matchterm) {
+    if (dm_matchterm->wantType == MatchTerm::Want_Title && !dm_para_type.isEmpty() && dm_para_type[0] == 'H') {
+      dm_matchterm->htmlString = *this;
+      dm_matchterm->foundIt = true;
+    }
+    if (dm_matchterm->wantType == MatchTerm::Want_FirstPara && this->size() > 50 && dm_para_type == "P") {
+      dm_matchterm->htmlString = *this;
+      dm_matchterm->foundIt = true;
+    }
   }
 
   if (!dm_para_type.isEmpty())
@@ -618,15 +650,18 @@ char markdown::styleToHtml(char style_c)
   return style_c == '*' ? 'B' : 'I';
 }
 
-QByteArray markdown::process(const QByteArray &input, int flags)
+QByteArray markdown::process(const QByteArray &input, int flags, MatchTerm *mterm)
 {
   this->input = &input;
   this->flags = flags;
   index = 0;
   state = FindingStart;
 
+  matchterm = mterm;
+
   output.reserve(input.size()*2);
   para_buf.resetOutput(&output);
+  para_buf.resetPartialOutput(mterm);
 
   while (index <= input.size()) {
     if (index < input.size())
@@ -635,6 +670,8 @@ QByteArray markdown::process(const QByteArray &input, int flags)
       c = '\n'; // fake eof
     index++;
 retry_c:
+    if (mterm && mterm->foundIt)
+      return output;    // abort now, we found our target string
     if (c == '\r')    // we completely filter these out
       continue;
     switch (state) {
@@ -854,9 +891,34 @@ retry_c:
 //
 //
 
-QByteArray MarkDown::process(const QByteArray &input, int flags)
+QByteArray MarkDown::process(const QByteArray &markdown, int flags)
 {
-  markdown md;
-  return md.process(input, flags);
+  ::markdown md;
+
+  return md.process(markdown, flags);
+}
+
+HTMLString MarkDown::title(const QByteArray &markdown)
+{
+  MatchTerm mterm(MatchTerm::Want_Title);
+
+  ::markdown md;
+
+  // throw away the rendered result
+  md.process(markdown, Format_Titles, &mterm);
+
+  return mterm.htmlString;   // even if we didnt find it, return the default emptry string
+}
+
+HTMLString MarkDown::firstPara(const QByteArray &markdown)
+{
+  MatchTerm mterm(MatchTerm::Want_FirstPara);
+
+  ::markdown md;
+
+  // throw away the rendered result
+  md.process(markdown, Format_Titles, &mterm);
+
+  return mterm.htmlString;   // even if we didnt find it, return the default emptry string
 }
 

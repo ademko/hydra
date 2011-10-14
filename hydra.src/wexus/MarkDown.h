@@ -10,6 +10,8 @@
 
 #include <QByteArray>
 
+#include <wexus/HTMLString.h>
+
 namespace wexus
 {
   class MarkDown;
@@ -43,22 +45,31 @@ class wexus::MarkDown
       Format_BlogPost = 0x7F, // ALL flags
       Format_Comment = Format_Basic,
       Format_WikiPage = Format_BlogPost, // ALL flags
-
-      // FUTURE TODO
-      // Return_All = 0
-      // Return_FirstTitle =
-      // Return_FirstPara
     };
 
     /**
-     * Format the given string as user markup.
+     * Format the given markdown code as HTML markup.
      *
      * As flags, either choose Format_Basic, Format_Post Format_Wiki, or if you
      * want total controler, the indiviual type flags.
      *
      * @author Aleksander Demko
      */ 
-    static QByteArray process(const QByteArray &input, int flags = Format_Basic);
+    static QByteArray process(const QByteArray &markdown, int flags = Format_Basic);
+
+    /**
+     * Returns the title, already rendered as an HTML string from the givenmarkdown code.
+     *
+     * @author Aleksander Demko
+     */ 
+    static HTMLString title(const QByteArray &markdown);
+
+    /**
+     * Returns the first paragraph, already rendered as an HTML string from the givenmarkdown code.
+     *
+     * @author Aleksander Demko
+     */ 
+    static HTMLString firstPara(const QByteArray &markdown);
 };
 
 #endif
