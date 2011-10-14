@@ -26,6 +26,32 @@ static void settingsToMap(const QSettings &settings, QVariantMap &out)
     out[*ii] = settings.value(*ii);
 }
 
+void showHelp(void)
+{
+  qDebug() << 
+    "how to run:\n\n"
+    "wexusserver base_site_directory\n\n"
+    "  base_site_directory  is the base directory for the web site\n\n"
+    "  site.ini     the base_site_directory can contain a site.ini file,\n"
+    "               which can have the following options\n"
+    "                httpport = 8080\n\n"
+    "  app.ini      any subdirectory can have an app.ini, which launches\n"
+    "               an application in that subdirectory\n"
+    "                app = application type (see list below) (required field)\n"
+    "\n"
+    "               computed values:\n"
+    "                mountpoint the web address (e.g. /blog)\n"
+    "                sitedir    the directory of the base site\n"
+    "                appdir     the directory of the app within the site\n"
+    "\n";
+
+  qDebug() << "Currently available app types:";
+  for (Registry::AppNameMap::const_iterator ii=Registry::appsByName().begin();
+      ii != Registry::appsByName().end(); ++ii) {
+    qDebug() << "  " << ii.key();
+  }
+}
+
 int main(int argc, char **argv)
 {
   QCoreApplication coreapp(argc, argv);
@@ -37,7 +63,9 @@ int main(int argc, char **argv)
 
     if (args.size() < 2) {
       //sitepath = ".";
-      qDebug() << "You must provide a site directory as a parameter.";
+      qDebug() << "You must provide a site directory as a parameter.\n";
+
+      showHelp();
       return -1;
     } else
       sitepath = QFileInfo(args[1]).canonicalFilePath();;
