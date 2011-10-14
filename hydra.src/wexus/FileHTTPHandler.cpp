@@ -82,21 +82,27 @@ qDebug() << "FileHTTPHandler serving " << fullpath;
   else
     reply.setContentType(MimeTypes::mimeType(fileext));
 
+  if (!sendFile(fullpath, reply.output().device()))
+    throw FileException("QFile::open failed");
+}
+
+
+bool FileHTTPHandler::sendFile(const QString &filename, QIODevice * outputdev)
+{
   // open and send the file
-  {
-    QFile file(fullpath);
+  QFile file(filename);
 
-    if (!file.open(QIODevice::ReadOnly))
-      throw FileException("QFile::open failed");
+  if (!file.open(QIODevice::ReadOnly))
+    return false;
 
-    char buf[1024*4];
-    qint64 num;
-    QIODevice *outputdev = reply.output().device();
+  char buf[1024*4];
+  qint64 num;
 
-    while ( (num = file.read(buf, sizeof(buf))) > 0)
-      if (num != outputdev->write(buf, num))
-        throw FileException("QFile::write short-wrote");
-  }
+  while ( (num = file.read(buf, sizeof(buf))) > 0)
+    if (num != outputdev->write(buf, num))
+      throw FileException("QFile::write short-wrote");
+
+  return true;
 }
 
 void FileHTTPHandler::generateDirIndex(wexus::HTTPRequest &req, wexus::HTTPReply &reply,

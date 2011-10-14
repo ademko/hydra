@@ -52,6 +52,16 @@ class wexus::FileHTTPHandler : public wexus::HTTPHandler
     /// handler
     void handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &reply);
 
+    /**
+     * Sends the given file to the given device (often reply.output().device().
+     *
+     * Returns true on success, false on cant-open-file,
+     * and throws on critical errors.
+     *
+     * @author Aleksander Demko
+     */ 
+    static bool sendFile(const QString &filename, QIODevice * outputdev);
+
   private:
     void generateDirIndex(wexus::HTTPRequest &req, wexus::HTTPReply &reply,
         const QString &fullpath, const QString &relpath);

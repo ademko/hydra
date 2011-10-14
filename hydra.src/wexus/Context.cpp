@@ -12,6 +12,7 @@
 #include <wexus/HTMLString.h>
 #include <wexus/Application.h>
 #include <wexus/Form.h>
+#include <wexus/FileHTTPHandler.h>    // for sendFile
 
 #include <QThreadStorage>
 #include <QDebug>
@@ -25,6 +26,7 @@ static QThreadStorage<ContextPtr *> Storage;
 Context::Context(wexus::Application *application, wexus::HTTPRequest &req, wexus::HTTPReply &reply)
   : dm_application(application),
     dm_req(req), dm_reply(reply),
+    dm_sentHeader(false),
     params(ParamsParser::parse(&dm_req)),
     cookies(&dm_req, &dm_reply),
     dm_sessionlocker(dm_application->sessionManager().getDataByCookie(cookies)),
@@ -41,6 +43,17 @@ Context::Context(wexus::Application *application, wexus::HTTPRequest &req, wexus
   Form::testFlashValidators(params, flash, errors);
 }
 
+Context::~Context()
+{
+  if (dm_sentHeader)
+    sendFooter();
+
+  // save the setFlast as the current flash for the next call
+  session["flash"] = setFlash;
+
+  Storage.setLocalData(0);
+}
+
 Context * Context::threadInstance(void)
 {
   Context *ret = *(Storage.localData());
@@ -50,17 +63,12 @@ Context * Context::threadInstance(void)
   return ret;
 }
 
-Context::~Context()
-{
-  // save the setFlast as the current flash for the next call
-  session["flash"] = setFlash;
-
-  Storage.setLocalData(0);
-}
-
 QTextStream & Context::output(void)
 {
   Context *here = threadInstance();
+
+  if (!here->dm_sentHeader)
+    here->sendHeader();
 
   // flush the other textstreams
   if (here->dm_htmloutput.get())
@@ -73,6 +81,9 @@ QTextStream & Context::htmlOutput(void)
 {
   Context *here = threadInstance();
 
+  if (!here->dm_sentHeader)
+    here->sendHeader();
+
   // flush the other textstreams
   here->dm_reply.output().flush();
 
@@ -83,5 +94,30 @@ QTextStream & Context::htmlOutput(void)
   here->dm_htmloutput.reset(new QTextStream(here->dm_htmldevice.get()));
 
   return *here->dm_htmloutput;
+}
+
+void Context::sendHeader(void)
+{
+  assert(!dm_sentHeader);
+
+  dm_sentHeader = true;
+
+  if (!dm_application->settings().contains("headerdir"))
+    return;
+
+  FileHTTPHandler::sendFile(dm_application->settings()["headerdir"].toString()
+      + "/header.html", dm_reply.output().device());
+}
+
+void Context::sendFooter(void)
+{
+  assert(dm_sentHeader);
+
+  // flush everything
+  output();
+  dm_reply.output().flush();
+
+  FileHTTPHandler::sendFile(dm_application->settings()["headerdir"].toString()
+      + "/footer.html", dm_reply.output().device());
 }
 

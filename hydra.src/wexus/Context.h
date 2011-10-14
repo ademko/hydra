@@ -32,6 +32,8 @@ namespace wexus
  * various thread-local storage variables necesary for the other
  * global functions defined in this file.
  *
+ * Does header/footer sending too, over the HTTPReply
+ *
  * @author Aleksander Demko
  */ 
 class wexus::Context
@@ -92,6 +94,8 @@ class wexus::Context
     std::shared_ptr<QIODevice> dm_htmldevice;
     std::shared_ptr<QTextStream> dm_htmloutput;
 
+    bool dm_sentHeader;   // was the common header sent already
+
   public:
     // public things
     // cant make these nice-static because they arent methods
@@ -116,6 +120,7 @@ class wexus::Context
   private:
     // this has to be constructed AFTER cookies but before session
     SessionLocker dm_sessionlocker;
+
   public:
 
     /**
@@ -148,6 +153,10 @@ class wexus::Context
      * @author Aleksander Demko
      */ 
     Errors errors;
+
+  private:
+    void sendHeader(void);
+    void sendFooter(void);
 };
 
 #endif

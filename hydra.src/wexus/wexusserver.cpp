@@ -43,6 +43,10 @@ void showHelp(void)
     "                mountpoint the web address (e.g. /blog)\n"
     "                sitedir    the directory of the base site\n"
     "                appdir     the directory of the app within the site\n"
+    "                headerdir  the directory of header.html and footer.html\n"
+    "                           can be overidden, but will default to headers/\n"
+    "                           if they exist in appdir or siteapp\n"
+    "                           can contain: header.html footer.html\n"
     "\n";
 
   qDebug() << "Currently available app types:";
@@ -149,6 +153,14 @@ int main(int argc, char **argv)
         vmap["mountpoint"] = mountpoint;
         vmap["sitedir"] = sitepath;
         vmap["appdir"] = info.path();
+
+        // calculate headerdir, if unset
+        if (!vmap.contains("headerdir")) {
+          if (QFileInfo(info.path() + "/headers").isDir())
+            vmap["headerdir"] = info.path() + "/headers";
+          if (QFileInfo(sitepath + "/headers").isDir())
+            vmap["headerdir"] = sitepath + "/headers";
+        }
 
 //qDebug() << vmap;
         // config the app
