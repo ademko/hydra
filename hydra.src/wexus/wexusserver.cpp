@@ -56,6 +56,39 @@ void showHelp(void)
   }
 }
 
+static void addAppFromSettings(Site &site, const QFileInfo &appini, const QString &appname,
+    const QString &sitepath, QVariantMap &vmap)
+{
+  std::shared_ptr<Registry::AppInfo> appinfo = Registry::appsByName()[appname];
+  assert(appinfo.get());
+
+  QString mountpoint(appini.path().mid(sitepath.size()) + "/");
+
+  qDebug() << "launching" << appinfo->appname << "@" << mountpoint;
+
+  std::shared_ptr<Application> app(appinfo->loader());
+  assert(app.get());
+
+  // the computed versions always override what's in the file
+  vmap["mountpoint"] = mountpoint;
+  vmap["sitedir"] = sitepath;
+  vmap["appdir"] = appini.path();
+
+  // calculate headerdir, if unset
+  if (!vmap.contains("headerdir")) {
+    if (QFileInfo(appini.path() + "/headers").isDir())
+      vmap["headerdir"] = appini.path() + "/headers";
+    if (QFileInfo(sitepath + "/headers").isDir())
+      vmap["headerdir"] = sitepath + "/headers";
+  }
+
+  //qDebug() << vmap;
+  // config the app
+  app->setSettings(vmap);
+  // add it to the site
+  site.addApplication(mountpoint, app);
+}
+
 int main(int argc, char **argv)
 {
   QCoreApplication coreapp(argc, argv);
@@ -126,49 +159,47 @@ int main(int argc, char **argv)
 
         settingsToMap(settings, vmap);
 
-        if (!vmap.contains("app")) {
-          qDebug() << "no app= line in the .ini file";
-          return -1;
+        if (vmap.contains("app")) {
+          QString appname = vmap["app"].toString();
+
+          if (!Registry::appsByName().contains(appname)) {
+            qDebug() << "app not found:" << appname;
+            return -1;
+          }
+
+          addAppFromSettings(s, info, appname, sitepath, vmap);
+        } else {
+          QStringList groupnames = settings.childGroups();
+
+          if (groupnames.isEmpty()) {
+            qDebug() << "no app= line or groups in the .ini file";
+            return -1;
+          }
+
+          for (QStringList::const_iterator group=groupnames.begin(); group != groupnames.end(); ++group) {
+            QVariantMap groupmap;
+
+            settings.beginGroup(*group);
+            settingsToMap(settings, groupmap);
+            settings.endGroup();
+
+            if (!groupmap.contains("app")) {
+              qDebug() << "app= not found in group :" << *group;
+              return -1;
+            }
+
+            QString appname = groupmap["app"].toString();
+
+            if (!Registry::appsByName().contains(appname)) {
+              qDebug() << "app not found (in group \"" << *group << "\" :" << appname;
+              return -1;
+            }
+
+            addAppFromSettings(s, info, appname, sitepath, groupmap);
+          }//for
         }
-
-        QString appname = vmap["app"].toString();
-
-        // find the app
-        if (!Registry::appsByName().contains(appname)) {
-          qDebug() << "app not found:" << appname;
-          return -1;
-        }
-
-        std::shared_ptr<Registry::AppInfo> appinfo = Registry::appsByName()[appname];
-        assert(appinfo.get());
-
-        QString mountpoint(info.path().mid(sitepath.size()) + "/");
-
-        qDebug() << "launching" << appinfo->appname << "@" << mountpoint;
-
-        std::shared_ptr<Application> app(appinfo->loader());
-        assert(app.get());
-
-        // the computed versions always override what's in the file
-        vmap["mountpoint"] = mountpoint;
-        vmap["sitedir"] = sitepath;
-        vmap["appdir"] = info.path();
-
-        // calculate headerdir, if unset
-        if (!vmap.contains("headerdir")) {
-          if (QFileInfo(info.path() + "/headers").isDir())
-            vmap["headerdir"] = info.path() + "/headers";
-          if (QFileInfo(sitepath + "/headers").isDir())
-            vmap["headerdir"] = sitepath + "/headers";
-        }
-
-//qDebug() << vmap;
-        // config the app
-        app->setSettings(vmap);
-        // add it to the site
-        s.addApplication(mountpoint, app);
-      }
-    }
+      }//if app.init
+    }//whild dd
   }
 
   //s.addApplication("/pinger/", std::shared_ptr<pingapp::PingApp>(new pingapp::PingApp));
