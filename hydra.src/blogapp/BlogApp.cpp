@@ -19,5 +19,5 @@ blogapp::BlogApp::BlogApp(void)
   b.addMatch("/", key("controller","posts") + key("action","index"));
 }
 
-static wexus::RegisterApp<blogapp::BlogApp> r1("ca.demko.blogapp");
+static wexus::RegisterApp<blogapp::BlogApp> r1("ca.demko.blog");
 

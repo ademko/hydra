@@ -16,7 +16,7 @@ namespace blogapp
 }
 
 /**
- * The first wexus application - a uptime/ping monitor.
+ * A basic blogging application.
  *
  * @author Aleksander Demko
  */ 
