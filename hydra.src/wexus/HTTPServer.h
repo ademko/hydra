@@ -62,9 +62,28 @@ class wexus::HTTPParams
 class wexus::HTTPServer
 {
   public:
-    class HTTPServerException : public std::exception
+    class Exception : public std::exception
     {
-      virtual const char* what() const throw() { return "HTTPServerException"; }
+      public:
+        /// no log message constructor
+        Exception(void);
+        /// log message constructor
+        Exception(const QString &logmsg);
+
+        virtual ~Exception() throw ();
+
+        virtual const char* what() const throw() { return dm_what; }
+
+        const QString & logMessage(void) const { return dm_logmsg; }
+
+      protected:
+        QString dm_logmsg;
+        QByteArray dm_what;
+    };
+    class PortInUseException : public Exception
+    {
+      public:
+        PortInUseException(int port);
     };
 
   public:

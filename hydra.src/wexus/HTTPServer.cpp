@@ -37,6 +37,32 @@ void HTTPParams::setHandler(HTTPHandler *handler)
 }
 
 //
+// HTTPServer::Exception
+//
+
+HTTPServer::Exception::Exception(void)
+{
+}
+
+HTTPServer::Exception::Exception(const QString &logmsg)
+  : dm_logmsg(logmsg), dm_what(logmsg.toUtf8())
+{
+}
+
+HTTPServer::Exception::~Exception() throw ()
+{
+}
+
+//
+// HTTPServer::PortInUseException
+//
+
+HTTPServer::PortInUseException::PortInUseException(int port)
+  : Exception("Server port in use: " + QString::number(port))
+{
+}
+
+//
 //
 // HTTPServer
 //
