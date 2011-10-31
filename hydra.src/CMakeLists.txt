@@ -141,6 +141,7 @@ ADD_EXECUTABLE(wexusserver
     ${THIS_PATH}/wexus/HTTP.cpp ${THIS_PATH}/wexus/HTTPServer.cpp
     ${THIS_PATH}/wexus/HTTPHandlerStack.cpp
     ${THIS_PATH}/wexus/FileHTTPHandler.cpp ${THIS_PATH}/wexus/MimeTypes.cpp
+    ${THIS_PATH}/wexus/OpenDatabases.cpp
     ${THIS_PATH}/wexus/Site.cpp ${THIS_PATH}/wexus/Application.cpp ${THIS_PATH}/wexus/Controller.cpp
     ${THIS_PATH}/wexus/HTMLString.cpp ${THIS_PATH}/wexus/ParamsParser.cpp
     ${THIS_PATH}/wexus/Cookies.cpp ${THIS_PATH}/wexus/Context.cpp
@@ -153,6 +154,8 @@ ADD_EXECUTABLE(wexusserver
     ${THIS_PATH}/wexus/Registry.cpp
     ${THIS_PATH}/wexus/ActiveFile.cpp
     ${THIS_PATH}/wexus/MarkDown.cpp
+#helper apps
+    ${THIS_PATH}/wexus/RedirectApp.cpp
 
 #pingapp
     ${THIS_PATH}/pingapp/PingApp.cpp
@@ -170,10 +173,13 @@ ADD_EXECUTABLE(wexusserver
 
 #blogapp
     ${THIS_PATH}/blogapp/BlogApp.cpp
-    ${THIS_PATH}/blogapp/Post.cpp
     ${THIS_PATH}/blogapp/PostsController.cpp
+#models
+    ${THIS_PATH}/blogapp/Post.cpp
+#views
     ${THIS_PATH}/blogapp/PostsController/indexHtml.cpp
     ${THIS_PATH}/blogapp/PostsController/showHtml.cpp
+
     )
 TARGET_LINK_LIBRARIES(wexusserver hydra)
 ADD_EXECUTABLE(wexusmake

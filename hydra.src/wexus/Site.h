@@ -71,6 +71,7 @@ class wexus::Site : public wexus::HTTPHandlerStack
 
   private:
     bool dm_madeMimeTypes;
+    bool dm_madeOpenDatabases;
 
     QString dm_siteDir;
     wexus::HTTPParams dm_httpparms;

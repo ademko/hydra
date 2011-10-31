@@ -12,6 +12,7 @@
 #include <wexus/HTTPRequest.h>
 #include <wexus/HTTPReply.h>
 #include <wexus/Registry.h>
+#include <wexus/OpenDatabases.h>
 
 #include <QSqlDatabase>
 
@@ -56,13 +57,26 @@ class wexus::Application
     const QString &mountPoint(void) const { return dm_mountpoint; }
 
     /**
-     * Called shortly after creation
+     * Called shortly after creation. This saves a copy
+     * of the settings reference (acceisble via settings())
+     * and also opens the database.
      *
      * Decendants may overide this to add additional functionality.
+     * They should call this version, first, however.
      *
      * @author Aleksander Demko
      */
-    virtual void setSettings(const QVariantMap &settings);
+    virtual void init(const QVariantMap &settings);
+
+    /**
+     * This minimalist version of init() can be called by decendant's init functions
+     * if instead of Application::init(). This version simply sets
+     * the settings variable and does not perform any other
+     * functions, like database initialization.
+     *
+     * @author Aleksander Demko
+     */ 
+    void initBasic(const QVariantMap &settings);
 
     /**
      * Returns the current settings
@@ -81,7 +95,8 @@ class wexus::Application
      * A enhanced handleApplicationRequest() call from the wexus::Site to wexus::Application.
      * filteredRequest contains just the action call. It always starts with atleast a /
      *
-     * This method is not typically overriden.
+     * This method is not typically overriden, but can be if you want to layer over the
+     * default controller-handler system.
      *
      * @author Aleksander Demko
      */ 
@@ -89,7 +104,7 @@ class wexus::Application
 
     SessionManager & sessionManager(void) { return dm_sessionmanager; }
 
-    QSqlDatabase & database(void) { return dm_db; }
+    QSqlDatabase & database(void) { return dm_db.database(); }
 
     std::shared_ptr<Registry::AppInfo> appInfo(void);
 
@@ -146,7 +161,7 @@ class wexus::Application
     /// inherited constructor
     Application(void);
 
-    /// called by setSettings to open (or reopen) the db
+    /// called by initSettings to open (or reopen) the db
     void openDB(void);
 
   private:
@@ -154,7 +169,7 @@ class wexus::Application
     QVariantMap dm_settings;
 
     SessionManager dm_sessionmanager;
-    QSqlDatabase dm_db;
+    OpenDatabases::Handle dm_db;
 
     std::shared_ptr<Registry::AppInfo> dm_appinfo;
 

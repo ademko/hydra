@@ -215,16 +215,6 @@ Application::Application(void)
 
 Application::~Application()
 {
-  // tear down DB
-  if (dm_db.isOpen()) {
-    QString connname(dm_db.connectionName());
-
-    dm_db.close();
-
-    dm_db = QSqlDatabase(); // we need to "null" dm_db otherwise removeDatabasew ill think its open
-
-    QSqlDatabase::removeDatabase(connname);
-  }
 }
 
 void Application::setMountPoint(const QString &mountPoint)
@@ -232,11 +222,16 @@ void Application::setMountPoint(const QString &mountPoint)
   dm_mountpoint = mountPoint;
 }
 
-void Application::setSettings(const QVariantMap &settings)
+void Application::init(const QVariantMap &settings)
 {
-  dm_settings = settings;
+  initBasic(settings);
 
   openDB();
+}
+
+void Application::initBasic(const QVariantMap &settings)
+{
+  dm_settings = settings;
 }
 
 void Application::handleApplicationRequest(QString &filteredRequest, wexus::HTTPRequest &req, wexus::HTTPReply &reply)
@@ -246,7 +241,8 @@ void Application::handleApplicationRequest(QString &filteredRequest, wexus::HTTP
   for (RouteList::iterator ii=dm_routes.begin(); ii != dm_routes.end(); ++ii)
     if ((*ii)->handleApplicationRequest(splitreq, req, reply))
       return;
-  throw HTTPHandler::Exception("wexus::Application: not route found for " + filteredRequest);
+  //commented out to allow fall through to the next application
+  //throw HTTPHandler::Exception("wexus::Application: not route found for " + filteredRequest);
 }
 
 std::shared_ptr<Registry::AppInfo> Application::appInfo(void)
@@ -262,15 +258,10 @@ std::shared_ptr<Registry::AppInfo> Application::appInfo(void)
 
 void Application::openDB(void)
 {
+  assert(settings().contains("appdir"));
   QString dbpath = settings()["appdir"].toString() + "/database.sqlite";
 
   // setup DB
-  dm_db = QSqlDatabase::addDatabase("QSQLITE", dbpath);
-  assert(dm_db.isValid());
-
-  dm_db.setDatabaseName(dbpath);
-  bool good = dm_db.open();
-  assert(good);
-
+  dm_db = OpenDatabases::database(dbpath);
 }
 

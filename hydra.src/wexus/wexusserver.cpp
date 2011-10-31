@@ -64,7 +64,7 @@ static void addAppFromSettings(Site &site, const QFileInfo &appini, const QStrin
 
   QString mountpoint(appini.path().mid(sitepath.size()) + "/");
 
-  qDebug() << "launching" << appinfo->appname << "@" << mountpoint;
+  qDebug() << "  Launching (" << appinfo->appname << ") at " << mountpoint;
 
   std::shared_ptr<Application> app(appinfo->loader());
   assert(app.get());
@@ -84,7 +84,7 @@ static void addAppFromSettings(Site &site, const QFileInfo &appini, const QStrin
 
   //qDebug() << vmap;
   // config the app
-  app->setSettings(vmap);
+  app->init(vmap);
   // add it to the site
   site.addApplication(mountpoint, app);
 }
@@ -122,7 +122,7 @@ int main(int argc, char **argv)
     QFileInfo info(sitefilename);
 
     if (info.isFile()) {
-      qDebug() << "parsing INI " << sitefilename;
+      qDebug() << "INI File: " << sitefilename;
       QSettings settings(sitefilename, QSettings::IniFormat);
 
       settingsToMap(settings, siteoptions);
@@ -149,7 +149,7 @@ int main(int argc, char **argv)
 
 //qDebug() << fullfilename;
       if (info.isFile() && info.fileName() == "app.ini") {
-        qDebug() << "parsing INI " << fullfilename;
+        qDebug() << "INI File: " << fullfilename;
 
         // load the ini file
         QSettings settings(fullfilename, QSettings::IniFormat);
@@ -163,7 +163,7 @@ int main(int argc, char **argv)
           QString appname = vmap["app"].toString();
 
           if (!Registry::appsByName().contains(appname)) {
-            qDebug() << "app not found:" << appname;
+            qDebug() << fullfilename << ": app not found:" << appname;
             return -1;
           }
 
@@ -191,7 +191,7 @@ int main(int argc, char **argv)
             QString appname = groupmap["app"].toString();
 
             if (!Registry::appsByName().contains(appname)) {
-              qDebug() << "app not found (in group \"" << *group << "\" :" << appname;
+              qDebug() << fullfilename << ": app not found (in group \"" << *group << "\" :" << appname;
               return -1;
             }
 
