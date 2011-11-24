@@ -28,6 +28,9 @@ namespace wexus
  *    X is a number, 1, 2, etc
  *   The directory to serve. If none are given then a dir1="." is assumed.
  *   All directotories will be relative to the app dir.
+ *   for any dirX, you can have a optionX. this string can contain a space
+ *   delimeted list any of the following (case insenstive):
+ *   optionsX = "IndexHtml AutoDirIndex AllowAllMimeTypes"
  *   TODO future allow full absolute dirs?
  *
  *

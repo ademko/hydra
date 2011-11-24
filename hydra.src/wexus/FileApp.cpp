@@ -22,19 +22,37 @@ FileApp::FileApp(const QString &docdir)
   dm_dirs.append(DirFlags(docdir, FileHTTPHandler::AutoDirIndex|FileHTTPHandler::AllowAllMimeTypes));
 }
 
+static int parseFileHTTPHandlerFlags(const QString &flagsstring)
+{
+  QStringList parts = flagsstring.split(" ");
+  int r = 0;
+
+  for (QStringList::const_iterator ii=parts.begin(); ii != parts.end(); ++ii) {
+    if ((*ii).toLower() == "indexhtml")
+      r |= FileHTTPHandler::IndexHtml;
+    if ((*ii).toLower() == "autodirindex")
+      r |= FileHTTPHandler::AutoDirIndex;
+    if ((*ii).toLower() == "allowallmimetypes")
+      r |= FileHTTPHandler::AllowAllMimeTypes;
+  }
+
+  return r;
+}
+
 void FileApp::init(const QVariantMap &settings)
 {
-  // TODO future: add option1 = "keys" that translate to FileHTTPHandler directory options
-
   QString appdir = settings["appdir"].toString();
 
   assert(!appdir.isEmpty());
 
   // parse all the dirs
   int i=1;
-  QString key;
+  QString key, flagskey;
   while (settings.contains(key = "dir" + QString::number(i))) {
-    dm_dirs.append(DirFlags(appdir + "/" + settings.value(key).toString()));
+    int flags = 0;
+    if (settings.contains(flagskey = "options" + QString::number(i)))
+      flags = parseFileHTTPHandlerFlags(settings.value(flagskey).toString());
+    dm_dirs.append(DirFlags(appdir + "/" + settings.value(key).toString(), flags));
     ++i;
   }
   if (dm_dirs.isEmpty())
