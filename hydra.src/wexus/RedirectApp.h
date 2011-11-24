@@ -18,6 +18,12 @@ namespace wexus
 /**
  * An app that, based on a list, does redirections.
  *
+ * INI parameters:
+ *  linkX = "/src dest"
+ *    X is a number, 1, 2, etc
+ *    /src is url to match, leading / is required
+ *    dest is the url to return, can be relative to have a / or hostname, etc
+ *
  * @author Aleksander Demko
  */ 
 class wexus::RedirectApp : public wexus::Application

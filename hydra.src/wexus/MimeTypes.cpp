@@ -58,7 +58,7 @@ const QString & MimeTypes::mimeType(const QString &ext)
 
 void MimeTypes::addMimeType(const QString &type, const QString &ext)
 {
-  dm_ext[type] = data_t(new QString(type));
+  dm_ext[ext] = data_t(new QString(type));
 }
 
 void MimeTypes::addMimeType(const QString &type, const QStringList &extlist)

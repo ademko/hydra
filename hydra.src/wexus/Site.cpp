@@ -73,8 +73,9 @@ Site::Site(const QString &siteDir, const wexus::HTTPParams &params)
   dm_httpparms.setHandler(this);
   dm_httpserver = HTTPServer::factoryNew(dm_httpparms);
 
-  dm_filehandler.reset(new FileHTTPHandler(siteDir, FileHTTPHandler::IndexHtml|FileHTTPHandler::AutoDirIndex));
-  addHandler(dm_filehandler, 100);
+  //dont do this as a default anymore, its unsafe... let the frontend demand it:
+  //dm_filehandler.reset(new FileHTTPHandler(siteDir, FileHTTPHandler::IndexHtml|FileHTTPHandler::AutoDirIndex));
+  //addHandler(dm_filehandler, 100);
 }
 
 Site::~Site()
