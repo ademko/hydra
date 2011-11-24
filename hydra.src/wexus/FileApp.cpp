@@ -17,6 +17,11 @@ FileApp::FileApp(void)
 {
 }
 
+FileApp::FileApp(const QString &docdir)
+{
+  dm_dirs.append(DirFlags(docdir, FileHTTPHandler::AutoDirIndex|FileHTTPHandler::AllowAllMimeTypes));
+}
+
 void FileApp::init(const QVariantMap &settings)
 {
   // TODO future: add option1 = "keys" that translate to FileHTTPHandler directory options
@@ -29,7 +34,7 @@ void FileApp::init(const QVariantMap &settings)
   int i=1;
   QString key;
   while (settings.contains(key = "dir" + QString::number(i))) {
-    dm_dirs.append(appdir + "/" + settings.value(key).toString());
+    dm_dirs.append(DirFlags(appdir + "/" + settings.value(key).toString()));
     ++i;
   }
   if (dm_dirs.isEmpty())
@@ -40,7 +45,7 @@ void FileApp::handleApplicationRequest(QString &filteredRequest, wexus::HTTPRequ
 {
 qDebug() << "FileApp::handling " << filteredRequest;
   for (int i=0; i<dm_dirs.size(); ++i) {
-    FileHTTPHandler::processRequest(0, dm_dirs[i], filteredRequest, reply);
+    FileHTTPHandler::processRequest(dm_dirs[i].flags, dm_dirs[i].dirname, filteredRequest, reply);
     if (reply.hasReply())
       return; // dont try any more dirs, we got one
   }

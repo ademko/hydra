@@ -14,7 +14,7 @@
 
 #include <wexus/Site.h>
 #include <wexus/Registry.h>
-#include <pingapp/PingApp.h>
+#include <wexus/FileApp.h>
 
 using namespace wexus;
 
@@ -139,6 +139,7 @@ int main(int argc, char **argv)
   wexus::Site s(sitepath, httpparams);
 
   // load all the app files
+  int appsloaded = 0;
   {
     QDirIterator dd(sitepath, QDirIterator::Subdirectories);
 
@@ -196,13 +197,18 @@ int main(int argc, char **argv)
             }
 
             addAppFromSettings(s, info, appname, sitepath, groupmap);
+            appsloaded++;
           }//for
         }
       }//if app.init
     }//whild dd
   }
 
-  //s.addApplication("/pinger/", std::shared_ptr<pingapp::PingApp>(new pingapp::PingApp));
+  // any apps loaded?
+  if (appsloaded == 0) {
+    std::shared_ptr<Application> fileapp(new FileApp(sitepath));
+    s.addApplication("/", fileapp);
+  }
 
   s.start();
   s.wait();

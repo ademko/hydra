@@ -36,14 +36,35 @@ namespace wexus
 class wexus::FileApp : public wexus::Application
 {
   public:
+    /// normal ctor
     FileApp(void);
+
+    /**
+     * Specific ctor called by the mainline.
+     *
+     * Do not call init if you use this ctor.
+     *
+     * docdir will have some flags set, like auto indexing and loading all files. careful.
+     * TODO future, add flags parameter
+     * @author Aleksander Demko
+     */ 
+    FileApp(const QString &docdir);
 
     virtual void init(const QVariantMap &settings);
 
     virtual void handleApplicationRequest(QString &filteredRequest, wexus::HTTPRequest &req, wexus::HTTPReply &reply);
 
   protected:
-    QVector<QString> dm_dirs;   // vector, because once its built, it wont change
+    struct DirFlags
+    {
+      QString dirname;
+      int flags;
+
+      DirFlags(void) : flags(0) { }
+      DirFlags(const QString &_dirname, int _flags = 0) : dirname(_dirname), flags(_flags) { }
+    };
+
+    QVector<DirFlags> dm_dirs;   // vector, because once its built, it wont change
 };
 
 #endif
