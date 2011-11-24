@@ -50,7 +50,15 @@ class wexus::FileHTTPHandler : public wexus::HTTPHandler
     FileHTTPHandler(const QString &docdir, int flags = 0);
 
     /// handler
-    void handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &reply);
+    virtual void handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &reply);
+
+    /**
+     * The core handler itself, reusable in other places
+     * (like FileApp) and without an FileHTTPHandler instance.
+     *
+     * @author Aleksander Demko
+     */ 
+    static void processRequest(int flags, const QString &docdir, const QString &relpath, wexus::HTTPReply &reply);
 
     /**
      * Sends the given file to the given device (often reply.output().device().
@@ -62,11 +70,10 @@ class wexus::FileHTTPHandler : public wexus::HTTPHandler
      */ 
     static bool sendFile(const QString &filename, QIODevice * outputdev);
 
-  private:
-    void generateDirIndex(wexus::HTTPRequest &req, wexus::HTTPReply &reply,
-        const QString &fullpath, const QString &relpath);
+  protected:
+    static void generateDirIndex(const QString &fullpath, const QString &relpath, wexus::HTTPReply &reply);
 
-  private:
+  protected:
     QString dm_docdir;
     int dm_flags;
 };

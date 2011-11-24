@@ -44,7 +44,12 @@ void FileHTTPHandler::handleRequest(wexus::HTTPRequest &req, wexus::HTTPReply &r
     }
   }
 
-  QString fullpath(dm_docdir + relpath);
+  processRequest(dm_flags, dm_docdir, relpath, reply);
+}
+
+void FileHTTPHandler::processRequest(int flags, const QString &docdir, const QString &relpath, wexus::HTTPReply &reply)
+{
+  QString fullpath(docdir + relpath);
   QFileInfo info(fullpath);
 
 qDebug() << "FileHTTPHandler serving " << fullpath;
@@ -55,14 +60,14 @@ qDebug() << "FileHTTPHandler serving " << fullpath;
     QFileInfo indexinfo(indexfullpath);
 
     // check if there is a index.html and fall through with that
-    if (dm_flags & IndexHtml && indexinfo.isFile()) {
+    if (flags & IndexHtml && indexinfo.isFile()) {
       // fall through to file handling below
       fullpath = indexfullpath;
       info = indexinfo;
     } else {
       // not an indexhtml, see if we need to auto gen
-      if (dm_flags & AutoDirIndex)
-        generateDirIndex(req, reply, fullpath, relpath);
+      if (flags & AutoDirIndex)
+        generateDirIndex(fullpath, relpath, reply);
 
       // if were here, that means its a dir but we cant handle it
       // lets just bail and assume some other handler will take it
@@ -77,7 +82,7 @@ qDebug() << "FileHTTPHandler serving " << fullpath;
   QString fileext(info.suffix().toLower());
 
   // check mime type
-  if ((dm_flags & AllowAllMimeTypes) && !MimeTypes::containsMimeType(fileext))
+  if ((flags & AllowAllMimeTypes) && !MimeTypes::containsMimeType(fileext))
     reply.setContentType(MimeTypes::binaryMimeType());  // send binary if I can and don't have a type
   else
     reply.setContentType(MimeTypes::mimeType(fileext));
@@ -85,7 +90,6 @@ qDebug() << "FileHTTPHandler serving " << fullpath;
   if (!sendFile(fullpath, reply.output().device()))
     throw FileException("QFile::open failed");
 }
-
 
 bool FileHTTPHandler::sendFile(const QString &filename, QIODevice * outputdev)
 {
@@ -105,8 +109,8 @@ bool FileHTTPHandler::sendFile(const QString &filename, QIODevice * outputdev)
   return true;
 }
 
-void FileHTTPHandler::generateDirIndex(wexus::HTTPRequest &req, wexus::HTTPReply &reply,
-  const QString &fullpath, const QString &relpath)
+void FileHTTPHandler::generateDirIndex(const QString &fullpath,
+    const QString &relpath, wexus::HTTPReply &reply)
 {
   reply.output() << "<h2>Index of: " << relpath <<
       "</h2>\n<UL>\n<LI><A HREF=\"../\">Parent Directory</A></LI><P>\n";

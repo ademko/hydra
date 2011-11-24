@@ -156,6 +156,7 @@ ADD_EXECUTABLE(wexusserver
     ${THIS_PATH}/wexus/MarkDown.cpp
 #helper apps
     ${THIS_PATH}/wexus/RedirectApp.cpp
+    ${THIS_PATH}/wexus/FileApp.cpp
 
 #pingapp
     ${THIS_PATH}/pingapp/PingApp.cpp
