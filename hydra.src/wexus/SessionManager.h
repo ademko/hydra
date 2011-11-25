@@ -93,7 +93,9 @@ class wexus::SessionManager
     std::shared_ptr<SessionLocker::Data> getDataByCookie(Cookies &cookies);
 
   private:
-    QMap<QUuid, std::shared_ptr<SessionLocker::Data> > dm_map;
+
+    QMutex dm_maplock;    // locks the following:
+    QMap<QUuid, std::shared_ptr<SessionLocker::Data> > dm_map; //shared RW
 };
 
 #endif

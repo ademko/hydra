@@ -165,6 +165,7 @@ class wexus::Application
     void openDB(void);
 
   private:
+    // all members here are RO (readonly), unless otherwise noted
     QString dm_mountpoint;
     QVariantMap dm_settings;
 

@@ -42,6 +42,8 @@ SessionManager::SessionManager(void)
 
 std::shared_ptr<SessionLocker::Data> SessionManager::getData(const QUuid &id)
 {
+  QMutexLocker L(&dm_maplock);
+
   if (dm_map.contains(id))
     return dm_map[id];
 

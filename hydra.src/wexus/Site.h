@@ -70,6 +70,8 @@ class wexus::Site : public wexus::HTTPHandlerStack
     void addApplication(const QString &mountpoint, std::shared_ptr<wexus::Application> app);
 
   private:
+    // all members here are RO (readonly)
+    // that is, set during startup in the main thread
     bool dm_madeMimeTypes;
     bool dm_madeOpenDatabases;
 
