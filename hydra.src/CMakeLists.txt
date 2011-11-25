@@ -158,20 +158,6 @@ ADD_EXECUTABLE(wexusserver
     ${THIS_PATH}/wexus/RedirectApp.cpp
     ${THIS_PATH}/wexus/FileApp.cpp
 
-#pingapp
-    ${THIS_PATH}/pingapp/PingApp.cpp
-    ${THIS_PATH}/pingapp/SitesController.cpp
-    ${THIS_PATH}/pingapp/HostsController.cpp
-#views
-    ${THIS_PATH}/pingapp/SitesController/indexHtml.cpp
-    ${THIS_PATH}/pingapp/SitesController/createHtml.cpp
-    ${THIS_PATH}/pingapp/SitesController/editHtml.cpp
-    ${THIS_PATH}/pingapp/SitesController/destroyHtml.cpp
-    ${THIS_PATH}/pingapp/HostsController/indexHtml.cpp
-    ${THIS_PATH}/pingapp/HostsController/createHtml.cpp
-#models
-    ${THIS_PATH}/pingapp/Host.cpp ${THIS_PATH}/pingapp/Site.cpp
-
 #blogapp
     ${THIS_PATH}/blogapp/BlogApp.cpp
     ${THIS_PATH}/blogapp/PostsController.cpp
