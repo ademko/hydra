@@ -73,7 +73,6 @@ class wexus::Site : public wexus::HTTPHandlerStack
     // all members here are RO (readonly)
     // that is, set during startup in the main thread
     bool dm_madeMimeTypes;
-    bool dm_madeOpenDatabases;
 
     QString dm_siteDir;
     wexus::HTTPParams dm_httpparms;

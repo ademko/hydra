@@ -9,58 +9,68 @@
 
 #include <assert.h>
 
+#include <QThread>
+#include <QThreadStorage>
 #include <QDebug>
 
 #include <wexus/HTTPServer.h>
 
 using namespace wexus;
 
+static QThreadStorage<OpenDatabases *> Storage;
+
 OpenDatabases::Handle::Handle(void)
 {
 }
 
-OpenDatabases::Handle::Handle(const std::shared_ptr<QSqlDatabase> &db)
-  : dm_db(db)
+OpenDatabases::Handle::Handle(const QString &filename)
+  : dm_filename(filename)
 {
 }
 
-OpenDatabases::Handle::~Handle()
+QSqlDatabase & OpenDatabases::Handle::database(void)
 {
-  if (dm_db.get() && dm_db.unique() && dm_db->isOpen()) {
-    QString connname(dm_db->connectionName());
+  return OpenDatabases::threadInstance()->database(dm_filename);
+}
 
-    dm_db->close();
+OpenDatabases::OpenDatabases(void)
+{
+}
 
-    dm_db.reset(); //dm_db = QSqlDatabase(); // we need to "null" dm_db otherwise removeDatabasew ill think its open
+OpenDatabases::~OpenDatabases()
+{
+  // manually remove all the open databases
+  for (map_t::iterator ii=dm_map.begin(); ii != dm_map.end(); ++ii) {
+    QString connname((*ii)->connectionName());
+
+    (*ii)->close();
+
+    (*ii).reset(); //dm_db = QSqlDatabase(); // we need to "null" dm_db otherwise removeDatabasew ill think its open
 
     QSqlDatabase::removeDatabase(connname);
   }
 }
 
-OpenDatabases * OpenDatabases::dm_instance;
-
-OpenDatabases::OpenDatabases(void)
+OpenDatabases * OpenDatabases::threadInstance(void)
 {
-  assert(dm_instance == 0);
-  dm_instance = this;
-}
+  OpenDatabases *ret = Storage.localData();
 
-OpenDatabases::~OpenDatabases()
-{
-  assert(dm_instance == this);
-  dm_instance = 0;
-}
+  if (!ret) {
+    ret = new OpenDatabases;
+    Storage.setLocalData(ret);
+  }
 
-OpenDatabases * OpenDatabases::instance(void)
-{
-  return dm_instance;
+  return ret;
 }
 
 static std::shared_ptr<QSqlDatabase> makeDB(const QString &filename)
 {
   std::shared_ptr<QSqlDatabase> ret(new QSqlDatabase);
+  // make the connection name a combination of threadid + filename
+  QString connname = QString::number(reinterpret_cast<quintptr>(
+        QThread::currentThread())) + " " + filename;
 
-  *ret = QSqlDatabase::addDatabase("QSQLITE", filename);
+  *ret = QSqlDatabase::addDatabase("QSQLITE", connname);
 
   if (!ret->isValid())
     throw HTTPServer::Exception("OpenDatabases: can't addDatabase: " + filename);
@@ -74,23 +84,26 @@ static std::shared_ptr<QSqlDatabase> makeDB(const QString &filename)
   return ret;
 }
 
-OpenDatabases::Handle OpenDatabases::database(const QString &filename)
+QSqlDatabase & OpenDatabases::database(const QString &filename)
 {
-  assert(dm_instance);
+  OpenDatabases *instance = threadInstance();
 
-  if (!dm_instance->dm_map.contains(filename)) {
+  assert(instance);
+
+  if (!instance->dm_map.contains(filename)) {
     std::shared_ptr<QSqlDatabase> db(makeDB(filename));
-    dm_instance->dm_map[filename] = db;
-    return Handle(db);
+    instance->dm_map[filename] = db;
+
+    return *db;
   } else {
-    std::shared_ptr<QSqlDatabase> db(dm_instance->dm_map[filename]);
+    std::shared_ptr<QSqlDatabase> db(instance->dm_map[filename]);
 
     if (!db.get()) {
       db = makeDB(filename);
-      dm_instance->dm_map[filename] = db;
+      instance->dm_map[filename] = db;
     }
 
-    return Handle(db);
+    return *db;
   }
 }
 

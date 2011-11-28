@@ -19,7 +19,12 @@ namespace wexus
 }
 
 /**
- * A singleton class that manages all the open databases.
+ * A per-thread class that managers all the open QSqlDatabase
+ * connections held by a thread.
+ *
+ * We need to use something like this because QSqlDatabase objects
+ * can only be used in the threads that created them, hense each thread
+ * needs its own set.
  *
  * @author Aleksander Demko
  */ 
@@ -30,43 +35,49 @@ class wexus::OpenDatabases
      * Speciall wrapper around the smart pointer because
      * QSqlDatabase needs some extra closing logic.
      *
+     * This class is copyable.
+     *
      * @author Aleksander Demko
      */ 
     class Handle
     {
       public:
         Handle(void);
-        Handle(const std::shared_ptr<QSqlDatabase> &db);
-        ~Handle();
+        Handle(const QString &filename);
 
-        QSqlDatabase & database(void) { return *dm_db; }
+        /**
+         * Gets the QSqlDatabase from this threads's TLS.
+         *
+         * @author Aleksander Demko
+         */ 
+        QSqlDatabase & database(void);
 
       private:
-        std::shared_ptr<QSqlDatabase> dm_db;
+        QString dm_filename;
     };
 
   public:
-    /// constructor
-    OpenDatabases(void);
     /// destructor
     ~OpenDatabases();
 
     /**
-     * Returns the singleton instance. May return null
-     * if there is none.
+     * Returns the "static-like" instance for this thread.
      *
      * @author Aleksander Demko
      */ 
-    static OpenDatabases *instance(void);
+    static OpenDatabases *threadInstance(void);
 
-    static Handle database(const QString &filename);
+    /// uses threadInstance
+    static QSqlDatabase & database(const QString &filename);
+
+  protected:
+    /// constructor, called by threadInstance when needed
+    OpenDatabases(void);
 
   private:
-    typedef std::weak_ptr<QSqlDatabase> data_t;
+    typedef std::shared_ptr<QSqlDatabase> data_t;
     typedef QMap<QString, data_t> map_t;
 
-    static OpenDatabases *dm_instance;
-    
     map_t dm_map;
 };
 

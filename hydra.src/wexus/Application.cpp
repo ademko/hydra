@@ -262,6 +262,6 @@ void Application::openDB(void)
   QString dbpath = settings()["appdir"].toString() + "/database.sqlite";
 
   // setup DB
-  dm_db = OpenDatabases::database(dbpath);
+  dm_db = OpenDatabases::Handle(dbpath);
 }
 

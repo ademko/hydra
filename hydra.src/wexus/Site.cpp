@@ -66,9 +66,6 @@ Site::Site(const QString &siteDir, const wexus::HTTPParams &params)
   dm_madeMimeTypes = MimeTypes::instance() == 0;
   if (dm_madeMimeTypes)
     new MimeTypes();    // instance not lost, its a singlton!
-  dm_madeOpenDatabases = OpenDatabases::instance() == 0;
-  if (dm_madeOpenDatabases)
-    new OpenDatabases();
 
   dm_httpparms.setHandler(this);
   dm_httpserver = HTTPServer::factoryNew(dm_httpparms);
@@ -85,8 +82,6 @@ Site::~Site()
 
   if (dm_madeMimeTypes)
     delete MimeTypes::instance();
-  if (dm_madeOpenDatabases)
-    delete OpenDatabases::instance();
 }
 
 bool Site::isRunning(void) const
