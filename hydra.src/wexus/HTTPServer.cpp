@@ -22,6 +22,7 @@ using namespace wexus;
 HTTPParams::HTTPParams(void)
 {
   dm_port = 8080;
+  dm_numthreads = 4;
   dm_handler = 0;
 }
 
@@ -29,6 +30,12 @@ void HTTPParams::setPort(int p)
 {
   assert(p>0);
   dm_port = p;
+}
+
+void HTTPParams::setNumThreads(int t)
+{
+  assert(t>0);
+  dm_numthreads = t;
 }
 
 void HTTPParams::setHandler(HTTPHandler *handler)

@@ -36,7 +36,11 @@ class wexus::HTTPParams
     /// port to listen to, 8080 by default.
     int port(void) const { return dm_port; }
 
+    int numThreads(void) const { return dm_numthreads; }
+
     void setPort(int p);
+
+    void setNumThreads(int t);
 
     /**
      * Sets the handeler that will receive
@@ -51,6 +55,7 @@ class wexus::HTTPParams
 
   private:
     int dm_port;
+    int dm_numthreads;
     HTTPHandler *dm_handler;
 };
 

@@ -45,15 +45,20 @@ void MongooseServer::start(void)
   if (isRunning())
     return;
 
-qDebug() << "MongooseServer::start";
   std::ostringstream s;
   s << dm_opt.port();
   std::string port_s = s.str();
 
+  s.str("");
+  s << dm_opt.numThreads();
+  std::string numthreads_s = s.str();
+
   const char * mgopts[] = {
     "listening_ports", port_s.c_str(),
+    "num_threads", numthreads_s.c_str(),
     0
   };
+qDebug() << "MongooseServer::start port=" << dm_opt.port() << " threads=" << dm_opt.numThreads(); 
   dm_ctx = mg_start(callback, this, mgopts);
   if (dm_ctx == 0) {
     throw PortInUseException(dm_opt.port());

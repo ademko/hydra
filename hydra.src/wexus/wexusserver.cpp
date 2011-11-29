@@ -33,8 +33,9 @@ void showHelp(void)
     "wexusserver base_site_directory\n\n"
     "  base_site_directory  is the base directory for the web site\n\n"
     "  site.ini     the base_site_directory can contain a site.ini file,\n"
-    "               which can have the following options\n"
-    "                httpport = 8080\n\n"
+    "               which can have the following options:\n"
+    "                httpport = 8080\n"
+    "                httpthreads = 4\n\n"
     "  app.ini      any subdirectory can have an app.ini, which launches\n"
     "               an application in that subdirectory\n"
     "                app = application type (see list below) (required field)\n"
@@ -134,6 +135,8 @@ int main(int argc, char **argv)
   // convert some options into httpparams for Site
   if (siteoptions.contains("httpport"))
     httpparams.setPort(siteoptions["httpport"].toInt());
+  if (siteoptions.contains("httpthreads"))
+    httpparams.setNumThreads(siteoptions["httpthreads"].toInt());
 
   // in the future, pass siteoptions directly to Site too?
   wexus::Site s(sitepath, httpparams);
