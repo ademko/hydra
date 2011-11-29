@@ -18,17 +18,16 @@
 
 namespace wexus
 {
-  class SessionLocker;
   class SessionManager;
 }
 
 /**
- * Parses and holds session parameters.
- * The 
+ * A map of UUIDs to sessions.
+ * rename this, perhaps?
  *
  * @author Aleksander Demko
  */ 
-class wexus::SessionLocker
+class wexus::SessionManager
 {
   public:
     class Data
@@ -39,38 +38,55 @@ class wexus::SessionLocker
         QVariantMap fieldValues;
     };
 
-  public:
-    /**
-     * Creates a session bound to the given Data.
-     * Future feature: disconnected sessions for when
-     * a session is not needed??
-     *
-     * @author Aleksander Demko
-     */ 
-    SessionLocker(std::shared_ptr<Data> data);
+  /**
+   * Holds a lock on session parameters.
+   *
+   * @author Aleksander Demko
+   */ 
+  class Locker
+  {
+    public:
+      /**
+       * Empty ctor.
+       *
+       * @author Aleksander Demko
+       */ 
+      Locker(void);
+      /**
+       * Copy ctor: TRANSFERS ownership of the session.
+       *
+       * @author Aleksander Demko
+       */ 
+      Locker(const Locker &rhs);
+      /**
+       * Creates a session bound to the given Data.
+       *
+       * @author Aleksander Demko
+       */ 
+      Locker(std::shared_ptr<Data> data);
+      /**
+       * Creates an orphan session for the given id.
+       *
+       * @author Aleksander Demko
+       */ 
+      Locker(SessionManager *sesman, const QUuid &orphanId);
 
-    /// destructor
-    ~SessionLocker();
+      /// destructor
+      ~Locker();
 
-    /// gets the linked QVariantMap of session values
-    QVariantMap & map(void) const { return dm_data->fieldValues; }
+      /// gets the linked QVariantMap of session values
+      QVariantMap & map(void) const;
 
-  private:
-    /// parse the linked HTTPRequest, if it hasnt already
-    //void parseRequest(void);
+    private:
+      /// parse the linked HTTPRequest, if it hasnt already
+      //void parseRequest(void);
 
-  private:
-    std::shared_ptr<Data> dm_data;
-};
+    private:
+      SessionManager *dm_sesman;
+      QUuid dm_orphanId;
+      mutable std::shared_ptr<Data> dm_data;
+  };
 
-/**
- * A map of UUIDs to sessions.
- * rename this, perhaps?
- *
- * @author Aleksander Demko
- */ 
-class wexus::SessionManager
-{
   public:
     /// ctor
     SessionManager(void);
@@ -82,7 +98,7 @@ class wexus::SessionManager
      *
      * @author Aleksander Demko
      */ 
-    std::shared_ptr<SessionLocker::Data> getData(const QUuid &id);
+    Locker getData(const QUuid &id);
 
     /**
      * Extra the session by the UUID stored in the session cookie,
@@ -90,12 +106,20 @@ class wexus::SessionManager
      *
      * @author Aleksander Demko
      */ 
-    std::shared_ptr<SessionLocker::Data> getDataByCookie(Cookies &cookies);
+    Locker getDataByCookie(Cookies &cookies);
+
+    /**
+     * Stores the given Data at the given ID.
+     * this is used by Locker.
+     *
+     * @author Aleksander Demko
+     */ 
+    void putData(const QUuid &id, std::shared_ptr<Data> &dat);
 
   private:
 
     QMutex dm_maplock;    // locks the following:
-    QMap<QUuid, std::shared_ptr<SessionLocker::Data> > dm_map; //shared RW
+    QMap<QUuid, std::shared_ptr<Data> > dm_map; //shared RW
 };
 
 #endif

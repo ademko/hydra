@@ -23,6 +23,14 @@ typedef Context* ContextPtr;
 
 static QThreadStorage<ContextPtr *> Storage;
 
+static QVariantMap extractFlash(const QVariantMap &session)
+{
+  if (session.contains("flash"))
+    return session["flash"].toMap();
+  else
+    return QVariantMap();
+}
+
 Context::Context(wexus::Application *application, wexus::HTTPRequest &req, wexus::HTTPReply &reply)
   : dm_application(application),
     dm_req(req), dm_reply(reply),
@@ -31,10 +39,11 @@ Context::Context(wexus::Application *application, wexus::HTTPRequest &req, wexus
     cookies(&dm_req, &dm_reply),
     dm_sessionlocker(dm_application->sessionManager().getDataByCookie(cookies)),
     session(dm_sessionlocker.map()),
-    flash(session["flash"].toMap())
+    flash(extractFlash(session))
 {
   // clear the flash
-  session["flash"] = QVariant();
+  if (session.contains("flash"))
+    session["flash"] = QVariant();
 
   // we need to store a dynamically allocated ptr-to-ptr
   // becase QThreadStorage insists on being able to call delete
@@ -49,7 +58,8 @@ Context::~Context()
     sendFooter();
 
   // save the setFlast as the current flash for the next call
-  session["flash"] = setFlash;
+  if ( !(!session.contains("flash") && setFlash.isEmpty()) )
+    session["flash"] = setFlash;
 
   Storage.setLocalData(0);
 }

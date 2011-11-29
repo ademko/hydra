@@ -9,6 +9,8 @@
 
 #include <assert.h>
 
+#include <QDebug>
+
 using namespace wexus;
 
 //
@@ -17,17 +19,53 @@ using namespace wexus;
 //
 //
 
-SessionLocker::SessionLocker(std::shared_ptr<SessionLocker::Data> data)
-  : dm_data(data)
+SessionManager::Locker::Locker(void)
+  : dm_sesman(0)
+{
+}
+
+SessionManager::Locker::Locker(const Locker &rhs)
+  : dm_sesman(0), dm_orphanId(rhs.dm_orphanId), dm_data(rhs.dm_data)
+{
+  // transfer by nuking the source ptr
+  rhs.dm_data.reset();
+}
+
+SessionManager::Locker::Locker(std::shared_ptr<SessionManager::Data> data)
+  : dm_sesman(0), dm_data(data)
 {
   assert(dm_data.get());
 
   dm_data->mutex.lock();
 }
 
-SessionLocker::~SessionLocker()
+SessionManager::Locker::Locker(SessionManager *sesman, const QUuid &orphanId)
+  : dm_sesman(sesman), dm_orphanId(orphanId), dm_data(new Data)
 {
+  dm_data->mutex.lock();
+}
+
+SessionManager::Locker::~Locker()
+{
+  if (dm_data.get() == 0)
+    return; // no data
+
+  bool isEmpty = dm_data->fieldValues.isEmpty();
+
   dm_data->mutex.unlock();
+
+  if (!isEmpty && dm_sesman) {
+    assert(!dm_orphanId.isNull());
+    // this an orphan, insert it
+    assert(dm_sesman);
+    dm_sesman->putData(dm_orphanId, dm_data);
+  }
+}
+
+QVariantMap & SessionManager::Locker::map(void) const
+{
+  assert(dm_data.get());
+  return dm_data->fieldValues;
 }
 
 //
@@ -40,20 +78,18 @@ SessionManager::SessionManager(void)
 {
 }
 
-std::shared_ptr<SessionLocker::Data> SessionManager::getData(const QUuid &id)
+SessionManager::Locker SessionManager::getData(const QUuid &id)
 {
   QMutexLocker L(&dm_maplock);
 
   if (dm_map.contains(id))
-    return dm_map[id];
+    return Locker(dm_map[id]);
 
-  // create it
-  std::shared_ptr<SessionLocker::Data> ptr(new SessionLocker::Data);
-  dm_map[id] = ptr;
-  return ptr;
+  // return a orphan-placeholder Locker
+  return Locker(this, id);
 }
 
-std::shared_ptr<SessionLocker::Data> SessionManager::getDataByCookie(Cookies &cookies)
+SessionManager::Locker SessionManager::getDataByCookie(Cookies &cookies)
 {
   QUuid id;
 
@@ -69,5 +105,12 @@ std::shared_ptr<SessionLocker::Data> SessionManager::getDataByCookie(Cookies &co
 
   // finally, extract the session
   return getData(id);
+}
+
+void SessionManager::putData(const QUuid &id, std::shared_ptr<Data> &dat)
+{
+  QMutexLocker L(&dm_maplock);
+
+  dm_map[id] = dat;
 }
 

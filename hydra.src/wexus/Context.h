@@ -119,7 +119,7 @@ class wexus::Context
 
   private:
     // this has to be constructed AFTER cookies but before session
-    SessionLocker dm_sessionlocker;
+    SessionManager::Locker dm_sessionlocker;
 
   public:
 
