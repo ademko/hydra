@@ -12,6 +12,7 @@
 #include <QUuid>
 #include <QMap>
 #include <QVariant>
+#include <QDateTime>
 
 #include <wexus/TR1.h>
 #include <wexus/Cookies.h>
@@ -36,6 +37,7 @@ class wexus::SessionManager
         // called by Session, used to protect fieldValues
         QMutex mutex;
         QVariantMap fieldValues;
+        QDateTime lastAccessed;
     };
 
   /**
@@ -63,13 +65,13 @@ class wexus::SessionManager
        *
        * @author Aleksander Demko
        */ 
-      Locker(std::shared_ptr<Data> data);
+      Locker(const QDateTime &now, std::shared_ptr<Data> data);
       /**
        * Creates an orphan session for the given id.
        *
        * @author Aleksander Demko
        */ 
-      Locker(SessionManager *sesman, const QUuid &orphanId);
+      Locker(const QDateTime &now, SessionManager *sesman, const QUuid &orphanId);
 
       /// destructor
       ~Locker();
@@ -88,8 +90,17 @@ class wexus::SessionManager
   };
 
   public:
-    /// ctor
-    SessionManager(void);
+    /**
+     * Constructs a session manager with the expiry
+     * time length.
+     *
+     *
+     * @param expiry_seconds the expiry time, in seconds.
+     * Could be 0, for no expiry, but this is not recommended
+     * (could leak sessions, then)
+     * @author Aleksander Demko
+     */ 
+    SessionManager(int expiry_seconds = 3600);
 
     /**
      * Gets a session based on the given id.
@@ -116,10 +127,16 @@ class wexus::SessionManager
      */ 
     void putData(const QUuid &id, std::shared_ptr<Data> &dat);
 
+  protected:
+    void pruneExpiredSessions(const QDateTime &now);
+
   private:
+    const int dm_expiry_seconds;  // RO (but if ever made RW, put it under the following lock:
 
     QMutex dm_maplock;    // locks the following:
-    QMap<QUuid, std::shared_ptr<Data> > dm_map; //shared RW
+    QDateTime dm_last_prunesweep;
+    typedef QMap<QUuid, std::shared_ptr<Data> > map_t;
+    map_t dm_map; //shared RW
 };
 
 #endif
