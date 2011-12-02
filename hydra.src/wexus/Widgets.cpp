@@ -153,6 +153,11 @@ HTMLString wexus::linkTo(const QString &desc, const QString &rawurl)
   return HTMLString("<A HREF=\"" + rawurl + "\">" + HTMLString::encode(desc) + "</A>");
 }
 
+HTMLString wexus::linkTo(const HTMLString &desc, const QString &rawurl)
+{
+  return HTMLString("<A HREF=\"" + rawurl + "\">" + desc + "</A>");
+}
+
 void wexus::redirectTo(const QString &rawurl)
 {
   if (rawurl.isEmpty())

@@ -84,6 +84,16 @@ namespace wexus
   wexus::HTMLString linkTo(const QString &desc, const QString &rawurl);
 
   /**
+   * Returns the HTML code for a link to rawurl with the given
+   * description.
+   *
+   * HTMLString description version.
+   *
+   * @author Aleksander Demko
+   */ 
+  wexus::HTMLString linkTo(const HTMLString &desc, const QString &rawurl);
+
+  /**
    * Redirectst the user to the given url.
    * This must be called before any output, etc.
    *

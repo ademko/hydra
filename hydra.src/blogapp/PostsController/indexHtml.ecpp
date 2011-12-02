@@ -1,11 +1,13 @@
 
-<ul>
+<dl>
 <% while (dm_post.next()) { %>
-  <li>(<%=dm_post.year%>-<%=dm_post.month%>-<%=dm_post.day%>) 
-      <%=linkTo(dm_post.id, pathTo(&PostsController::show, dm_post))%> <p>
-  <H2><%= MarkDown::title(dm_post.asByteArray()) %></H2>
-  <BLOCKQUOTE><%= MarkDown::firstPara(dm_post.asByteArray()) %></BLOCKQUOTE>
-  </li>
+  <p><dt>
+      <%=linkTo(MarkDown::title(dm_post.asByteArray()), pathTo(&PostsController::show, dm_post))%>
+  </dt>
+  <dd>
+  <i><%=dm_post.year%>-<%=dm_post.month%>-<%=dm_post.day%></i><br/>
+  <%= MarkDown::firstPara(dm_post.asByteArray()) %>...
+  </dd> </p>
 <% } %>
-</ul>
+</dl>
 

@@ -1,8 +1,5 @@
 
-showing
-
-<p>id=<%=dm_post.id%></p>
-<p>post=</p>
+<%=linkTo("<< Back to Posts", pathTo(&PostsController::index))%>
 
 <% output() << MarkDown::process(dm_post.asByteArray(), MarkDown::Format_BlogPost); %>
 

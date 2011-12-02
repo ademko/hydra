@@ -17,7 +17,7 @@ using namespace blogapp;
 
 void PostsController::index(void)
 {
-  dm_post.all();
+  dm_post.all(true);
 
   indexHtml();
 }

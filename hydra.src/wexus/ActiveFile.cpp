@@ -7,6 +7,8 @@
 
 #include <wexus/ActiveFile.h>
 
+#include <algorithm>
+
 #include <QFile>
 #include <QVariant>
 
@@ -77,7 +79,7 @@ QByteArray & ActiveFile::asByteArray(void)
   return dm_data->bytearray;
 }
 
-void ActiveFile::all(void)
+void ActiveFile::all(bool reverseOrder)
 {
   std::shared_ptr<IteratorSpec> ii(new IteratorSpec);
 
@@ -96,6 +98,8 @@ void ActiveFile::all(void)
 
   // sort the list
   ii->filenames.sort();
+  if (reverseOrder)
+    std::reverse(ii->filenames.begin(), ii->filenames.end());
 
   ii->iterator = ii->filenames.begin();
 

@@ -123,7 +123,7 @@ class wexus::ActiveFile : public wexus::IDAble
      *
      * @author Aleksander Demko
      */ 
-    void all(void);
+    void all(bool reverseOrder = false);
 
     /**
      * Returns the next record in file list, or false if
