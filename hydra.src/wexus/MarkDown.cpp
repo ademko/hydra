@@ -112,7 +112,7 @@ namespace { class markdown
       FindingStart,
       InPara_Basic,
       InPara_WithStyleChecking,
-      InPara_GotASpace,
+      InPara_CheckForStyle,
       InPara_HashCheck,
       InPara_StartOfLine,
       Style_Start,
@@ -705,7 +705,7 @@ retry_c:
                                    state = InPara_Basic;
                                  else {
                                    para_buf.push_back(' ');
-                                   state = InPara_GotASpace;// we actually want style and link checking at the start of the line too
+                                   state = InPara_CheckForStyle;// we actually want style and link checking at the start of the line too
                                  }
                                }
                                goto retry_c;
@@ -713,9 +713,9 @@ retry_c:
                              }
       case InPara_WithStyleChecking: {
                                        bool skipbreak = false;
-                                       if (c == ' ') {
-                                         para_buf.push_back(' ');
-                                         state = InPara_GotASpace;
+                                       if (c == ' ' || c == '(') {  // more special cases or broaden this list?
+                                         para_buf.push_back(c);
+                                         state = InPara_CheckForStyle;
                                        } else if (escapeJumped(InPara_WithStyleChecking)) {
                                          // nothing needed
                                        } else if (ampJumped(InPara_WithStyleChecking)) {
@@ -736,7 +736,7 @@ retry_c:
                        encodedPushBack();
                      break;
                    }
-      case InPara_GotASpace: {
+      case InPara_CheckForStyle: {
                                if (styleJumped(InPara_WithStyleChecking)) {
                                  // nothing needed
                                } else if (linkJumped(InPara_WithStyleChecking)) {
