@@ -60,3 +60,17 @@ QString wexus::upperFirstChar(const QString &s)
   return r;
 }
 
+QString wexus::checkNull(const QString &s, const QString &def)
+{
+  if (s.isEmpty())
+    return def;
+  else
+    return s;
+}
+HTMLString wexus::checkNull(const HTMLString &s, const QString &def)
+{
+  if (s.isEmpty())
+    return HTMLString(def);
+  else
+    return s;
+}

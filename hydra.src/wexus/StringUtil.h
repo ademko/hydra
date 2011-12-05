@@ -11,6 +11,8 @@
 #include <QString>
 #include <QStringList>
 
+#include <wexus/HTMLString.h>
+
 namespace wexus
 {
   /**
@@ -58,6 +60,22 @@ namespace wexus
    * @author Aleksander Demko
    */ 
   QString upperFirstChar(const QString &s);
+
+  /**
+   * If the given string is null, return the default string instead.
+   *
+   * @author Aleksander Demko
+   */
+  QString checkNull(const QString &s, const QString &def);
+
+  /**
+   * If the given string is null, return the default string instead.
+   *
+   * Will we be needing HTMLString versions of everything?
+   *
+   * @author Aleksander Demko
+   */
+  HTMLString checkNull(const HTMLString &s, const QString &def);
 };
 
 #endif

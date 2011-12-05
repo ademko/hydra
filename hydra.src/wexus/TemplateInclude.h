@@ -12,6 +12,7 @@
 // ecpp->cpp generated files
 
 #include <wexus/HTMLString.h>
+#include <wexus/StringUtil.h>
 #include <wexus/Widgets.h>
 #include <wexus/Form.h>
 #include <wexus/VarPath.h>

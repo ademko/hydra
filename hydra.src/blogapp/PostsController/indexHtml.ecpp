@@ -1,13 +1,15 @@
 
 <dl>
-<% while (dm_post.next()) { %>
+<% if (!dm_post.next()) { %>
+  No posts found.
+<% } else do { %>
   <p><dt>
-      <%=linkTo(MarkDown::title(dm_post.asByteArray()), pathTo(&PostsController::show, dm_post))%>
+      <%=linkTo(checkNull(MarkDown::title(dm_post.asByteArray()), dm_post.id), pathTo(&PostsController::show, dm_post))%>
   </dt>
   <dd>
   <i><%=dm_post.year%>-<%=dm_post.month%>-<%=dm_post.day%></i><br/>
   <%= MarkDown::firstPara(dm_post.asByteArray()) %>...
   </dd> </p>
-<% } %>
+<% } while (dm_post.next()); %>
 </dl>
 
