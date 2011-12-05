@@ -117,6 +117,7 @@ namespace { class markdown
       InPara_StartOfLine,
       Style_Start,
       Style_Processing,
+      Style_GotEnd,
       Amp_Processing,
       Escape_Processing,
       Link_Start,
@@ -765,15 +766,27 @@ retry_c:
                         }
       case Style_Processing: {
                                if (c == style_c) {
-                                 // done styling
-                                 para_buf += QString("</") + styleToHtml(style_c) + ">";
-                                 state = style_returnstate;
+                                 state = Style_GotEnd;
                                } else if (ampJumped(Style_Processing)) {
                                  // do nothing
                                } else
                                  encodedPushBack();
                                break;
                              }
+      case Style_GotEnd: {
+                           if (!QChar(c).isLetterOrNumber()) {
+                             // done styling
+                             para_buf += QString("</") + styleToHtml(style_c) + ">";
+                             state = style_returnstate;
+                             goto retry_c;
+                           } else {
+                             // not a space char, flush the style char and continue normal style processing
+                             para_buf.push_back(style_c);
+                             state = Style_Processing;
+                             goto retry_c;
+                           }
+                           break;
+                         }
       case Amp_Processing: {
                         if (c >= 'a' && c <= 'z' && (index - amp_index) < 5) {
                           // do nothing
