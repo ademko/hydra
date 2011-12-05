@@ -19,15 +19,28 @@ blogapp::Post::Post(void)
 {
 }
 
-bool blogapp::Post::onLoad(void)
+bool blogapp::Post::onLoad(const QString &fullfilename)
 {
   if (id.isEmpty())
     return true;
 
   QRegExp r = QRegExp("^(\\d\\d\\d\\d)(\\d\\d)(\\d\\d)?_(.+)\\.txt$");
 
-  if (!r.exactMatch(id))
+  if (!r.exactMatch(id)) {
+    // see if its just a basic text file then
+    QRegExp txt = QRegExp("^(.+)\\.txt$");
+    if (txt.exactMatch(id)) {
+      QFileInfo info(fullfilename);
+      QDate mod(info.lastModified().date());
+      year = mod.year();
+      month = mod.month();
+      day = mod.day();
+      QStringList l = r.capturedTexts();
+      title = l[1];
+      return true;
+    }
     return false;
+  }
 
   QStringList l = r.capturedTexts();
   bool ok;

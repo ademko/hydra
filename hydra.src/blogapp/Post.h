@@ -26,7 +26,8 @@ class blogapp::Post : public wexus::ActiveFile
   public:
     Post(void);
 
-    virtual bool onLoad(void);
+  protected:
+    virtual bool onLoad(const QString &fullfilename);
 };
 
 #endif
