@@ -9,8 +9,6 @@
 
 #include <assert.h>
 
-#include <hydra/ArgumentParser.h>   //only hydra dependancy
-
 #include <wexus/TemplateTokenList.h>
 #include <wexus/HTMLTemplateParser.h>
 #include <wexus/ModelTokenList.h>
@@ -18,13 +16,21 @@
 #include <wexus/CPPScanner.h>
 #include <wexus/StringUtil.h>
 #include <wexus/HTTP.h>
+#include <wexus/Exception.h>
 
 #include <QFile>
+#include <QDateTime>
 #include <QDirIterator>
 #include <QDebug>
+#include <QCoreApplication>
 
-using namespace hydra;
 using namespace wexus;
+
+class ErrorException : public wexus::Exception
+{
+  public:
+    ErrorException(const QString &_what) throw() : Exception(_what) { }
+};
 
 class ModelGenerator
 {
@@ -256,25 +262,16 @@ void ModelGenerator::emitModelCPPSection(QTextStream &output, const QStringList 
 static void showHelp(const QString &progname, QTextStream &out)
 {
   out <<
-    progname << " -- Wexus Utility -- " " (" __DATE__ " " __TIME__ ")\n"
-    "A programmers tool for Wexus Library users\n"
+    progname << " -- Wexus Make -- " " (" __DATE__ " " __TIME__ ")\n"
+    "Converts various Wexus files to .cpp files\n"
     "Copyright (c) " WEXUS_COPYRIGHT_STRING ", Aleksander B. Demko\n\n"
     "Usage:\n"
-    "  " << progname << " command [command options]\n\n"
-    "Where command can be one of:\n"
-    "  template   converts an .ecpp file to a .cpp file\n"
-    "               -i filename         the input filename (required)\n"
-    "               -o filename         the output filename (optional)\n"
-    "The input filename must be of the form  class__method_name.html.ecpp\n"
-    "(yes, double underscores represent :: delimeters)\n"
-    "Optionally, additional namespace__ prefixes are accepted\n"
-    "\n"
-    "  views directory\n"
-    "             convert all the .ecpp in the given directory (and all\n"
-    "             its sub-directories\n"
-    "  models directory\n"
-    "             convert all the .eh in the given directory (and all\n"
-    "             its sub-directories\n"
+    "  " << progname << " [-f] directories...\n\n"
+    "Converts all the following files in the given directories:\n"
+    "    - .ecpp views files\n"
+    "    - .eh model files\n\n"
+    "Options:\n"
+    "    -f force file generation, even if the files are up to date\n"
     << endl;
 }
 static void showError(QTextStream &out, std::exception &e)
@@ -311,7 +308,7 @@ void parseFileName(const QString &filename,
       break;
 
   if (filename[i] != '.')
-    throw ArgumentParser::ErrorException("No file extension found");
+    throw ErrorException("No file extension found");
 
   int extmarker = i;
   outext = filename.mid(extmarker+1);
@@ -323,7 +320,7 @@ void parseFileName(const QString &filename,
       break;
 
   if (filename[i] != '.')
-    throw ArgumentParser::ErrorException("No .html or similar sub-extension found");
+    throw ErrorException("No .html or similar sub-extension found");
 
   int subextmarker = i;
   outsubext = filename.mid(subextmarker+1, extmarker-subextmarker-1);
@@ -361,7 +358,7 @@ void parseFilePathParts(const QString &filename,
 
   int startmarker = 0;
 
-qDebug() << filename;
+//qDebug() << filename;
   for (int i=0; i<filename.size(); ++i) {
     if (filename[i] == '/') {
       if (i - startmarker > 0)
@@ -468,7 +465,7 @@ void generateTemplateCPPOutput(const QString &infilename, QIODevice &outfile, co
   outstream << "}\n\n";
 }
 
-static void commandCompile(QTextStream &out, hydra::ArgumentParser &args)
+/*static void commandCompile(QTextStream &out, hydra::ArgumentParser &args)
 {
   QString infilename;
   QString outfilename;
@@ -535,25 +532,10 @@ static void commandCompile(QTextStream &out, hydra::ArgumentParser &args)
   }
 
   qDebug() << "wrote" << outfilename;
-}
+}*/
 
-static void commandViews(QTextStream &out, hydra::ArgumentParser &args)
+static void commandViews(QTextStream &out, const QString & viewdir, bool forceconvert)
 {
-  QString viewdir;
-
-  while (args.hasNext()) {
-    QString a;
-    bool isswitch;
-
-    a = args.next(&isswitch);
-
-    if (!isswitch && viewdir.isEmpty())
-      viewdir = a;
-  }
-
-  if (viewdir.isEmpty())
-    throw ArgumentParser::ErrorException("Missing view directory");
-
   QDirIterator dd(viewdir, QDirIterator::Subdirectories);
 
   while (dd.hasNext()) {
@@ -566,7 +548,7 @@ static void commandViews(QTextStream &out, hydra::ArgumentParser &args)
       continue;
 
     if (baseName.indexOf("html", 0, Qt::CaseInsensitive) == -1)
-      throw ArgumentParser::ErrorException("Only html sub-types are supported (for now): " + infilename);
+      throw ErrorException("Only html sub-types are supported (for now): " + infilename);
 
     // parse the file
 
@@ -574,7 +556,7 @@ static void commandViews(QTextStream &out, hydra::ArgumentParser &args)
     QFile in(infilename);
 
     if (!in.open(QIODevice::ReadOnly))
-      throw ArgumentParser::ErrorException("Cannot open input file: " + infilename);
+      throw ErrorException("Cannot open input file: " + infilename);
 
     HTMLTemplateParser().parse(in, toklist);
     compressList(toklist);
@@ -589,11 +571,21 @@ static void commandViews(QTextStream &out, hydra::ArgumentParser &args)
 
 //qDebug() << "infilename" << infilename << "ext" << ext << "parts" << parts << "outfilename" << outfilename;
 
+    if (!forceconvert) {
+      // check if outfile is up to date
+      QFileInfo outinfo(outfilename);
+
+      if (info.lastModified() <= outinfo.lastModified()) {
+        qDebug() << outfilename << "is up to date.";
+        continue;
+      }
+    }
+
     // render the output
     QFile out(outfilename);
 
     if (!out.open(QIODevice::WriteOnly))
-      throw ArgumentParser::ErrorException("Cannot open output file: " + outfilename);
+      throw ErrorException("Cannot open output file: " + outfilename);
 
     generateTemplateCPPOutput(infilename, out, toklist, parts);
 
@@ -601,23 +593,8 @@ static void commandViews(QTextStream &out, hydra::ArgumentParser &args)
   }
 }
 
-static void commandModels(QTextStream &out, hydra::ArgumentParser &args)
+static void commandModels(QTextStream &out, const QString &modeldir, bool forceconvert)
 {
-  QString modeldir;
-
-  while (args.hasNext()) {
-    QString a;
-    bool isswitch;
-
-    a = args.next(&isswitch);
-
-    if (!isswitch && modeldir.isEmpty())
-      modeldir = a;
-  }
-
-  if (modeldir.isEmpty())
-    throw ArgumentParser::ErrorException("Missing model directory");
-
   QDirIterator dd(modeldir, QDirIterator::Subdirectories);
 
   while (dd.hasNext()) {
@@ -635,7 +612,7 @@ static void commandModels(QTextStream &out, hydra::ArgumentParser &args)
     QFile in(infilename);
 
     if (!in.open(QIODevice::ReadOnly))
-      throw ArgumentParser::ErrorException("Cannot open input file: " + infilename);
+      throw ErrorException("Cannot open input file: " + infilename);
 
     try {
       HeaderModelParser().parse(in, toklist);
@@ -675,6 +652,16 @@ static void commandModels(QTextStream &out, hydra::ArgumentParser &args)
       if (parts[x].contains("__"))
         throw HeaderModelParser::Exception("Class names cannot contian double-underscores (__): " + parts[x]);
 
+    if (!forceconvert) {
+      // check if outfile is up to date
+      QFileInfo outinfo(outfilename);
+
+      if (info.lastModified() <= outinfo.lastModified()) {
+        qDebug() << outfilename << "is up to date.";
+        continue;
+      }
+    }
+
 //qDebug() << "infilename" << infilename << "ext" << ext << "parts" << parts << "outfilename" << outfilename;
 
     ModelGenerator gen(toklist);
@@ -687,7 +674,7 @@ static void commandModels(QTextStream &out, hydra::ArgumentParser &args)
       QFile out(outfilename);
 
       if (!out.open(QIODevice::WriteOnly))
-        throw ArgumentParser::ErrorException("Cannot open output file: " + outfilename);
+        throw ErrorException("Cannot open output file: " + outfilename);
 
       QTextStream outstream(&out);
 
@@ -712,7 +699,7 @@ static void commandModels(QTextStream &out, hydra::ArgumentParser &args)
       QFile out(outfilename);
 
       if (!out.open(QIODevice::WriteOnly))
-        throw ArgumentParser::ErrorException("Cannot open output file: " + outfilename);
+        throw ErrorException("Cannot open output file: " + outfilename);
 
       QTextStream outstream(&out);
       gen.emitModelCPPSection(outstream, parts);
@@ -722,18 +709,30 @@ static void commandModels(QTextStream &out, hydra::ArgumentParser &args)
   }
 }
 
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
   QCoreApplication app(argc, argv);
-  hydra::ArgumentParser args;
   QTextStream out(stdout);
-
-  QString progname = args.next(); // eat the program name
+  bool force = false;
 
   // iterate through the params
   try {
-    if (!args.hasNext())
-      throw ArgumentParser::HelpException();
+    if (argc <= 1) {
+      showHelp(argv[0], out);
+      return 0;
+    }
+    for (int i=1; argv[i]; ++i) {
+      QString dir(argv[i]);
+      if (dir == "-f") {
+        force = true;
+        continue;
+      }
+      qDebug() << "Processing Directory: " << dir;
+      commandViews(out, dir, force);
+      commandModels(out, dir, force);
+    }
+    /*if (!args.hasNext())
+      throw HelpException();
 
     QString cmd(args.next());
 
@@ -744,12 +743,12 @@ int main(int argc, char **argv)
     else if (cmd == "models")
       commandModels(out, args);
     else
-      throw ArgumentParser::ErrorException("Unknown command: " + cmd);
+      throw ErrorException("Unknown command: " + cmd);*/
   }
-  catch (ArgumentParser::HelpException &) {
+  /*catch (HelpException &) {
     showHelp(progname, out);
     return 0;
-  }
+  }*/
   catch (std::exception &e){
     showError(out, e);
     return 1;
