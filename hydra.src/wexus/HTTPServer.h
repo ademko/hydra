@@ -8,11 +8,10 @@
 #ifndef __INCLUDED_WEXUS_HTTPSERVER_H__
 #define __INCLUDED_WEXUS_HTTPSERVER_H__
 
-#include <exception>
-
 #include <QString>
 
 #include <wexus/TR1.h>
+#include <wexus/Exception.h>
 
 namespace wexus
 {
@@ -67,23 +66,20 @@ class wexus::HTTPParams
 class wexus::HTTPServer
 {
   public:
-    class Exception : public std::exception
+    class Exception : public wexus::Exception
     {
       public:
-        /// no log message constructor
-        Exception(void);
+        /// no log message constructor... is this version needed?
+        //Exception(void);
         /// log message constructor
         Exception(const QString &logmsg);
 
         virtual ~Exception() throw ();
 
-        virtual const char* what() const throw() { return dm_what; }
-
         const QString & logMessage(void) const { return dm_logmsg; }
 
       protected:
         QString dm_logmsg;
-        QByteArray dm_what;
     };
     class PortInUseException : public Exception
     {

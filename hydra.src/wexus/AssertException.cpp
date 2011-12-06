@@ -20,18 +20,13 @@ AssertThrower wexus::required;
 //
 
 AssertException::AssertException(const char *msg)
-  : dm_msg(msg)
+  : Exception(msg)
 {
   assert(msg);
 }
 
 AssertException::AssertException(const QString &msg)
-  : dm_buf(msg.toUtf8())
-{
-  dm_msg = dm_buf;
-}
-
-AssertException::~AssertException() throw()
+  : Exception(msg)
 {
 }
 

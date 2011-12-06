@@ -10,10 +10,10 @@
 
 #include <assert.h>
 
-#include <exception>
-
 #include <QVariant>
 #include <QString>
+
+#include <wexus/Exception.h>
 
 namespace wexus
 {
@@ -22,21 +22,13 @@ namespace wexus
    *
    * @author Aleksander Demko
    */ 
-  class AssertException : public std::exception
+  class AssertException : public wexus::Exception
   {
     public:
       /// constructor
       AssertException(const char *msg);
       /// for QString
       AssertException(const QString &msg);
-      /// dtor
-      virtual ~AssertException() throw();
-
-      virtual const char* what() const throw () { return dm_msg; }
-
-    protected:
-      const char * dm_msg;
-      QByteArray dm_buf;
   };
 
   /**

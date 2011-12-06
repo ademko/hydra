@@ -8,12 +8,12 @@
 #ifndef __INCLUDED_WEXUSHEADERMODELPARSER_H__
 #define __INCLUDED_WEXUSHEADERMODELPARSER_H__
 
-#include <exception>
-
 #include <QString>
 #include <QIODevice>
 
 #include <wexus/ModelTokenList.h>
+#include <wexus/Exception.h>
+
 
 namespace wexus
 {
@@ -23,18 +23,11 @@ namespace wexus
 class wexus::HeaderModelParser
 {
   public:
-    class Exception : public std::exception
+    class Exception : public wexus::Exception
     {
       public:
         /// usermessage constructor
         Exception(const QString &_what) throw();
-        virtual ~Exception() throw();
-
-        virtual const char* what() const throw() { return dm_what; }
-
-      private:
-        // cant be a QString as then what() will return a * to a temporary
-        QByteArray dm_what;
     };
 
   public:

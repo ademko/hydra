@@ -8,7 +8,7 @@
 #ifndef __INCLUDED_WEXUS_VALIDATIONEXPR_H__
 #define __INCLUDED_WEXUS_VALIDATIONEXPR_H__
 
-#include <hydra/TR1.h>
+#include <wexus/TR1.h>
 
 #include <QVariant>
 #include <QStringList>

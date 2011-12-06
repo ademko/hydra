@@ -47,12 +47,12 @@ void HTTPParams::setHandler(HTTPHandler *handler)
 // HTTPServer::Exception
 //
 
-HTTPServer::Exception::Exception(void)
+/*HTTPServer::Exception::Exception(void)
 {
-}
+}*/
 
 HTTPServer::Exception::Exception(const QString &logmsg)
-  : dm_logmsg(logmsg), dm_what(logmsg.toUtf8())
+  : wexus::Exception(logmsg), dm_logmsg(logmsg)
 {
 }
 

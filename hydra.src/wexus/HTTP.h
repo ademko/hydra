@@ -18,6 +18,8 @@
 #define WEXUS_VERSION_STRING "0.20"
 #define WEXUS_COPYRIGHT_STRING "2011"
 
+#include <wexus/Exception.h>
+
 namespace wexus
 {
   QString escapeForXML(const QString &s);
@@ -287,17 +289,15 @@ class wexus::HTTPHandler
      *
      * @author Aleksander Demko
      */ 
-    class Exception : public std::exception
+    class Exception : public wexus::Exception
     {
       public:
         /// no usermessage constructor
-        Exception(void);
+        //Exception(void);
         /// usermessage constructor
         Exception(const QString &usermsg);
 
         virtual ~Exception() throw ();
-
-        virtual const char* what() const throw () { return dm_what; }
 
         /**
          * The user-visable error message string.
@@ -308,8 +308,6 @@ class wexus::HTTPHandler
 
       protected:
         QString dm_usermsg;
-        // cant be a QString as then what() will return a * to a temporary
-        QByteArray dm_what;
     };
 
   public:

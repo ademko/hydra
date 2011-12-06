@@ -14,14 +14,9 @@
 using namespace wexus;
 
 HeaderModelParser::Exception::Exception(const QString &_what) throw()
-  : dm_what(_what.toUtf8())
+  : wexus::Exception(_what)
 {
 }
-
-HeaderModelParser::Exception::~Exception() throw()
-{
-}
-
 
 HeaderModelParser::HeaderModelParser(void)
 {
