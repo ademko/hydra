@@ -178,6 +178,7 @@ ADD_EXECUTABLE(wexusmake
     ${THIS_PATH}/wexus/CPPScanner.cpp
     ${THIS_PATH}/wexus/StringUtil.cpp
     ${THIS_PATH}/wexus/HTMLString.cpp
+    ${THIS_PATH}/wexus/Exception.cpp
     )
 TARGET_LINK_LIBRARIES(wexusmake hydra)
 
