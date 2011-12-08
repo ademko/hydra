@@ -113,7 +113,7 @@ DB::~DB()
 {
 }
 
-bool DB::has(const char *key)
+bool DB::contains(const char *key)
 {
   ResetOnExit R(dm_has_statement.handle);
   assert(key);
@@ -140,7 +140,7 @@ bool DB::erase(const char *key)
   return 0 < sqlite3_changes(dm_connection->handle);
 }
 
-bool DB::put(const char *key, const std::string &value)
+bool DB::insert(const char *key, const std::string &value)
 {
   ResetOnExit R(dm_put_statement.handle);
   assert(key);
@@ -179,7 +179,7 @@ bool DB::get(const char *key, std::string &value)
   return true;
 }
 
-bool DB::put(const char *key, const hydra::Record &value)
+bool DB::insert(const char *key, const hydra::Record &value)
 {
   assert(key);
 

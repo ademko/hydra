@@ -316,13 +316,13 @@ int MyHandler::commit(void)
       if (
           (!dm_smartmerge && copyItem(ii->second.item, myitem)) ||
           (dm_smartmerge && modtimeMergeItem(ii->second.item, myitem)) ) {
-        eng->fileItemDB().put(myitem.id, myitem);
+        eng->fileItemDB().insert(myitem.id, myitem);
         ++count;
       }
     } else {
       // not merge, new item
       assert(!ii->second.item.id.isNull());
-      eng->fileItemDB().put(ii->second.item.id, ii->second.item);
+      eng->fileItemDB().insert(ii->second.item.id, ii->second.item);
       ++count;
     }
   } // for dm_itemmap
@@ -332,7 +332,7 @@ int MyHandler::commit(void)
   endhh=dm_hashmap.end();
   for (; hh != endhh; ++hh) {
     hash.id = hh->second;
-    eng->fileHashDB().put(hh->first, hash);
+    eng->fileHashDB().insert(hh->first, hash);
   }
 
   return count;

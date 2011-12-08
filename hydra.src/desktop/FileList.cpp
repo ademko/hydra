@@ -150,7 +150,7 @@ QVariant FileList::data(const QModelIndex &index, int role) const
       return entry.justname();
     case 1: {
               bool needsBigRead = false;
-              entry.hasRecord(&needsBigRead);
+              entry.containsRecord(&needsBigRead);
 
               if (needsBigRead) {
                 const_cast<FileList*>(this)->enqueueLoad(entry.fullfilename(), index.row());

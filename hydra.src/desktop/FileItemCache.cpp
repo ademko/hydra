@@ -60,8 +60,8 @@ bool FileItemCache::getItem(const QString &fullfilename, desktop::cache_ptr<hydr
     return false;
 
   // do we already have this record for this UUID loaded?
-  if (!dm_cache.hasItem(hashrec.id))
-    dm_cache.putItem(hashrec.id, item);
+  if (!dm_cache.containsItem(hashrec.id))
+    dm_cache.insertItem(hashrec.id, item);
 //else qDebug() << "USING CACHED FileItemRecord for " << fullfilename;
 
   outhash = pathrec.hash;

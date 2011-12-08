@@ -65,11 +65,11 @@ class hydra::DB
     virtual ~DB();
 
     /// is this key even in the db?
-    bool has(const std::string &key) { return has(key.c_str()); }
+    bool contains(const std::string &key) { return contains(key.c_str()); }
     /// is this key even in the db?
-    bool has(const QString &key) { return has(key.toUtf8().constData()); }
+    bool contains(const QString &key) { return contains(key.toUtf8().constData()); }
     /// is this key even in the db?
-    bool has(const char *key);
+    bool contains(const char *key);
 
     /// removes the key from the db, returns true if anything was done
     bool erase(const std::string &key) { return erase(key.c_str()); }
@@ -78,12 +78,12 @@ class hydra::DB
     /// removes the key from the db, returns true if anything was done
     bool erase(const char *key);
 
-    /// saves to the db, returns true on success
-    bool put(const std::string &key, const std::string &value) { return put(key.c_str(), value); }
-    /// saves to the db, returns true on success
-    bool put(const QString &key, const std::string &value) { return put(key.toUtf8().constData(), value); }
-    /// saves to the db, returns true on success
-    bool put(const char *key, const std::string &value);
+    /// saves to the db, returns true on success, will replace if exists
+    bool insert(const std::string &key, const std::string &value) { return insert(key.c_str(), value); }
+    /// saves to the db, returns true on success, will replace if exists
+    bool insert(const QString &key, const std::string &value) { return insert(key.toUtf8().constData(), value); }
+    /// saves to the db, returns true on success, will replace if exists
+    bool insert(const char *key, const std::string &value);
 
     /// returns false on not-found or failed to load
     bool get(const std::string &key, std::string &value) { return get(key.c_str(), value); }
@@ -92,12 +92,12 @@ class hydra::DB
     /// returns false on not-found or failed to load
     bool get(const char *key, std::string &value);
 
-    /// saves to the db, returns true on success
-    bool put(const std::string &key, const hydra::Record &value) { return put(key.c_str(), value); }
-    /// saves to the db, returns true on success
-    bool put(const QString &key, const hydra::Record &value) { return put(key.toUtf8().constData(), value); }
-    /// saves to the db, returns true on success
-    bool put(const char *key, const hydra::Record &value);
+    /// saves to the db, returns true on success, will replace if exists
+    bool insert(const std::string &key, const hydra::Record &value) { return insert(key.c_str(), value); }
+    /// saves to the db, returns true on success, will replace if exists
+    bool insert(const QString &key, const hydra::Record &value) { return insert(key.toUtf8().constData(), value); }
+    /// saves to the db, returns true on success, will replace if exists
+    bool insert(const char *key, const hydra::Record &value);
 
     /// returns false on not-found or failed to load
     bool get(const std::string &key, hydra::Record &value) { return get(key.c_str(), value); }

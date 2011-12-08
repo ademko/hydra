@@ -69,9 +69,9 @@ class desktop::LoadCacheBase
 
     //~LoadCacheBase() { qDebug() << __FUNCTION__; }
 
-    bool hasItem(const KEY &key) const;
+    bool containsItem(const KEY &key) const;
 
-    void putItem(const KEY &key, const std::shared_ptr<T> &item);
+    void insertItem(const KEY &key, const std::shared_ptr<T> &item);
 
     // asserts if the item is not in the cache already
     desktop::cache_ptr<T,KEY> getItem(const KEY &key);
@@ -146,15 +146,15 @@ template <class T, class KEY>
 }
 
 template <class T, class KEY>
-  bool desktop::LoadCacheBase<T,KEY>::hasItem(const KEY &key) const
+  bool desktop::LoadCacheBase<T,KEY>::containsItem(const KEY &key) const
 {
   return dm_keymap.count(key) > 0;
 }
 
 template <class T, class KEY>
-  void desktop::LoadCacheBase<T,KEY>::putItem(const KEY &key, const std::shared_ptr<T> &item)
+  void desktop::LoadCacheBase<T,KEY>::insertItem(const KEY &key, const std::shared_ptr<T> &item)
 {
-  assert(!hasItem(key));
+  assert(!containsItem(key));
 
   dm_keymap[key].ptr = item;
 }

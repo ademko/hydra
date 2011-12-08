@@ -37,7 +37,7 @@ class desktop::FileEntry
 
     // have any meta data (hash/item)
     // may trigger a load
-    bool hasRecord(bool *needsBigRead = 0) const;
+    bool containsRecord(bool *needsBigRead = 0) const;
 
     // may trigger a load
     const QString & recordHash(void) const;

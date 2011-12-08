@@ -107,7 +107,7 @@ bool Tags::insertTag(const QString &newtag, bool *imageChanged)
     QString key(newtag.left(k));
 
     // remove the old key
-    if (hasKey(key))
+    if (containsKey(key))
       eraseKey(key);
 
     insert(newtag);
@@ -148,7 +148,7 @@ bool Tags::clearTags(bool *imageChanged)
   if (empty())
     return false;
 
-  if (imageChanged && hasKey("rotate"))
+  if (imageChanged && containsKey("rotate"))
     *imageChanged = true;
 
   clear();
@@ -156,7 +156,7 @@ bool Tags::clearTags(bool *imageChanged)
   return true;
 }
 
-bool Tags::hasKey(const QString &key) const
+bool Tags::containsKey(const QString &key) const
 {
   const_iterator ii = lower_bound(key);
 

@@ -89,7 +89,7 @@ int Engine::addFile(const QString &fullfilename, const QString *precalchash)
     new_path = false;
 
     if (dm_filehashdb->get(path.hash, hash))
-      if (dm_fileitemdb->has(hash.id))
+      if (dm_fileitemdb->contains(hash.id))
         old_path_itemid = hash.id;
 
     // check if PATH needs updating
@@ -119,7 +119,7 @@ int Engine::addFile(const QString &fullfilename, const QString *precalchash)
   // check if HASH exists
   if (dm_filehashdb->get(path.hash, hash)) {
     // exists, just save the new path
-    if (!dm_filepathdb->put(fullfilename, path))
+    if (!dm_filepathdb->insert(fullfilename, path))
       return Add_Error; // perhaps throw an exception instead?
     if (new_path)
       return Add_NewPath;
@@ -134,9 +134,9 @@ int Engine::addFile(const QString &fullfilename, const QString *precalchash)
   else
     hash.id = old_path_itemid;    // linking to the old item
 
-  if (!dm_filepathdb->put(fullfilename, path))
+  if (!dm_filepathdb->insert(fullfilename, path))
     return Add_Error; // perhaps throw an exception instead?
-  if (!dm_filehashdb->put(path.hash, hash))
+  if (!dm_filehashdb->insert(path.hash, hash))
     return Add_Error; // perhaps throw an exception instead?
 
   if (!old_path_itemid.isNull())
@@ -153,7 +153,7 @@ int Engine::addFile(const QString &fullfilename, const QString *precalchash)
   else
     item.filetype = 1;
 
-  if (!dm_fileitemdb->put(item.id, item))
+  if (!dm_fileitemdb->insert(item.id, item))
     return Add_Error; // perhaps throw an exception instead?
 
   return Add_New;
@@ -231,7 +231,7 @@ bool Engine::saveFileItem(hydra::FileItemRecord &rec, const QDateTime &newmodtim
 {
   if (newmodtime.isValid())
     rec.modtime = newmodtime;
-  return dm_fileitemdb->put(rec.id, rec);
+  return dm_fileitemdb->insert(rec.id, rec);
 }
 
 char Engine::codeToChar(int code)
