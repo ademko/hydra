@@ -30,7 +30,7 @@ namespace hydra
  *
  * The Regisiter objects will then use BASE::registry to add types.
  * You can then inspect and instatiate registered objects via
- * the members of this class.
+ * the members of BASE::registry
  *
  * @author Aleksander Demko
  */ 
@@ -44,22 +44,39 @@ template <class BASE> class hydra::Registry
     class payload_t {
       public:
         loadfunc_t loader;
+        const char *name;    /// a name, might be null
       public:
-        payload_t(loadfunc_t _loader) : loader(_loader) { }
+        payload_t(loadfunc_t _loader, const char *_name = 0) : loader(_loader), name(_name) { }
     };
 
   public:
     //Registry(void) { qDebug() << __FUNCTION__; }
     //Registry<BASE> & instance(Registry<BASE> & *ptr);
 
-    void appendFunc(loadfunc_t func) { instance(); /*qDebug() << __FUNCTION__;*/ dm_funcs->push_back(func); }
+    void appendFunc(loadfunc_t func, const char *name = 0) { instance(); dm_funcs->push_back(payload_t(func,name)); }
 
-    //template <class SUB>
-      //void appendType(void) { } //appendFunc(&loadfunc_impl<SUB>); }
+    // none of the following methods are const as they all call instance()
 
+    /**
+     * Returns the number of currently registered types in this registry.
+     *
+     * @author Aleksander Demko
+     */ 
     size_t size(void) { instance(); return dm_funcs->size(); }
 
+    /**
+     * Instatite the registered type.
+     *
+     * @author Aleksander Demko
+     */ 
     std::shared_ptr<BASE> create(size_t index) { instance(); return std::shared_ptr<BASE>((*dm_funcs)[index].loader()); }
+    /**
+     * Returns the set name of the given registered type.
+     * Might be null if it was never set.
+     *
+     * @author Aleksander Demko
+     */ 
+    const char * name(size_t index) { instance(); return (*dm_funcs)[index].name; }
 
   private:
     void instance(void);
@@ -112,6 +129,15 @@ template <class SUB> class hydra::Register
         //if (!SUB::registry)
           //SUB::registry = new typename SUB::registry_type;
         SUB::registry.appendFunc(&hydra::loadfunc_impl<typename SUB::registry_type::base_type, SUB>);
+      }
+    /**
+     * Registering constructor, with a name.
+     *
+     * @author Aleksander Demko
+     */ 
+    Register(const char *name)
+      {
+        SUB::registry.appendFunc(&hydra::loadfunc_impl<typename SUB::registry_type::base_type, SUB>, name);
       }
 };
 
