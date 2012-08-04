@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=HydraDesktop
+GenericName=HydraDesktop
+Comment=Powerfull image tagging and searching system
+Exec=hydradesktop
+#Icon=hydradesktop
+Terminal=false
+Categories=Graphics
+

@@ -1,5 +1,10 @@
 
-Version bump:
+Version/Copyright bump:
+  in Engine.h
+  MIT License
+
+Windows
+=======
 
 Windows 32-bit build:
   in /build32, cmake-gui hydra.src:
@@ -25,3 +30,16 @@ for 64-bit:
   same as 32-bit, but:
     - use build64
     - requires qt to be built from source, preferably git.. build the latest 4.x stable
+
+Linux
+=====
+
+  do this for 32 and 64 bit:
+
+  in build32/ cmake:
+    - without exif
+    - no shared libs
+    - release
+  in installer/linux
+    run build_deb32
+

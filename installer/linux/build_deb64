@@ -1,0 +1,7 @@
+cd deb64
+mkdir usr/bin
+cp ../../../build64/hydra{desktop,tag,web} usr/bin
+find usr -type f | xargs md5sum > DEBIAN/md5sums
+#tar cfzv data.tar.gz usr
+dpkg -b . ../
+

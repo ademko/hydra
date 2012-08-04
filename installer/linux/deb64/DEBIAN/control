@@ -1,0 +1,13 @@
+Package: hydradesktop
+Version: 0.21
+Section: graphics
+Priority: optional
+Architecture: amd64
+Essential: no
+Depends: libqtgui4, libqt4-xml, libstdc++6, libsqlite3-0
+Installed-Size: 460k
+Maintainer: Aleksander Demko [ademko@gmail.com]
+Description: HydraDesktop
+  Hydra ia a suite of applications and libraries for non-invasive image
+  and file tagging.
+
