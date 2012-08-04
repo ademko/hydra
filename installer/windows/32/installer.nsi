@@ -12,8 +12,8 @@ InstallDirRegKey HKLM "Software\WexusSoftware_HydraDesktop" "Install_Dir"
 ; Request application privileges for Windows Vista
 RequestExecutionLevel admin
 
-LicenseText "License - GPLv2"
-LicenseData ..\..\..\LICENSE.GPL2.txt
+LicenseText "License - MIT"
+LicenseData ..\..\..\LICENSE.MIT.txt
 
 Page license
 Page components
@@ -29,30 +29,30 @@ Section "HydraDesktop (required)"
 
   SetOutPath $INSTDIR
 
-  File Microsoft.VC90.CRT.manifest
-  File msvcm90.dll
-  File msvcp90.dll
-  File msvcr90.dll
-  File QtCore4.dll
-  File QtGui4.dll
-  File QtXml4.dll
   File HydraDesktop.exe.manifest
   File HydraDesktop.exe
   File hydratag.exe.manifest
   File hydratag.exe
   File hydraweb.exe.manifest
   File hydraweb.exe
-  CreateDirectory $INSTDIR\imageformats
-  File /oname=imageformats\Microsoft.VC90.CRT.manifest imageformats\Microsoft.VC90.CRT.manifest
-  File /oname=imageformats\msvcm90.dll imageformats\msvcm90.dll
-  File /oname=imageformats\msvcp90.dll imageformats\msvcp90.dll
-  File /oname=imageformats\msvcr90.dll imageformats\msvcr90.dll
-  File /oname=imageformats\qgif4.dll imageformats\qgif4.dll
-  File /oname=imageformats\qico4.dll imageformats\qico4.dll
-  File /oname=imageformats\qjpeg4.dll imageformats\qjpeg4.dll
-  File /oname=imageformats\qmng4.dll imageformats\qmng4.dll
-  File /oname=imageformats\qsvg4.dll imageformats\qsvg4.dll
-  File /oname=imageformats\qtiff4.dll imageformats\qtiff4.dll
+
+  File Microsoft.VC90.CRT.manifest
+  File msvcm90.dll
+  File msvcp90.dll
+  File msvcr90.dll
+
+  File imageformats\Microsoft.VC90.CRT.manifest
+  File imageformats\msvcm90.dll
+  File imageformats\msvcp90.dll
+  File imageformats\msvcr90.dll
+
+  File QtCore4.dll
+  File QtGui4.dll
+  File QtXml4.dll
+
+  File imageformats\qgif4.dll
+  File imageformats\qjpeg4.dll
+  File imageformats\qtiff4.dll
 
   WriteRegStr HKLM "SOFTWARE\WexusSoftware_HydraDesktop" "Install_Dir" "$INSTDIR"
   
@@ -92,34 +92,29 @@ Section "Uninstall"
   DeleteRegKey HKLM SOFTWARE\WexusSoftware_HydraDesktop
 
   ; Remove files and uninstaller
-  Delete $INSTDIR\Microsoft.VC90.CRT.manifest
-  Delete $INSTDIR\msvcm90.dll
-  Delete $INSTDIR\msvcp90.dll
-  Delete $INSTDIR\msvcr90.dll
-  Delete $INSTDIR\HydraDesktop.exe.manifest
-  Delete $INSTDIR\HydraDesktop.exe
-  Delete $INSTDIR\Microsoft.VC90.CRT.manifest
-  Delete $INSTDIR\msvcm90.dll
-  Delete $INSTDIR\msvcp90.dll
-  Delete $INSTDIR\msvcr90.dll
-  Delete $INSTDIR\QtCore4.dll
-  Delete $INSTDIR\QtGui4.dll
-  Delete $INSTDIR\QtXml4.dll
   Delete $INSTDIR\HydraDesktop.exe.manifest
   Delete $INSTDIR\HydraDesktop.exe
   Delete $INSTDIR\hydratag.exe.manifest
   Delete $INSTDIR\hydratag.exe
   Delete $INSTDIR\hydraweb.exe.manifest
   Delete $INSTDIR\hydraweb.exe
+
+  Delete $INSTDIR\Microsoft.VC90.CRT.manifest
+  Delete $INSTDIR\msvcm90.dll
+  Delete $INSTDIR\msvcp90.dll
+  Delete $INSTDIR\msvcr90.dll
+
   Delete $INSTDIR\imageformats\Microsoft.VC90.CRT.manifest
   Delete $INSTDIR\imageformats\msvcm90.dll
   Delete $INSTDIR\imageformats\msvcp90.dll
   Delete $INSTDIR\imageformats\msvcr90.dll
+
+  Delete $INSTDIR\QtCore4.dll
+  Delete $INSTDIR\QtGui4.dll
+  Delete $INSTDIR\QtXml4.dll
+
   Delete $INSTDIR\imageformats\qgif4.dll
-  Delete $INSTDIR\imageformats\qico4.dll
   Delete $INSTDIR\imageformats\qjpeg4.dll
-  Delete $INSTDIR\imageformats\qmng4.dll
-  Delete $INSTDIR\imageformats\qsvg4.dll
   Delete $INSTDIR\imageformats\qtiff4.dll
 
   Delete $INSTDIR\uninstall.exe

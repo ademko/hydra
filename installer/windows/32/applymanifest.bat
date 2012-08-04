@@ -10,9 +10,6 @@ mt -manifest 1.manifest -outputresource:QtCore4.dll;2
 mt -manifest 1.manifest -outputresource:QtGui4.dll;2
 mt -manifest 1.manifest -outputresource:QtXml4.dll;2
 mt -manifest 1.manifest -outputresource:imageformats\qgif4.dll;2
-mt -manifest 1.manifest -outputresource:imageformats\qico4.dll;2
 mt -manifest 1.manifest -outputresource:imageformats\qjpeg4.dll;2
-mt -manifest 1.manifest -outputresource:imageformats\qmng4.dll;2
-mt -manifest 1.manifest -outputresource:imageformats\qsvg4.dll;2
 mt -manifest 1.manifest -outputresource:imageformats\qtiff4.dll;2
 

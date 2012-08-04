@@ -274,11 +274,6 @@ void MainWindow::onAbout(void)
       " Optimized"
 #endif
       " Qt_" QT_VERSION_STR
-#ifdef BUILD_SHARED_LIBS
-      "_dynamic"
-#else
-      "_static"
-#endif
       );
   lay->addWidget(lab);
 

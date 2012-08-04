@@ -1,0 +1,27 @@
+
+Version bump:
+
+Windows 32-bit build:
+  in /build32, cmake-gui hydra.src:
+    - make sure you're in the proper VC shell type (32 or 64)
+    - no shared libraries
+    - no libexif
+    - use a typical Qt SDK install
+    - use a sqlite amalgamation
+  do:
+    devenv hydra.sln /build release
+
+Windows 32-bit deployment:
+  in installer\windows\32:
+  copy ..\..\..\build32\release\*.exe .
+  verify that these files are in there:
+      (see the .nsi file for the list)
+  run applymanifests.bat
+    make sure the applied manifest is the same as in the distroed VC lib
+  you might need to run the installer on the C:
+  test under XP
+
+for 64-bit:
+  same as 32-bit, but:
+    - use build64
+    - requires qt to be built from source, preferably git.. build the latest 4.x stable
