@@ -93,7 +93,7 @@ bool FileOpGuiTest::copyFile(const QString &srcfile, const QString &destfile)
     if (!dm_overwrite_all) {
       // exists and is writable, confirm with the user
       QMessageBox msg;
-      QAbstractButton *yes, *yes_all, *no, *no_all, *cancel;
+      QAbstractButton *yes_all, *no, *no_all, *cancel;
 
       msg.setText("The destination file already exists");
       msg.setInformativeText("The file " + destfile + " already exists. Overwrite it?");
@@ -101,7 +101,7 @@ bool FileOpGuiTest::copyFile(const QString &srcfile, const QString &destfile)
       no_all = msg.addButton("Never overwrite", QMessageBox::AcceptRole);
       no = msg.addButton("Don't overwrite", QMessageBox::AcceptRole);
       yes_all = msg.addButton("Overwrite All", QMessageBox::AcceptRole);
-      yes = msg.addButton("Overwrite", QMessageBox::AcceptRole);
+      msg.addButton("Overwrite", QMessageBox::AcceptRole);
       cancel = msg.addButton(QMessageBox::Cancel);
 
       msg.exec();
@@ -127,14 +127,14 @@ error_section:
     return false;
 
   QMessageBox msg;
-  QAbstractButton *retry, *skip, *skip_all, *cancel;
+  QAbstractButton *skip, *skip_all, *cancel;
 
   msg.setText("File error");
   msg.setInformativeText(error_msg + destfile);
 
   skip_all = msg.addButton("Ignore all errors", QMessageBox::AcceptRole);
   skip = msg.addButton("Ignore", QMessageBox::AcceptRole);
-  retry = msg.addButton("Try Again", QMessageBox::AcceptRole);
+  msg.addButton("Try Again", QMessageBox::AcceptRole);
   cancel = msg.addButton(QMessageBox::Cancel);
 
   msg.exec();

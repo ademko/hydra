@@ -7,6 +7,8 @@
 
 #include <hydra/FileOp.h>
 
+#include <unistd.h>
+
 #include <QFile>
 #include <QFileInfo>
 #include <QDir>

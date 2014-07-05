@@ -253,9 +253,10 @@ void DB::initDB(void)
 {
   //std::string stmt("create table if not exists " + dm_table + " (key text not null primary key, value blob not null)");
   std::string stmt("create table " + std::string(dm_table.toUtf8().constData()) + " (key text not null primary key, value blob not null)");
-  int ret;
+  //int ret;
 
-  ret = sqlite3_exec(dm_connection->handle, stmt.c_str(), 0, 0, 0);
+  //ret =
+  sqlite3_exec(dm_connection->handle, stmt.c_str(), 0, 0, 0);
   //assert(!ret);   // this may fail for older versions that dont support "if not exists", and failing in this case is ok
 }
 

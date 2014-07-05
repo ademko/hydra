@@ -239,6 +239,8 @@ void FileItemRecord::save(QDataStream &out) const
   out << id << title << desc << filetype;
 
   out << (qint32)tags.size();
+  assert(tags.size()<1000);     // sanity check
+
   for (tags_t::const_iterator ii=tags.begin(); ii != tags.end(); ++ii) {
     assert(!ii->isEmpty());
     out << *ii;
@@ -265,14 +267,15 @@ void FileItemRecord::load(QDataStream &in)
 
   in >> sz;
 
-  if (sz > 16000)        // surely greater than this is some kind of error?
+  if (sz >= 1000)        // surely greater than this is some kind of error? // sanity check
     throw FormatException();
 
   tags.clear();
   for(; sz>0; --sz) {
     tags_t::value_type v;
     in >> v;
-    assert(!v.isEmpty());
+    if (v.isEmpty())
+      throw FormatException();    // this should never happen to.. empty tags are not allowed
     tags.insert(v);
   }
 
