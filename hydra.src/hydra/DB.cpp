@@ -133,8 +133,10 @@ bool DB::erase(const char *key)
   assert(key);
   sqlite3_bind_text(dm_erase_statement.handle, 1, key, static_cast<int>(strlen(key)), SQLITE_STATIC);
 
-  int ret;
-  ret = sqlite3_step(dm_erase_statement.handle);
+#ifndef NDEBUG
+  int ret =
+#endif
+  sqlite3_step(dm_erase_statement.handle);
   assert(ret == SQLITE_OK || ret == SQLITE_DONE);
 
   return 0 < sqlite3_changes(dm_connection->handle);
@@ -264,32 +266,46 @@ void DB::initPrepared(void)
 {
   std::string stmt_string;
   std::string table(dm_table.toUtf8());
+#ifndef NDEBUG
   int ret;
+#endif
 
   // has
   stmt_string = "select key from " + table + " where key = ?";
-  ret = sqlite3_prepare_vX(dm_connection->handle, stmt_string.c_str(), static_cast<int>(stmt_string.size()),
+#ifndef NDEBUG
+  ret =
+#endif
+  sqlite3_prepare_vX(dm_connection->handle, stmt_string.c_str(), static_cast<int>(stmt_string.size()),
       &dm_has_statement.handle, 0);
   assert(ret == 0);
   assert(dm_has_statement.handle);
 
   // put
   stmt_string = "insert or replace into " + table + " (key, value) values (?,?)";
-  ret = sqlite3_prepare_vX(dm_connection->handle, stmt_string.c_str(), static_cast<int>(stmt_string.size()),
+#ifndef NDEBUG
+  ret =
+#endif
+  sqlite3_prepare_vX(dm_connection->handle, stmt_string.c_str(), static_cast<int>(stmt_string.size()),
       &dm_put_statement.handle, 0);
   assert(ret == 0);
   assert(dm_put_statement.handle);
 
   // get
   stmt_string = "select value from " + table + " where key = ?";
-  ret = sqlite3_prepare_vX(dm_connection->handle, stmt_string.c_str(), static_cast<int>(stmt_string.size()),
+#ifndef NDEBUG
+  ret =
+#endif
+  sqlite3_prepare_vX(dm_connection->handle, stmt_string.c_str(), static_cast<int>(stmt_string.size()),
       &dm_get_statement.handle, 0);
   assert(ret == 0);
   assert(dm_get_statement.handle);
 
   // erase
   stmt_string = "delete from " + table + " where key = ?";
-  ret = sqlite3_prepare_vX(dm_connection->handle, stmt_string.c_str(), static_cast<int>(stmt_string.size()),
+#ifndef NDEBUG
+  ret =
+#endif
+  sqlite3_prepare_vX(dm_connection->handle, stmt_string.c_str(), static_cast<int>(stmt_string.size()),
       &dm_erase_statement.handle, 0);
   assert(ret == 0);
   assert(dm_erase_statement.handle);
@@ -305,11 +321,13 @@ Cursor::Cursor(hydra::DB &db)
   : dm_isvalid(false), dm_connection(db.dm_connection)
 {
   std::string stmt_string("select key, value from ");
-  int ret;
 
   stmt_string += db.dm_table.toUtf8().constData();
 
-  ret = sqlite3_prepare_vX(dm_connection->handle, stmt_string.c_str(),
+#ifndef NDEBUG
+  int ret =
+#endif
+  sqlite3_prepare_vX(dm_connection->handle, stmt_string.c_str(),
       static_cast<int>(stmt_string.size()), &dm_select_statement.handle, 0);
   assert(ret == 0);
   assert(dm_select_statement.handle);
@@ -319,13 +337,15 @@ Cursor::Cursor(hydra::DB &db, const QString &prefix)
   : dm_isvalid(false), dm_connection(db.dm_connection)
 {
   std::string stmt_string("select key, value from ");
-  int ret;
 
   stmt_string += db.dm_table.toUtf8().constData();
 
   stmt_string += " where key glob ?";
 
-  ret = sqlite3_prepare_vX(dm_connection->handle, stmt_string.c_str(),
+#ifndef NDEBUG
+  int ret =
+#endif
+  sqlite3_prepare_vX(dm_connection->handle, stmt_string.c_str(),
       static_cast<int>(stmt_string.size()), &dm_select_statement.handle, 0);
   assert(ret == 0);
   assert(dm_select_statement.handle);

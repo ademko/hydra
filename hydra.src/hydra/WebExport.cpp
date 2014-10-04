@@ -52,6 +52,12 @@ WebExport::DirEntry::DirEntry(const QString &_basedir)
   justname = QFileInfo(basedir).fileName();
 }
 
+//
+//
+// FileEntry
+//
+//
+
 void WebExport::FileEntry::calc(void)
 {
   assert(!basefilename.isEmpty());
@@ -120,7 +126,7 @@ void WebExport::addFile(const QString &fullfilename, const QString &basedir,
       str << dupeid++;
 
     QFileInfo info(entry->justname);
-    str << info.baseName() << "_r" << rotateCodeToDegrees(entry->rotateCode) << "." + info.suffix();
+    str << info.completeBaseName() << "_r" << rotateCodeToDegrees(entry->rotateCode) << "." + info.suffix();
 
     entry->basefilename = entry->basedir + "/" + entry->basejustname;
 
@@ -148,9 +154,15 @@ int WebExport::commitWebSite(void)
 {
   //QDir(dm_outdir).mkdir("original_files");
   Thumb::mkThumbDir();
+
   buildDirTree();
   computeDirCounts(*dm_basedirs[""]);
-  writeIndexFiles();
+
+  for (DirMap::const_iterator ii=dm_basedirs.begin(); ii != dm_basedirs.end(); ++ii) {
+    writeDirIndex(*(ii->second));
+    writeAllImageHtmls(*(ii->second));
+  }
+
   return writeImageFiles();
 }
 
@@ -313,7 +325,7 @@ int WebExport::writeImageFiles(void)
   return count;
 }
 
-bool WebExport::writeFileIndex(int myid, int numpeers, FileEntry &entry)
+bool WebExport::writeImageHtml(int myid, int randomId, int numpeers, FileEntry &entry)
 {
   QString outfilename(dm_outdir + "/" + entry.urlhtml);
   QFile outfile(outfilename);
@@ -341,7 +353,7 @@ bool WebExport::writeFileIndex(int myid, int numpeers, FileEntry &entry)
   out << "<img border=\"0\" src=\"" << escapeForXML(entry.urlviewimage) << "\" />";
   if (myid + 1 < numpeers)
     out << "</a>\n";
-  out << "</td></tr><tr><th align=\"left\" width=\"33%\">";
+  out << "</td></tr>\n<tr><th align=\"left\" width=\"33%\">";
   if (myid>0)
     out << "<a href=\"" << escapeForXML(parent->subimages[myid-1]->urlhtml) << "\">&lt;&lt; Previous image</a>";
   out << "</th><th align=\"center\" width=\"34%\">"
@@ -349,9 +361,34 @@ bool WebExport::writeFileIndex(int myid, int numpeers, FileEntry &entry)
     "<th align=\"right\" width=\"33%\">";
   if (myid + 1 < numpeers)
     out << "<a href=\"" << escapeForXML(parent->subimages[myid+1]->urlhtml) << "\">Next image &gt;&gt;</a>";
-  out << "</th></tr><tr><td align=\"center\" colspan=\"3\">"
+  out << "</th></tr>\n";
+  if (numpeers >= 1000) { //threshold to show the new bar
+    // decrement
+    out << "<tr><td align=\"left\">";
+    if (myid>0)
+        out << "<a href=\"" << escapeForXML(parent->subimages[0]->urlhtml) << "\">&lt;&lt;First</a>";
+    for (int delta=1000000; delta>=1; delta /= 10)
+      if (myid-delta >= 0)
+        out << " <a href=\"" << escapeForXML(parent->subimages[myid-delta]->urlhtml) << "\">" << delta << "</a>";
+    out << "</td>";
+
+    out << "<td align=\"center\">";
+        out << " <a href=\"" << escapeForXML(parent->subimages[randomId]->urlhtml) << "\">Random</a>";
+    out << "</td>";
+
+    out << "<td align=\"right\">";
+    for (int delta=1000000; delta>=1; delta /= 10)
+      if (myid+delta < numpeers)
+        out << "<a href=\"" << escapeForXML(parent->subimages[myid+delta]->urlhtml) << "\">" << delta << "</a> ";
+    if (myid+1<numpeers)
+        out << "<a href=\"" << escapeForXML(parent->subimages[numpeers-1]->urlhtml) << "\">Last&gt;&gt;</a>";
+    out << "</td>";
+    out << "</tr>\n";
+  }
+  out << "<tr><td align=\"center\" colspan=\"3\">"
     "<a href=\"" << escapeForXML(entry.urlorigimage) << "\">Download the high-quality, original file</a>"
-    "</td></tr></table></center></body></html>";
+    "</td></tr>\n";
+  out << "</table></center></body></html>";
 
   dm_out << "  VIEW " << outfilename << endl;
 
@@ -419,19 +456,23 @@ bool WebExport::writeDirIndex(DirEntry &entry)
 
   dm_out << "INDEX " << outfilename << endl;
 
-  int i=0; 
-  for (FileSet::const_iterator ii=entry.subimages.begin(); ii != entry.subimages.end(); ++ii) {
-    writeFileIndex(i, static_cast<int>(entry.subimages.size()), *(*ii));
-    ++i;
-  }
-
   return true;
 }
 
-void WebExport::writeIndexFiles(void)
+void WebExport::writeAllImageHtmls(DirEntry &entry)
 {
-  for (DirMap::const_iterator ii=dm_basedirs.begin(); ii != dm_basedirs.end(); ++ii)
-    writeDirIndex(*(ii->second));
+  int i=0; 
+
+  std::vector<int> random_ids(entry.subimages.size());
+
+  for (unsigned i=0; i<random_ids.size(); ++i)
+    random_ids[i] = i;
+  std::random_shuffle(random_ids.begin(), random_ids.end());
+
+  for (FileSet::const_iterator ii=entry.subimages.begin(); ii != entry.subimages.end(); ++ii) {
+    writeImageHtml(i, random_ids[i], static_cast<int>(entry.subimages.size()), *(*ii));
+    ++i;
+  }
 }
 
 void WebExport::fileCopyMakeDirs(const QString dir)

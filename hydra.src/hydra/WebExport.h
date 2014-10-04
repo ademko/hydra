@@ -86,9 +86,13 @@ class hydra::WebExport
 
     int writeImageFiles(void);
 
-    bool writeFileIndex(int myid, int numpeers, FileEntry &entry);
+    bool writeImageHtml(int myid, int randomId, int numpeers, FileEntry &entry);
     bool writeDirIndex(DirEntry &entry);
-    void writeIndexFiles(void);
+    
+    /**
+     * Call writeImageHtml for each subimages in the given directory
+     */
+    void writeAllImageHtmls(DirEntry &entry);
 
     void fileCopyMakeDirs(const QString dir = "");
     int fileCopyCopyFiles(void);
@@ -122,9 +126,10 @@ class hydra::WebExport
       // they all store map keys, ofcourse
       DirSet subdirs;       // sub dirs
       FileSet subimages;     // images (thumbable) in this dir
-      FileSet subfiles;      // no-image files in this dir
+      FileSet subfiles;      // non-image files in this dir
 
       DirEntry(const QString &_basedir);
+
     };
 
     typedef std::map<QString, std::shared_ptr<DirEntry> > DirMap;

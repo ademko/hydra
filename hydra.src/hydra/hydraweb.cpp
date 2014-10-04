@@ -34,6 +34,7 @@ static void showHelp(QTextStream &out)
     "  -o outdir           REQUIRED. The output directory to write the website too\n"
     "  -t --title=desc     set the title variable to be desc\n"
     "  -f                  Build a file tree rather than a website\n"
+    "  -v                  Verbose output/display progress\n"
     "\n"
     "Commands can include:\n"
     "  flat                just dump all the files into the single output directory (the default)\n"
@@ -117,6 +118,7 @@ static void commandWebExport(QTextStream &out, ArgumentParser &parser)
   std::vector<QString> ops;
   QString outputdir, title;
   bool build_file_tree = false;
+  bool verbose_output = false;
 
   // parse the command line
   while (parser.hasNext()) {
@@ -129,6 +131,8 @@ static void commandWebExport(QTextStream &out, ArgumentParser &parser)
       title = parser.nextParam("-t");
     else if (cmd == "-f")
       build_file_tree = true;
+    else if (cmd == "-v")
+      verbose_output = true;
     else if (isswitch)
       throw ArgumentParser::ErrorException("Unknown switch: " + cmd);
     else
@@ -154,6 +158,7 @@ static void commandWebExport(QTextStream &out, ArgumentParser &parser)
   short curtype = flat_type;
   QString pivot_tag, pivot_path, webpath;
   std::tr1::shared_ptr<hydra::Token> query_tok, pivot_tok;
+  int scanned_count = 0;
 
   parseQueryTokens("", query_tok);   // init it
 
@@ -197,6 +202,10 @@ static void commandWebExport(QTextStream &out, ArgumentParser &parser)
 
       while (ii.hasNext()) {
         fullcur = ii.next();
+
+        scanned_count++;
+        if (verbose_output && scanned_count % 100 == 0)
+          out << "Files scanned: " << scanned_count << endl;
         // load and check query
         if (Engine::instance()->getFileItem(fullcur, &item, 0, &path) != Engine::Load_OK)
           continue;
