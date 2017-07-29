@@ -306,7 +306,7 @@ int WebExport::writeImageFiles(void)
 
       code = T.generate(outthumb, 0, entry.rotateCode, Thumb::DEFAULT_THUMB_W, Thumb::DEFAULT_THUMB_H);
       if (code != Thumb::Generate_Ok && code != Thumb::Generate_FileExists) {
-        dm_out << "!ERROR " << outthumb << endl;
+        dm_out << "!ERROR THUMB " << outthumb << " code " << code << endl;
         continue;
       }
       smartCopy(outthumb, outfile);
@@ -320,7 +320,7 @@ int WebExport::writeImageFiles(void)
 
       code = T.generate(outthumb, 0, entry.rotateCode, Thumb::DEFAULT_VIEW_W, Thumb::DEFAULT_VIEW_H);
       if (code != Thumb::Generate_Ok && code != Thumb::Generate_FileExists) {
-        dm_out << "!ERROR " << outthumb << endl;
+        dm_out << "!ERROR VIEWTHUMB " << outthumb << " code " << code << endl;
         continue;
       }
       smartCopy(outthumb, outfile);
@@ -346,7 +346,7 @@ bool WebExport::writeImageHtml(int myid, int randomId, int numpeers, const FileE
   QFile outfile(outfilename);
 
   if (!outfile.open(QIODevice::WriteOnly)) {
-    dm_out << "!ERROR " << outfilename << endl;
+    dm_out << "!ERROR failed to open for output: " << outfilename << endl;
     return false;
   }
 
