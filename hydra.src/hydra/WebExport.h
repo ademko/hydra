@@ -12,6 +12,7 @@
 #include <QUuid>
 #include <QTextStream>
 
+#include <stdint.h>
 #include <vector>
 #include <map>
 #include <hydra/TR1.h>
@@ -86,8 +87,9 @@ class hydra::WebExport
 
     int writeImageFiles(void);
 
-    bool writeImageHtml(int myid, int randomId, int numpeers, FileEntry &entry);
-    bool writeDirIndex(DirEntry &entry);
+    bool writeImageHtml(int myid, int randomId, int numpeers, const FileEntry &entry);
+    void sortDirIndex(DirEntry &entry);
+    bool writeDirIndex(const DirEntry &entry);
     
     /**
      * Call writeImageHtml for each subimages in the given directory
@@ -111,6 +113,8 @@ class hydra::WebExport
 
     static bool FileEntryLT(const std::shared_ptr<FileEntry> &lhs,
         const std::shared_ptr<FileEntry> &rhs);
+
+    static void writeHydraImg(QTextStream &out, int id, const FileEntry &entry);
 
     struct DirEntry {
       bool isroot;
@@ -157,6 +161,8 @@ class hydra::WebExport
       QString urlorigimage;  // urlnamebase
       QString urlviewimage;  // VIEW, + urlnamebase
       QString urlthumbimage; // THUMB, + urlnamebase
+
+      uint64_t original_file_size;    // in bytes
 
       void calc(void);        // calculates various computed strings after the others are set
     };

@@ -76,6 +76,8 @@ void WebExport::FileEntry::calc(void)
   urlorigimage = urlnamebase;
   urlviewimage = "VIEW," + urlnamebase;
   urlthumbimage = "THUMB," + urlnamebase;
+
+  original_file_size = QFileInfo(fullfilename).size();
 }
 
 //
@@ -157,6 +159,9 @@ int WebExport::commitWebSite(void)
 
   buildDirTree();
   computeDirCounts(*dm_basedirs[""]);
+
+  for (DirMap::const_iterator ii=dm_basedirs.begin(); ii != dm_basedirs.end(); ++ii)
+    sortDirIndex(*(ii->second));
 
   for (DirMap::const_iterator ii=dm_basedirs.begin(); ii != dm_basedirs.end(); ++ii) {
     writeDirIndex(*(ii->second));
@@ -325,7 +330,17 @@ int WebExport::writeImageFiles(void)
   return count;
 }
 
-bool WebExport::writeImageHtml(int myid, int randomId, int numpeers, FileEntry &entry)
+void WebExport::writeHydraImg(QTextStream &out, int id, const FileEntry &entry)
+{
+    out << "   <hydraimg id=\"" << id << "\" url=\"" << escapeForXML(entry.urlhtml) << "\" view_img=\"" << escapeForXML(entry.urlviewimage)
+        << "\" img=\"" << escapeForXML(entry.urlorigimage) << "\" />\n";
+}
+
+static inline bool IsOkId(int test_id, int num_ids) {
+    return test_id > 0 && (test_id+1) < num_ids;
+}
+
+bool WebExport::writeImageHtml(int myid, int randomId, int numpeers, const FileEntry &entry)
 {
   QString outfilename(dm_outdir + "/" + entry.urlhtml);
   QFile outfile(outfilename);
@@ -337,6 +352,9 @@ bool WebExport::writeImageHtml(int myid, int randomId, int numpeers, FileEntry &
 
   QTextStream out(&outfile);
 
+  out.setRealNumberPrecision(2);
+  out.setRealNumberNotation(QTextStream::FixedNotation);
+
   std::shared_ptr<DirEntry> parent(entry.parent);
 
   assert(parent.get());
@@ -345,6 +363,24 @@ bool WebExport::writeImageHtml(int myid, int randomId, int numpeers, FileEntry &
     "<html>\n"
     "<!-- hydraweb " HYDRA_VERSION_STRING " demko.ca -->\n"
     "<head>\n"
+    "<hydrainfo id=\"" << myid << "\">\n";
+
+  //<hydraimg> tags
+  if (myid > 0)//this might emit a dupe from the delta loop, whatever for now i guess
+      writeHydraImg(out, 0, *parent->subimages[0]);
+  for (int delta=1000000; delta>=1; delta /= 10)
+      if (IsOkId(myid-delta, numpeers))
+          writeHydraImg(out, myid-delta, *parent->subimages[myid-delta]);
+  writeHydraImg(out, myid, entry);
+  for (int delta=1000000; delta>=1; delta /= 10)
+      if (IsOkId(myid+delta, numpeers))
+          writeHydraImg(out, myid+delta, *parent->subimages[myid+delta]);
+  if (myid + 1 < numpeers)//this might emit a dupe from the delta loop, whatever for now i guess
+      writeHydraImg(out, numpeers-1, *parent->subimages[numpeers-1]);
+  writeHydraImg(out, randomId, *parent->subimages[randomId]);
+
+  out << 
+    "</hydrainfo>\n"
     "<title>#" << (myid+1) << '/' << numpeers << ' ' << escapeForXML(entry.justname) << "</title>\n"
     "</head><body>\n"
     "<center><table border=\"0\"><tr><td align=\"center\" colspan=\"3\">\n";
@@ -386,7 +422,8 @@ bool WebExport::writeImageHtml(int myid, int randomId, int numpeers, FileEntry &
     out << "</tr>\n";
   }
   out << "<tr><td align=\"center\" colspan=\"3\">"
-    "<a href=\"" << escapeForXML(entry.urlorigimage) << "\">Download the high-quality, original file</a>"
+    "<a href=\"" << escapeForXML(entry.urlorigimage) << "\">Download the high-quality, original file</a>  (" <<
+    (entry.original_file_size / 1000000.0) << "MB)"
     "</td></tr>\n";
   out << "</table></center></body></html>";
 
@@ -395,7 +432,17 @@ bool WebExport::writeImageHtml(int myid, int randomId, int numpeers, FileEntry &
   return false;
 }
 
-bool WebExport::writeDirIndex(DirEntry &entry)
+void WebExport::sortDirIndex(DirEntry &entry)
+{
+  // sort by name for display
+  std::sort(entry.subdirs.begin(), entry.subdirs.end(), DirEntryLT);
+  // sort by name for display
+  std::sort(entry.subfiles.begin(), entry.subfiles.end(), FileEntryLT);
+  // sort by name for display
+  std::sort(entry.subimages.begin(), entry.subimages.end(), FileEntryLT);
+}
+
+bool WebExport::writeDirIndex(const DirEntry &entry)
 {
   QString outfilename(dm_outdir + "/" + entry.urlname);
   QFile outfile(outfilename);
@@ -405,10 +452,20 @@ bool WebExport::writeDirIndex(DirEntry &entry)
   }
   QTextStream out(&outfile);
 
+  out.setRealNumberPrecision(2);
+  out.setRealNumberNotation(QTextStream::FixedNotation);
+
   out <<
     "<html>\n"
     "<!-- hydraweb " HYDRA_VERSION_STRING " demko.ca -->\n"
     "<head>\n"
+    "<hydrainfo>\n";
+  if (entry.subimages.size() > 0)
+      writeHydraImg(out, 0, *entry.subimages[0]);
+  if (entry.subimages.size() > 1)
+      writeHydraImg(out, entry.subimages.size() - 1, *entry.subimages[entry.subimages.size() - 1]);
+  out <<
+    "</hydrainfo>\n"
     "<title>" << escapeForXML(entry.isroot ? dm_title : entry.basedir) << "</title>\n"
     "</head>\n"
     "<body><h2>" << escapeForXML(entry.isroot ? dm_title : entry.basedir) << "</h2>\n"
@@ -424,8 +481,6 @@ bool WebExport::writeDirIndex(DirEntry &entry)
     out << "\">&lt;&lt;Go Back</a></i>\n\n";
   }
 
-  // sort by name for display
-  std::sort(entry.subdirs.begin(), entry.subdirs.end(), DirEntryLT);
   // sub directories
   for (DirSet::const_iterator ii=entry.subdirs.begin(); ii != entry.subdirs.end(); ++ii)
     out << "  <a href=\"" << escapeForXML((*ii)->urlname) << "\">"
@@ -434,18 +489,14 @@ bool WebExport::writeDirIndex(DirEntry &entry)
   out << 
     "</pre></font>\n";
 
-  // sort by name for display
-  std::sort(entry.subfiles.begin(), entry.subfiles.end(), FileEntryLT);
   // extra files
   if (!entry.subfiles.empty()) {
     out << "<pre>\n  Extra files:\n";
     for (FileSet::const_iterator ii=entry.subfiles.begin(); ii != entry.subfiles.end(); ++ii)
-      out << "    <a href=\"" << (*ii)->urlorigimage << "\">" << (*ii)->justname << "</a>\n";
+      out << "    <a href=\"" << (*ii)->urlorigimage << "\">" << (*ii)->justname << "</a> (" << ( (*ii)->original_file_size / 1000000.0 ) << "MB)\n";
     out << "</pre><br/>\n";
   }
 
-  // sort by name for display
-  std::sort(entry.subimages.begin(), entry.subimages.end(), FileEntryLT);
   // images
   for (FileSet::const_iterator ii=entry.subimages.begin(); ii != entry.subimages.end(); ++ii)
     out <<
