@@ -13,7 +13,7 @@
 #include <QString>
 #include <QDateTime>
 
-#define HYDRA_VERSION_STRING "0.23"
+#define HYDRA_VERSION_STRING "0.24.0"
 #define HYDRA_COPYRIGHT_STRING "2007-2017"
 
 /**

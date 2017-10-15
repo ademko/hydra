@@ -79,7 +79,7 @@ static hydra::Register<SelectByTagsPlugin> reg04_23948xx;
 void SelectByTagsPlugin::go(desktop::MainWindow *mainwindow, desktop::FileList *filelist)
 {
   QString query_string;
-  std::tr1::shared_ptr<hydra::Token> query_token;
+  std::shared_ptr<hydra::Token> query_token;
 
   while (true) {
     query_string = QInputDialog::getText(mainwindow,

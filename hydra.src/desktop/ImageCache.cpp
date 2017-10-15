@@ -36,9 +36,9 @@ QPixmap ImageCache::getPixmap(QImage &image, int windoww, int windowh, bool grow
   return QPixmap::fromImage(scaled_image);
 }
 
-std::tr1::shared_ptr<QImage> ImageCache::ImageLoader::operator()(const QString &fullfilename)
+std::shared_ptr<QImage> ImageCache::ImageLoader::operator()(const QString &fullfilename)
 {
-  std::tr1::shared_ptr<QImage> i(new QImage);
+  std::shared_ptr<QImage> i(new QImage);
 
   i->load(fullfilename);
 

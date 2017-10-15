@@ -33,7 +33,7 @@ void TagSelectView::onClear(void)
 
 void TagSelectView::onEntry(void)
 {
-  std::tr1::shared_ptr<hydra::Token> token;
+  std::shared_ptr<hydra::Token> token;
 
   if (dm_query->text().isEmpty())
     return;

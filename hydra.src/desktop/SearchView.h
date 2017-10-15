@@ -49,7 +49,7 @@ class desktop::SearchView : public desktop::View
     QLineEdit *dm_query;
 
     QString dm_last_query;
-    std::tr1::shared_ptr<hydra::Token> dm_last_tok;  // null if the last query isnt valid
+    std::shared_ptr<hydra::Token> dm_last_tok;  // null if the last query isnt valid
 
     QHBoxLayout *dm_buttonbox;
 };

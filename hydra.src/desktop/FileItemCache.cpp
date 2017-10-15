@@ -41,7 +41,7 @@ bool FileItemCache::getItem(const QString &fullfilename, desktop::cache_ptr<hydr
   FilePathRecord pathrec;
   FileHashRecord hashrec;
   int code;
-  std::tr1::shared_ptr<FileItemRecord> item(new FileItemRecord);
+  std::shared_ptr<FileItemRecord> item(new FileItemRecord);
 
   code = Engine::instance()->getFileItem(fullfilename, item.get(), &hashrec, &pathrec);
 

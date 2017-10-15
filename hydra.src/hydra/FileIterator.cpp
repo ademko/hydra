@@ -66,7 +66,7 @@ FileIterator::FileIterator(const QString &fileOrDir, bool allfiles, bool recurse
     return;
   }
 
-  dm_iterator = std::auto_ptr<QDirIterator>(new QDirIterator(fileOrDir, (recurse ? QDirIterator::Subdirectories : QDirIterator::NoIteratorFlags)));
+  dm_iterator = std::make_unique<QDirIterator>(fileOrDir, (recurse ? QDirIterator::Subdirectories : QDirIterator::NoIteratorFlags));
 
   loadNextFile();
 }

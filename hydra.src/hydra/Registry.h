@@ -89,7 +89,7 @@ template <class BASE> class hydra::Registry
     // resolution (ie. we can control it somewhat)
     // also, auto_ptr since we still want initilization/destruction
     // at ctor/dtor time
-    std::auto_ptr<std::vector<payload_t> > dm_funcs;
+    std::unique_ptr<std::vector<payload_t> > dm_funcs;
 };
 
 /*template <class BASE>

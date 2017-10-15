@@ -195,7 +195,7 @@ static void commandList(QTextStream &out, ArgumentParser &parser)
   bool format_file = false;
   bool format_xml = false;
   bool format_null = false;
-  std::tr1::shared_ptr<Token> query_token;
+  std::shared_ptr<Token> query_token;
 
   parseQueryTokens("", query_token);
 
@@ -306,7 +306,7 @@ static void commandTag(QTextStream &out, ArgumentParser &parser)
   QStringList fileList;
   bool do_clear = false;
   std::set<QString> add_tags, rm_tags;
-  std::tr1::shared_ptr<Token> query_token;
+  std::shared_ptr<Token> query_token;
   FileItemRecord rec;
   QDateTime now(QDateTime::currentDateTime());
 
@@ -537,7 +537,7 @@ static void commandDupe(QTextStream &out, ArgumentParser &parser)
   typedef std::set<QString> stringset_t;
   typedef std::map<QString, stringset_t> hashpathmap_t;
   typedef std::map<QUuid, stringset_t> idhashmap_t;
-  typedef std::map<QUuid, std::tr1::shared_ptr<FileItemRecord> > itemmap_t;
+  typedef std::map<QUuid, std::shared_ptr<FileItemRecord> > itemmap_t;
   hashpathmap_t hashpath;
   idhashmap_t idhash;
   itemmap_t itemmap;
@@ -585,7 +585,7 @@ static void commandDupe(QTextStream &out, ArgumentParser &parser)
 
       // add the item if need be
       if (itemmap.count(item.id) == 0)
-        itemmap[item.id] = std::tr1::shared_ptr<FileItemRecord>(new FileItemRecord(item));
+        itemmap[item.id] = std::shared_ptr<FileItemRecord>(new FileItemRecord(item));
 
       // add this hash to the id
       idhash[item.id].insert(path.hash);

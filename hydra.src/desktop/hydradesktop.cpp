@@ -63,7 +63,7 @@ int main(int argc, char **argv)
     // else case 0 (nothing given)
 
   hydra::Engine eng;
-  std::tr1::shared_ptr<desktop::MainState> state(new desktop::MainState);
+  std::shared_ptr<desktop::MainState> state(new desktop::MainState);
   desktop::MainWindow *mw = new desktop::MainWindow(initMode, state);
 
   hydra::Thumb::mkThumbDir();

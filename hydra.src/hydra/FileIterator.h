@@ -122,7 +122,7 @@ class hydra::FileIterator
     bool dm_allfiles;
     bool dm_istraversing;
 
-    std::auto_ptr<QDirIterator> dm_iterator;
+    std::unique_ptr<QDirIterator> dm_iterator;
 };
 
 #endif

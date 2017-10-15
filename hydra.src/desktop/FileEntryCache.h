@@ -28,8 +28,8 @@ class desktop::FileEntryCache
     class EntryLoader
     {
       public:
-        std::tr1::shared_ptr<desktop::FileEntry> operator()(const QString &fullfilename)
-        { return std::tr1::shared_ptr<desktop::FileEntry>(new desktop::FileEntry(fullfilename)); }
+        std::shared_ptr<desktop::FileEntry> operator()(const QString &fullfilename)
+        { return std::shared_ptr<desktop::FileEntry>(new desktop::FileEntry(fullfilename)); }
     };
 
     LoadCache<FileEntry, EntryLoader> dm_loader;

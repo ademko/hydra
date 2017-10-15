@@ -157,7 +157,7 @@ static void commandWebExport(QTextStream &out, ArgumentParser &parser)
   };
   short curtype = flat_type;
   QString pivot_tag, pivot_path, webpath;
-  std::tr1::shared_ptr<hydra::Token> query_tok, pivot_tok;
+  std::shared_ptr<hydra::Token> query_tok, pivot_tok;
   int scanned_count = 0;
 
   parseQueryTokens("", query_tok);   // init it

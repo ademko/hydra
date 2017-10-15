@@ -58,7 +58,7 @@ void FutureLoader::start(void)
   dm_quit = false;
 
   RunnableEventFunction::enqueueWorker(
-      std::tr1::bind(std::tr1::mem_fn(&FutureLoader::workerFunc), this)
+      std::bind(std::mem_fn(&FutureLoader::workerFunc), this)
       , -1);
 }
 
@@ -73,7 +73,7 @@ void FutureLoader::workerFunc(void)
 
 //qDebug() << "FutureLoader" << __FUNCTION__ << "enqueueMain";
   RunnableEventFunction::enqueueMain(
-      std::tr1::bind(std::tr1::mem_fn(&FutureLoader::mainFunc), this)
+      std::bind(std::mem_fn(&FutureLoader::mainFunc), this)
       );
 }
 
@@ -167,7 +167,7 @@ void FutureLoader::mainFunc(void)
   // not done, enqueue myself to run another time
   if (dm_running)
     RunnableEventFunction::enqueueWorker(
-        std::tr1::bind(std::tr1::mem_fn(&FutureLoader::workerFunc), this)
+        std::bind(std::mem_fn(&FutureLoader::workerFunc), this)
         , -1);
 }
 

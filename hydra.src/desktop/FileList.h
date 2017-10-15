@@ -398,7 +398,7 @@ class desktop::FileListLoader
     bool dm_changed_shuffle;
     bool dm_changed_list;
 
-    std::auto_ptr<QProgressDialog> dm_progdlg;
+    std::unique_ptr<QProgressDialog> dm_progdlg;
 };
 
 /**

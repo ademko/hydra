@@ -33,7 +33,7 @@ ENDIF(BUILD_SHARED_LIBS)
 #
 
 IF(UNIX)
-ADD_DEFINITIONS(-Wall -Wno-sign-compare)
+ADD_DEFINITIONS(-std=c++14 -Wall -Wno-sign-compare)
 ENDIF(UNIX)
 
 IF(WIN32)
