@@ -87,9 +87,13 @@ class hydra::WebExport
 
     int writeImageFiles(void);
 
-    bool writeImageHtml(int myid, int randomId, int numpeers, const FileEntry &entry);
+    void writeStaticFiles(void);
+
     void sortDirIndex(DirEntry &entry);
-    bool writeDirIndex(const DirEntry &entry);
+    /// returns true on sccess
+    bool writeImageHtml(const QString &outfilename, int myid, int randomId, int numpeers, const FileEntry &entry);
+    /// returns true on sccess
+    bool writeDirIndexHtml(const QString &outfilename, const DirEntry &entry);
     
     /**
      * Call writeImageHtml for each subimages in the given directory
@@ -100,10 +104,6 @@ class hydra::WebExport
     int fileCopyCopyFiles(void);
 
   private:
-    QTextStream &dm_out;
-
-    QString dm_outdir, dm_title;
-
     typedef std::vector<std::shared_ptr<DirEntry> > DirSet;
 
     static bool DirEntryLT(const std::shared_ptr<DirEntry> &lhs,
@@ -168,6 +168,11 @@ class hydra::WebExport
     };
 
     typedef std::map<QString, std::shared_ptr<FileEntry> > FileMap;
+
+  private:
+    QTextStream &dm_out;
+
+    QString dm_outdir, dm_title;
 
     FileMap dm_basefiles;   // built incrementally when caller adds files
 

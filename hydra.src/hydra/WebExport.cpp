@@ -26,6 +26,12 @@
 
 using namespace hydra;
 
+namespace {
+  const char * StyleCSSFileName = "hydraweb.css";
+}
+
+// TODO always make sure that dm_outdir has a trailing / (if not empty) so that we dont have to do that in every usage
+
 //
 //
 // DirEntry
@@ -163,8 +169,16 @@ int WebExport::commitWebSite(void)
   for (DirMap::const_iterator ii=dm_basedirs.begin(); ii != dm_basedirs.end(); ++ii)
     sortDirIndex(*(ii->second));
 
+  writeStaticFiles();
+
   for (DirMap::const_iterator ii=dm_basedirs.begin(); ii != dm_basedirs.end(); ++ii) {
-    writeDirIndex(*(ii->second));
+    QString outfilename(dm_outdir + "/" + ii->second->urlname);
+
+    if (writeDirIndexHtml(outfilename, *(ii->second)))
+      dm_out << "INDEX " << outfilename << endl;
+    else
+      dm_out << "!ERROR " << outfilename << endl;
+
     writeAllImageHtmls(*(ii->second));
   }
 
@@ -340,96 +354,84 @@ static inline bool IsOkId(int test_id, int num_ids) {
     return test_id > 0 && (test_id+1) < num_ids;
 }
 
-bool WebExport::writeImageHtml(int myid, int randomId, int numpeers, const FileEntry &entry)
+void WebExport::writeStaticFiles(void)
 {
-  QString outfilename(dm_outdir + "/" + entry.urlhtml);
+  QString outfilename(dm_outdir + "/" + StyleCSSFileName);
   QFile outfile(outfilename);
 
-  if (!outfile.open(QIODevice::WriteOnly)) {
-    dm_out << "!ERROR failed to open for output: " << outfilename << endl;
-    return false;
-  }
+  if (!outfile.open(QIODevice::WriteOnly))
+    return;//switch to throwing exceptions on errors?
 
   QTextStream out(&outfile);
 
-  out.setRealNumberPrecision(2);
-  out.setRealNumberNotation(QTextStream::FixedNotation);
+  out << R"EOF(
+.navBut {
+	-moz-box-shadow:inset 0px 1px 3px 0px #91b8b3;
+	-webkit-box-shadow:inset 0px 1px 3px 0px #91b8b3;
+	box-shadow:inset 0px 1px 3px 0px #91b8b3;
+	background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #768d87), color-stop(1, #6c7c7c));
+	background:-moz-linear-gradient(top, #768d87 5%, #6c7c7c 100%);
+	background:-webkit-linear-gradient(top, #768d87 5%, #6c7c7c 100%);
+	background:-o-linear-gradient(top, #768d87 5%, #6c7c7c 100%);
+	background:-ms-linear-gradient(top, #768d87 5%, #6c7c7c 100%);
+	background:linear-gradient(to bottom, #768d87 5%, #6c7c7c 100%);
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#768d87', endColorstr='#6c7c7c',GradientType=0);
+	background-color:#768d87;
+	-moz-border-radius:5px;
+	-webkit-border-radius:5px;
+	border-radius:5px;
+	border:1px solid #566963;
+	display:inline-block;
+	cursor:pointer;
+	color:#ffffff;
+	font-family:Arial;
+	font-size:15px;
+	font-weight:bold;
+	padding:6px 10px;
+	text-decoration:none;
+	text-shadow:0px -1px 0px #2b665e;
+}
+.navBut:hover {
+	background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #6c7c7c), color-stop(1, #768d87));
+	background:-moz-linear-gradient(top, #6c7c7c 5%, #768d87 100%);
+	background:-webkit-linear-gradient(top, #6c7c7c 5%, #768d87 100%);
+	background:-o-linear-gradient(top, #6c7c7c 5%, #768d87 100%);
+	background:-ms-linear-gradient(top, #6c7c7c 5%, #768d87 100%);
+	background:linear-gradient(to bottom, #6c7c7c 5%, #768d87 100%);
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#6c7c7c', endColorstr='#768d87',GradientType=0);
+	background-color:#6c7c7c;
+}
+.navBut:active {
+	position:relative;
+	top:1px;
+}
 
-  std::shared_ptr<DirEntry> parent(entry.parent);
+div#topBar { width: 100%; text-align: center; margin: 6px 0px; }
+div#topBar #leftBut { float: left; margin-left: 2px; }
+div#topBar #rightBut { float: right; margin-right: 2px; }
+div#imageCaption { color: grey; font-family:Arial; font-size:15px; margin: 1em 1em; text-align: center; }
+.optionsDropDown { position: relative; display: inline-block; }
+.optionsBut { }
+.optionsContent { display: none; position: absolute; right:-2px; z-index: 1; 
+text-align: right; background: black; padding: 6px 4px 10px 10px; border-radius: 0 0 0 10px;}
+.optionsLink { margin: 2px 0; white-space: nowrap; }
+.optionsDropDown:hover .optionsContent { display: block; }
 
-  assert(parent.get());
+div#viewImageHolder { width: 100%; }
+div#viewImageHolder img { max-width: 100%; max-height: 100%; display: block; margin: auto auto; vertical-align: middle; border="0"; }
 
-  out <<
-    "<html>\n"
-    "<!-- hydraweb " HYDRA_VERSION_STRING " demko.ca -->\n"
-    "<head>\n"
-    "<hydrainfo id=\"" << myid << "\">\n";
+div.wideLinkListHeader { font-family: Arial; font-weight: bold; text-align: center; }
+div.wideLinkList div { font-family: Arial; display: inline-block; width: 17em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border: 1px solid #000000; }
+div.wideLinkList a { color: #8f96ff; font-weight: bold; text-decoration: none; }
+div.wideLinkList a:hover { text-decoration: underline; }
 
-  //<hydraimg> tags
-  if (myid > 0)//this might emit a dupe from the delta loop, whatever for now i guess
-      writeHydraImg(out, 0, *parent->subimages[0]);
-  for (int delta=1000000; delta>=1; delta /= 10)
-      if (IsOkId(myid-delta, numpeers))
-          writeHydraImg(out, myid-delta, *parent->subimages[myid-delta]);
-  writeHydraImg(out, myid, entry);
-  for (int delta=1000000; delta>=1; delta /= 10)
-      if (IsOkId(myid+delta, numpeers))
-          writeHydraImg(out, myid+delta, *parent->subimages[myid+delta]);
-  if (myid + 1 < numpeers)//this might emit a dupe from the delta loop, whatever for now i guess
-      writeHydraImg(out, numpeers-1, *parent->subimages[numpeers-1]);
-  writeHydraImg(out, randomId, *parent->subimages[randomId]);
+div#imageIndex img { }
+.albumTitle { color: white; font-family:Arial; font-size:28px; text-align: center; }
 
-  out << 
-    "</hydrainfo>\n"
-    "<title>#" << (myid+1) << '/' << numpeers << ' ' << escapeForXML(entry.justname) << "</title>\n"
-    "</head><body>\n"
-    "<center><table border=\"0\"><tr><td align=\"center\" colspan=\"3\">\n";
-  if (myid + 1 < numpeers)
-    out << "<a href=\"" << escapeForXML(parent->subimages[myid+1]->urlhtml) << "\">";
-  out << "<img border=\"0\" src=\"" << escapeForXML(entry.urlviewimage) << "\" />";
-  if (myid + 1 < numpeers)
-    out << "</a>\n";
-  out << "</td></tr>\n<tr><th align=\"left\" width=\"33%\">";
-  if (myid>0)
-    out << "<a href=\"" << escapeForXML(parent->subimages[myid-1]->urlhtml) << "\">&lt;&lt; Previous image</a>";
-  out << "</th><th align=\"center\" width=\"34%\">"
-    "<a href=\"" << escapeForXML(parent->urlname) << "\">Return to album</a></th>"
-    "<th align=\"right\" width=\"33%\">";
-  if (myid + 1 < numpeers)
-    out << "<a href=\"" << escapeForXML(parent->subimages[myid+1]->urlhtml) << "\">Next image &gt;&gt;</a>";
-  out << "</th></tr>\n";
-  if (numpeers >= 1000) { //threshold to show the new bar
-    // decrement
-    out << "<tr><td align=\"left\">";
-    if (myid>0)
-        out << "<a href=\"" << escapeForXML(parent->subimages[0]->urlhtml) << "\">&lt;&lt;First</a>";
-    for (int delta=1000000; delta>=1; delta /= 10)
-      if (myid-delta >= 0)
-        out << " <a href=\"" << escapeForXML(parent->subimages[myid-delta]->urlhtml) << "\">" << delta << "</a>";
-    out << "</td>";
+body { background-color: black; color: white; }
+img { border:0; }
+)EOF";
 
-    out << "<td align=\"center\">";
-        out << " <a href=\"" << escapeForXML(parent->subimages[randomId]->urlhtml) << "\">Random</a>";
-    out << "</td>";
-
-    out << "<td align=\"right\">";
-    for (int delta=1000000; delta>=1; delta /= 10)
-      if (myid+delta < numpeers)
-        out << "<a href=\"" << escapeForXML(parent->subimages[myid+delta]->urlhtml) << "\">" << delta << "</a> ";
-    if (myid+1<numpeers)
-        out << "<a href=\"" << escapeForXML(parent->subimages[numpeers-1]->urlhtml) << "\">Last&gt;&gt;</a>";
-    out << "</td>";
-    out << "</tr>\n";
-  }
-  out << "<tr><td align=\"center\" colspan=\"3\">"
-    "<a href=\"" << escapeForXML(entry.urlorigimage) << "\">Download the high-quality, original file</a>  (" <<
-    (entry.original_file_size / 1000000.0) << "MB)"
-    "</td></tr>\n";
-  out << "</table></center></body></html>";
-
-  dm_out << "  VIEW " << outfilename << endl;
-
-  return false;
 }
 
 void WebExport::sortDirIndex(DirEntry &entry)
@@ -442,70 +444,189 @@ void WebExport::sortDirIndex(DirEntry &entry)
   std::sort(entry.subimages.begin(), entry.subimages.end(), FileEntryLT);
 }
 
-bool WebExport::writeDirIndex(const DirEntry &entry)
+bool WebExport::writeImageHtml(const QString &outfilename, int myid, int randomId, int numpeers, const FileEntry &entry)
 {
-  QString outfilename(dm_outdir + "/" + entry.urlname);
   QFile outfile(outfilename);
-  if (!outfile.open(QIODevice::WriteOnly)) {
-    dm_out << "!ERROR " << outfilename << endl;
+
+  if (!outfile.open(QIODevice::WriteOnly))
     return false;
+
+  QTextStream out(&outfile);
+
+  out.setRealNumberPrecision(2);
+  out.setRealNumberNotation(QTextStream::FixedNotation);
+
+  std::shared_ptr<DirEntry> parent(entry.parent);
+
+  assert(parent.get());
+
+  out <<
+    "<!DOCTYPE html>\n"
+    "<html>\n"
+    "<!-- hydraweb " HYDRA_VERSION_STRING " demko.ca -->\n"
+    "<head>\n";
+
+  out << 
+    "<title>#" << (myid+1) << '/' << numpeers << ' ' << escapeForXML(entry.justname) << "</title>\n"
+    "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n"
+    "<meta http-equiv=\"Content-Type\" content=\"text/html\" />\n"
+    "<meta charset=\"utf-8\" />\n"
+    "<link href=\"" << StyleCSSFileName << "\" type=\"text/css\" rel=\"stylesheet\" />\n"
+    "</head>\n";
+  
+  // body
+
+  // navbar
+  out <<
+    "<body>\n\n"
+    "<div id=\"topBar\" >\n"
+    "<span id=\"leftBut\"><a class=\"navBut\" href=\"" << escapeForXML(parent->urlname)
+    << "\">Album</a></span>\n";
+
+  out <<
+    "<span id=\"rightBut\" class=\"optionsDropDown\">\n"
+    "<a class=\"navBut optionsBut\" href=\"#\">Menu...</a>\n"
+    "<div class=\"optionsContent\">\n"
+    "<a class=\"navBut optionsLink\" href=\"" << escapeForXML(entry.urlorigimage) << "\">Download</a>\n";
+  if (myid>0)
+    out << "<a class=\"navBut optionsLink\" href=\"" << escapeForXML(parent->subimages[0]->urlhtml) << "\">&lt;&lt;First</a>\n";
+  if (myid+1<numpeers)
+    out << "<a class=\"navBut optionsLink\" href=\"" << escapeForXML(parent->subimages[numpeers-1]->urlhtml) << "\">Last&gt;&gt;</a>\n";
+
+  if (numpeers >= 1000) { //threshold to show the new bar 1000
+    out << " <a class=\"navBut optionsLink\" href=\"" << escapeForXML(parent->subimages[randomId]->urlhtml) << "\">Random</a>\n";
+
+    for (int delta=1000000; delta>1; delta /= 10) {
+      if (myid+delta < numpeers)
+        out << "<a class=\"navBut optionsLink\" href=\"" << escapeForXML(parent->subimages[myid+delta]->urlhtml) << "\">Jump +" << delta << "</a>\n";
+    }
+    for (int delta=10; delta<=1000000; delta *= 10) {
+      if (myid-delta >= 0)
+        out << " <a class=\"navBut optionsLink\" href=\"" << escapeForXML(parent->subimages[myid-delta]->urlhtml) << "\">Jump -" << delta << "</a>\n";
+    }
   }
+  out << "</div></span>\n";
+
+  if (myid>0)
+    out << "<a class=\"navBut\" href=\"" << escapeForXML(parent->subimages[myid-1]->urlhtml) << "\">&lt;Prev</a>\n";
+  if (myid + 1 < numpeers)
+    out << "<a class=\"navBut\" href=\"" << escapeForXML(parent->subimages[myid+1]->urlhtml) << "\">Next&gt;</a>\n";
+  out <<
+    "</div>\n\n";
+
+  // image
+  out
+    << "<div id=\"viewImageHolder\"><a href=\"";
+  if (myid + 1 < numpeers)
+    out << escapeForXML(parent->subimages[myid+1]->urlhtml);
+  else
+    out << escapeForXML(parent->subimages[0]->urlhtml);
+  out << "\"><img border=\"0\" src=\"" << escapeForXML(entry.urlviewimage) << "\" /></a></div>\n";
+
+  out << "<div id=\"imageCaption\">#" << (myid+1) << " / " << numpeers << "</div>\n";
+
+  //<hydraimg> tags
+  out << "<hydrainfo id=\"" << myid << "\">\n";
+  if (myid > 0)//this might emit a dupe from the delta loop, whatever for now i guess
+      writeHydraImg(out, 0, *parent->subimages[0]);
+  for (int delta=1000000; delta>=1; delta /= 10)
+      if (IsOkId(myid-delta, numpeers))
+          writeHydraImg(out, myid-delta, *parent->subimages[myid-delta]);
+  writeHydraImg(out, myid, entry);
+  for (int delta=1000000; delta>=1; delta /= 10)
+      if (IsOkId(myid+delta, numpeers))
+          writeHydraImg(out, myid+delta, *parent->subimages[myid+delta]);
+  if (myid + 1 < numpeers)//this might emit a dupe from the delta loop, whatever for now i guess
+      writeHydraImg(out, numpeers-1, *parent->subimages[numpeers-1]);
+  writeHydraImg(out, randomId, *parent->subimages[randomId]);
+  out << "</hydrainfo>\n";
+
+  out << "</body>\n";
+
+  out << "</html>\n";
+
+  return true;
+}
+
+bool WebExport::writeDirIndexHtml(const QString &outfilename, const DirEntry &entry)
+{
+  QFile outfile(outfilename);
+  if (!outfile.open(QIODevice::WriteOnly))
+    return false;
+
   QTextStream out(&outfile);
 
   out.setRealNumberPrecision(2);
   out.setRealNumberNotation(QTextStream::FixedNotation);
 
   out <<
+    "<!DOCTYPE html>\n"
     "<html>\n"
     "<!-- hydraweb " HYDRA_VERSION_STRING " demko.ca -->\n"
-    "<head>\n"
-    "<hydrainfo>\n";
-  if (entry.subimages.size() > 0)
-      writeHydraImg(out, 0, *entry.subimages[0]);
-  if (entry.subimages.size() > 1)
-      writeHydraImg(out, entry.subimages.size() - 1, *entry.subimages[entry.subimages.size() - 1]);
-  out <<
-    "</hydrainfo>\n"
-    "<title>" << escapeForXML(entry.isroot ? dm_title : entry.basedir) << "</title>\n"
-    "</head>\n"
-    "<body><h2>" << escapeForXML(entry.isroot ? dm_title : entry.basedir) << "</h2>\n"
-    "<font size=\"+1\"><pre>\n";
+    "<head>\n";
 
+  out <<
+    "<title>" << escapeForXML(entry.isroot ? dm_title : entry.basedir) << "</title>\n"
+    "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n"
+    "<meta http-equiv=\"Content-Type\" content=\"text/html\" />\n"
+    "<meta charset=\"utf-8\" />\n"
+    "<link href=\"" << StyleCSSFileName << "\" type=\"text/css\" rel=\"stylesheet\" />\n"
+    "</head><body>\n";
+
+  // nav bar
   // parent dir and sub dirs
+  out <<
+    "<div id=\"topBar\" >\n"
+    "<span id=\"leftBut\"><a class=\"navBut\" href=\"";
   if (entry.isroot) {
-    out << "<i><a href=\"../\">&lt;&lt;Exit Gallery</a></i>\n\n";
+    out << "../\">&lt;&lt;Exit Gallery";
   } else {
-    out << "<i><a href=\"";
-    std::shared_ptr<DirEntry> parent(entry.parent);
-    out << escapeForXML(parent->urlname);
-    out << "\">&lt;&lt;Go Back</a></i>\n\n";
+    out << escapeForXML(entry.parent.lock()->urlname);
+    out << "\">&lt;&lt;Up Album";
   }
+  out
+    << "</a></span>\n"
+    << "<span class=\"albumTitle\">" << escapeForXML(entry.isroot ? dm_title : entry.basedir) << "</span>\n";
+  out <<
+    "</div>\n\n";
 
   // sub directories
+  if (!entry.subdirs.empty() && !entry.subfiles.empty()) // display his heading only if we're displaying the other one too
+    out << "<div class=\"wideLinkListHeader\">Albums</div>\n";
+  out << "<div id=\"albumSubDirList\" class=\"wideLinkList\">\n";
   for (DirSet::const_iterator ii=entry.subdirs.begin(); ii != entry.subdirs.end(); ++ii)
-    out << "  <a href=\"" << escapeForXML((*ii)->urlname) << "\">"
+    out << "<div><a href=\"" << escapeForXML((*ii)->urlname) << "\">"
       << escapeForXML((*ii)->justname) << "</a> ("
-      << (*ii)->totalfiles << ")\n";
-  out << 
-    "</pre></font>\n";
+      << (*ii)->totalfiles << ")</div>\n";
+  out << "</div>\n\n";
 
   // extra files
   if (!entry.subfiles.empty()) {
-    out << "<pre>\n  Extra files:\n";
+    out << "<div class=\"wideLinkListHeader\">Bonus Files</div>\n";
+    out << "<div id=\"albumExtraFiles\" class=\"wideLinkList\">\n";
     for (FileSet::const_iterator ii=entry.subfiles.begin(); ii != entry.subfiles.end(); ++ii)
-      out << "    <a href=\"" << (*ii)->urlorigimage << "\">" << (*ii)->justname << "</a> (" << ( (*ii)->original_file_size / 1000000.0 ) << "MB)\n";
-    out << "</pre><br/>\n";
+      out << "<div><a href=\"" << (*ii)->urlorigimage << "\">" << (*ii)->justname << "</a> (" << ( (*ii)->original_file_size / 1000000.0 ) << "MB)</div>\n";
+    out << "</div>\n\n";
   }
-
   // images
+  out << "<div id=\"imageIndex\">\n";
   for (FileSet::const_iterator ii=entry.subimages.begin(); ii != entry.subimages.end(); ++ii)
     out <<
       "<a href=\"" << escapeForXML((*ii)->urlhtml) << "\"><img border=\"0\" src=\""
       << escapeForXML((*ii)->urlthumbimage) << "\" /></a>\n";
+  out << "</div>\n";
 
-  out << "</body></html>\n\n";
+  //<hydraimg> tags
+  out << "<hydrainfo>\n";
+  if (entry.subimages.size() > 0)
+      writeHydraImg(out, 0, *entry.subimages[0]);
+  if (entry.subimages.size() > 1)
+      writeHydraImg(out, entry.subimages.size() - 1, *entry.subimages[entry.subimages.size() - 1]);
+  out << "</hydrainfo>\n";
 
-  dm_out << "INDEX " << outfilename << endl;
+  out << "</body>\n";
+
+  out << "</html>\n\n";
 
   return true;
 }
@@ -521,7 +642,12 @@ void WebExport::writeAllImageHtmls(DirEntry &entry)
   std::random_shuffle(random_ids.begin(), random_ids.end());
 
   for (FileSet::const_iterator ii=entry.subimages.begin(); ii != entry.subimages.end(); ++ii) {
-    writeImageHtml(i, random_ids[i], static_cast<int>(entry.subimages.size()), *(*ii));
+    QString outfilename(dm_outdir + "/" + (*ii)->urlhtml);
+
+    if (writeImageHtml(outfilename, i, random_ids[i], static_cast<int>(entry.subimages.size()), *(*ii)))
+      dm_out << "  VIEW " << outfilename << endl;
+    else
+      dm_out << "!ERROR failed to open for output: " << outfilename << endl;
     ++i;
   }
 }
