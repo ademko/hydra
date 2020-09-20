@@ -8,12 +8,11 @@
 #ifndef __INCLUDED_HYDRADESKTOP_FILEITEMCACHE_H__
 #define __INCLUDED_HYDRADESKTOP_FILEITEMCACHE_H__
 
-#include <hydra/Records.h>
 #include <desktop/LoadCache.h>
+#include <hydra/Records.h>
 
-namespace desktop
-{
-  class FileItemCache;
+namespace desktop {
+class FileItemCache;
 }
 
 /**
@@ -23,23 +22,23 @@ namespace desktop
  * Will reenable in the future when we want to catch circular references.
  *
  * @author Aleksander Demko
- */ 
-class desktop::FileItemCache
-{
+ */
+class desktop::FileItemCache {
   public:
-    typedef LoadCacheBase<hydra::FileItemRecord,QUuid>::cache_ptr cache_ptr;
+    typedef LoadCacheBase<hydra::FileItemRecord, QUuid>::cache_ptr cache_ptr;
 
   public:
     FileItemCache(void);
     ~FileItemCache();
 
-    static FileItemCache * instance(void) { return dm_instance; }
+    static FileItemCache *instance(void) { return dm_instance; }
 
-    //bool containsItem(const QString &fullfilename);
+    // bool containsItem(const QString &fullfilename);
 
     // returns true on success
-    bool getItem(const QString &fullfilename, desktop::cache_ptr<hydra::FileItemRecord,QUuid> &outitem, 
-        QString &outhash, bool *needsBigRead = 0);
+    bool getItem(const QString &fullfilename,
+                 desktop::cache_ptr<hydra::FileItemRecord, QUuid> &outitem,
+                 QString &outhash, bool *needsBigRead = 0);
 
   private:
     LoadCacheBase<hydra::FileItemRecord, QUuid> dm_cache;
@@ -49,4 +48,3 @@ class desktop::FileItemCache
 };
 
 #endif
-

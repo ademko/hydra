@@ -8,18 +8,16 @@
 #ifndef __INCLUDED_HYDRADESKTOP_INFOVIEW_H__
 #define __INCLUDED_HYDRADESKTOP_INFOVIEW_H__
 
-#include <desktop/View.h>
 #include <desktop/ImageCache.h>
+#include <desktop/View.h>
 
 #include <QLabel>
 
-namespace desktop
-{
-  class InfoView;
+namespace desktop {
+class InfoView;
 }
 
-class desktop::InfoView : public desktop::View
-{
+class desktop::InfoView : public desktop::View {
     Q_OBJECT
   public:
     InfoView(FileList *_filelist, ImageCache *_loader);
@@ -28,10 +26,9 @@ class desktop::InfoView : public desktop::View
     void onCurrentChanged(void);
 
   private:
-    ImageCache *dm_loader;  // needed for dimen info
+    ImageCache *dm_loader; // needed for dimen info
 
     QLabel *dm_label;
 };
 
 #endif
-

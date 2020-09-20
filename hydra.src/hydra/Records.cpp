@@ -21,25 +21,20 @@ using namespace hydra;
 //
 //
 
-FilePathRecord::FilePathRecord(void)
-  : file_time(0), file_size(0)
-{
+FilePathRecord::FilePathRecord(void) : file_time(0), file_size(0) {}
+
+void FilePathRecord::save(QDataStream &out) const {
+    out << (qint32)2; // write version;
+    out << hash;
+    out << file_time;
+    out << file_size;
 }
 
-void FilePathRecord::save(QDataStream &out) const
-{
-  out << (qint32)2;   // write version;
-  out << hash;
-  out << file_time;
-  out << file_size;
-}
+void FilePathRecord::load(QDataStream &in) {
+    qint32 version;
 
-void FilePathRecord::load(QDataStream &in)
-{
-  qint32 version;
-
-  in >> version;    // read version
-  in >> hash >> file_time >> file_size;
+    in >> version; // read version
+    in >> hash >> file_time >> file_size;
 }
 
 //
@@ -48,177 +43,164 @@ void FilePathRecord::load(QDataStream &in)
 //
 //
 
-FileHashRecord::FileHashRecord(void)
-{
+FileHashRecord::FileHashRecord(void) {}
+
+void FileHashRecord::save(QDataStream &out) const {
+    out << (qint32)1; // write version;
+    out << id;
 }
 
-void FileHashRecord::save(QDataStream &out) const
-{
-  out << (qint32)1;   // write version;
-  out << id;
+void FileHashRecord::load(QDataStream &in) {
+    qint32 version;
+
+    in >> version; // read version
+
+    in >> id;
 }
 
-void FileHashRecord::load(QDataStream &in)
-{
-  qint32 version;
+Tags::Tags(void) {}
 
-  in >> version;    // read version
-
-  in >> id;
+void Tags::debugPrint(void) const {
+    for (const_iterator ii = begin(); ii != end(); ++ii)
+        qDebug() << *ii;
 }
 
-Tags::Tags(void)
-{
-}
+bool Tags::insertTag(const QString &newtag, bool *imageChanged) {
+    assert(newtag.size() > 0);
 
-void Tags::debugPrint(void) const
-{
-  for (const_iterator ii=begin(); ii != end(); ++ii)
-    qDebug() << *ii;
-}
+    if (count(newtag) > 0)
+        return false; // already have this tag, no need
 
-bool Tags::insertTag(const QString &newtag, bool *imageChanged)
-{
-  assert(newtag.size() > 0);
+    bool isstar(newtag[0] == hydra::SCORE_CHAR);
 
-  if (count(newtag) > 0)
-    return false; // already have this tag, no need
+    if (isstar) {
+        // star logic
+        // find the existing star, and erase it, if need be
+        iterator ii = lower_bound(QString(hydra::SCORE_CHAR));
 
-  bool isstar(newtag[0] == hydra::SCORE_CHAR);
+        // erase the existing score, if any
+        if (ii != end() && (*ii)[0] == hydra::SCORE_CHAR)
+            erase(ii);
 
-  if (isstar) {
-    // star logic
-    // find the existing star, and erase it, if need be
-    iterator ii = lower_bound(QString(hydra::SCORE_CHAR));
+        // finally, insert this new score
+        insert(newtag);
+        return true;
+    }
 
-    // erase the existing score, if any
-    if (ii != end() && (*ii)[0] == hydra::SCORE_CHAR)
-      erase(ii);
+    int k = indexOfKeyValue(newtag);
 
-    // finally, insert this new score
+    if (k >= -1) {
+        // this is a key=value, erase the old one first
+        QString key(newtag.left(k));
+
+        // remove the old key
+        if (containsKey(key))
+            eraseKey(key);
+
+        insert(newtag);
+
+        // does this change the image rotation? note it
+        if (imageChanged && key == "rotate")
+            *imageChanged = true;
+
+        return true;
+    }
+
+    // basic tag, just insert it
+
     insert(newtag);
-    return true;
-  }
-
-  int k=indexOfKeyValue(newtag);
-
-  if (k >= -1) {
-    // this is a key=value, erase the old one first
-    QString key(newtag.left(k));
-
-    // remove the old key
-    if (containsKey(key))
-      eraseKey(key);
-
-    insert(newtag);
-
-    // does this change the image rotation? note it
-    if (imageChanged && key == "rotate")
-      *imageChanged = true;
 
     return true;
-  }
-
-  // basic tag, just insert it
-
-  insert(newtag);
-
-  return true;
 }
 
-bool Tags::eraseTag(const QString &newtag, bool *imageChanged)
-{
-  iterator ii = find(newtag);
+bool Tags::eraseTag(const QString &newtag, bool *imageChanged) {
+    iterator ii = find(newtag);
 
-  if (ii == end())
-    return false;
+    if (ii == end())
+        return false;
 
 #define LEN_OF_ROTATE 6
-  int index = indexOfKeyValue(newtag);
-  if (index == LEN_OF_ROTATE && imageChanged && newtag.startsWith("rotate"))
-    *imageChanged = true;
+    int index = indexOfKeyValue(newtag);
+    if (index == LEN_OF_ROTATE && imageChanged && newtag.startsWith("rotate"))
+        *imageChanged = true;
 
-  erase(ii);
+    erase(ii);
 
-  return true;
+    return true;
 }
 
-bool Tags::clearTags(bool *imageChanged)
-{
-  if (empty())
-    return false;
+bool Tags::clearTags(bool *imageChanged) {
+    if (empty())
+        return false;
 
-  if (imageChanged && containsKey("rotate"))
-    *imageChanged = true;
+    if (imageChanged && containsKey("rotate"))
+        *imageChanged = true;
 
-  clear();
+    clear();
 
-  return true;
+    return true;
 }
 
-bool Tags::containsKey(const QString &key) const
-{
-  const_iterator ii = lower_bound(key);
+bool Tags::containsKey(const QString &key) const {
+    const_iterator ii = lower_bound(key);
 
-  if (ii == end())
-    return false;
+    if (ii == end())
+        return false;
 
-  int index = indexOfKeyValue(*ii);
+    int index = indexOfKeyValue(*ii);
 
-  if (index < 0)
-    return false;
+    if (index < 0)
+        return false;
 
-  // check if the key matches
-  if (index != key.size() || !(*ii).startsWith(key))
-    return false;
-  return true;
+    // check if the key matches
+    if (index != key.size() || !(*ii).startsWith(key))
+        return false;
+    return true;
 }
 
-bool Tags::insertKey(const QString &key, const QString &value, bool *imageChanged)
-{
-  QString newtag(key + SEP_CHAR + value);
+bool Tags::insertKey(const QString &key, const QString &value,
+                     bool *imageChanged) {
+    QString newtag(key + SEP_CHAR + value);
 
-  return insertTag(newtag, imageChanged);
+    return insertTag(newtag, imageChanged);
 }
 
-bool Tags::eraseKey(const QString &key, bool *imageChanged)
-{
-  const_iterator ii = lower_bound(key);
+bool Tags::eraseKey(const QString &key, bool *imageChanged) {
+    const_iterator ii = lower_bound(key);
 
-  if (ii == end())
-    return false;
+    if (ii == end())
+        return false;
 
-  int index = indexOfKeyValue(*ii);
+    int index = indexOfKeyValue(*ii);
 
-  if (index < 0)
-    return false;
+    if (index < 0)
+        return false;
 
-  // check if the key matches
-  if (index != key.size() || !(*ii).startsWith(key))
-    return false;
+    // check if the key matches
+    if (index != key.size() || !(*ii).startsWith(key))
+        return false;
 
-  // good, now erase it
-  return eraseTag(*ii, imageChanged);
+    // good, now erase it
+    return eraseTag(*ii, imageChanged);
 }
 
-QString Tags::keyValue(const QString &key) const
-{
-  const_iterator ii = lower_bound(key);
+QString Tags::keyValue(const QString &key) const {
+    const_iterator ii = lower_bound(key);
 
-  if (ii == end())
-    return "";
+    if (ii == end())
+        return "";
 
-  int index = indexOfKeyValue(*ii);
+    int index = indexOfKeyValue(*ii);
 
-  if (index < 0)
-    return "";
+    if (index < 0)
+        return "";
 
-  // check if the key matches
-  if (index != key.size() || !(*ii).startsWith(key))
-    return "";
+    // check if the key matches
+    if (index != key.size() || !(*ii).startsWith(key))
+        return "";
 
-  // key is good, return the value
-  return (*ii).mid(index+1);
+    // key is good, return the value
+    return (*ii).mid(index + 1);
 }
 
 //
@@ -227,67 +209,63 @@ QString Tags::keyValue(const QString &key) const
 //
 //
 
-FileItemRecord::FileItemRecord(void)
-  : filetype(0)
-{
+FileItemRecord::FileItemRecord(void) : filetype(0) {}
+
+void FileItemRecord::save(QDataStream &out) const {
+    out << (qint32)3; // write version;
+
+    out << id << title << desc << filetype;
+
+    out << (qint32)tags.size();
+    assert(tags.size() < 1000); // sanity check
+
+    for (tags_t::const_iterator ii = tags.begin(); ii != tags.end(); ++ii) {
+        assert(!ii->isEmpty());
+        out << *ii;
+    }
+
+    // always write out the data in 64-bit uint format
+    // that way, we won't get hit by the ~2030 bug
+    // (yes, we'll need to update the time_t functions
+    // to do 64-bit stuff ofcourse
+    out << modtimeAsInt64();
 }
 
-void FileItemRecord::save(QDataStream &out) const
-{
-  out << (qint32)3;   // write version;
+void FileItemRecord::load(QDataStream &in) {
+    qint32 version;
 
-  out << id << title << desc << filetype;
+    modtime = QDateTime();
 
-  out << (qint32)tags.size();
-  assert(tags.size()<1000);     // sanity check
+    in >> version;
 
-  for (tags_t::const_iterator ii=tags.begin(); ii != tags.end(); ++ii) {
-    assert(!ii->isEmpty());
-    out << *ii;
-  }
+    in >> id >> title >> desc >> filetype;
 
-  // always write out the data in 64-bit uint format
-  // that way, we won't get hit by the ~2030 bug
-  // (yes, we'll need to update the time_t functions
-  // to do 64-bit stuff ofcourse
-  out << modtimeAsInt64();
+    qint32 sz;
+
+    in >> sz;
+
+    if (sz >=
+        1000) // surely greater than this is some kind of error? // sanity check
+        throw FormatException();
+
+    tags.clear();
+    for (; sz > 0; --sz) {
+        tags_t::value_type v;
+        in >> v;
+        if (v.isEmpty())
+            throw FormatException(); // this should never happen to.. empty tags
+                                     // are not allowed
+        tags.insert(v);
+    }
+
+    if (version < 3)
+        return;
+
+    // version 3 added modtime
+    quint64 intmodtime;
+
+    in >> intmodtime;
+
+    // in the future, make this thing grok 64-bit dates to avoid a ~2030 bug
+    setModtimeFromInt64(intmodtime);
 }
-
-void FileItemRecord::load(QDataStream &in)
-{
-  qint32 version;
-
-  modtime = QDateTime();
-
-  in >> version;
-
-  in >> id >> title >> desc >> filetype;
-
-  qint32 sz;
-
-  in >> sz;
-
-  if (sz >= 1000)        // surely greater than this is some kind of error? // sanity check
-    throw FormatException();
-
-  tags.clear();
-  for(; sz>0; --sz) {
-    tags_t::value_type v;
-    in >> v;
-    if (v.isEmpty())
-      throw FormatException();    // this should never happen to.. empty tags are not allowed
-    tags.insert(v);
-  }
-
-  if (version < 3)
-    return;
-
-  // version 3 added modtime
-  quint64 intmodtime;
-
-  in >> intmodtime;
-
-  // in the future, make this thing grok 64-bit dates to avoid a ~2030 bug
-  setModtimeFromInt64(intmodtime);
-}
-

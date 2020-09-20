@@ -8,37 +8,37 @@
 #ifndef __INCLUDED_HYDRA_DIRMONITOR_H__
 #define __INCLUDED_HYDRA_DIRMONITOR_H__
 
-#include <set>
-#include <map>
 #include <hydra/TR1.h>
+#include <map>
+#include <set>
 
+#include <QFileSystemWatcher>
 #include <QObject>
 #include <QString>
 #include <QStringList>
-#include <QFileSystemWatcher>
 
-namespace hydra
-{
-  void pruneDirectory(const QString &dirname);
+namespace hydra {
+void pruneDirectory(const QString &dirname);
 
-  class FileList;
-  class DirChangeEvent;
-  class DirMonitor;
+class FileList;
+class DirChangeEvent;
+class DirMonitor;
 
-  class DirDBUpdater;
-}
+class DirDBUpdater;
+} // namespace hydra
 
 /**
  * Emited when a directory changes.
  *
  * @author Aleksander Demko
- */ 
-class hydra::DirChangeEvent : public QObject
-{
+ */
+class hydra::DirChangeEvent : public QObject {
   public:
     QStringList addFiles, removeFiles;
 
-    bool isEmpty(void) const { return addFiles.isEmpty() && removeFiles.isEmpty(); }
+    bool isEmpty(void) const {
+        return addFiles.isEmpty() && removeFiles.isEmpty();
+    }
 
     void debugPrint(void);
 };
@@ -47,13 +47,12 @@ class hydra::DirChangeEvent : public QObject
  * Monitors one or more directories.
  *
  * @author Aleksander Demko
- */ 
-class hydra::DirMonitor : public QObject
-{
+ */
+class hydra::DirMonitor : public QObject {
     Q_OBJECT
 
   protected:
-    class MarkList;//fwd/internal class
+    class MarkList; // fwd/internal class
   public:
     /// constructor
     DirMonitor(void);
@@ -78,7 +77,7 @@ class hydra::DirMonitor : public QObject
     bool dm_queued;
     bool dm_requeue;
 
-    typedef std::map<QString, std::shared_ptr<MarkList> > marklists_t;
+    typedef std::map<QString, std::shared_ptr<MarkList>> marklists_t;
     marklists_t dm_marklists;
 };
 
@@ -87,9 +86,8 @@ class hydra::DirMonitor : public QObject
  * the DB (via the singleton Engine class).
  *
  * @author Aleksander Demko
- */ 
-class hydra::DirDBUpdater : public QObject
-{
+ */
+class hydra::DirDBUpdater : public QObject {
     Q_OBJECT
 
   public:
@@ -101,4 +99,3 @@ class hydra::DirDBUpdater : public QObject
 };
 
 #endif
-

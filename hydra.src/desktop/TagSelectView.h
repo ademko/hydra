@@ -12,19 +12,18 @@
 
 #include <desktop/View.h>
 
-namespace desktop
-{
-  class TagSelectView;
+namespace desktop {
+class TagSelectView;
 }
 
-class desktop::TagSelectView : public desktop::View
-{
+class desktop::TagSelectView : public desktop::View {
     Q_OBJECT
 
   public:
     TagSelectView(FileList *_filelist);
 
-    static void queryToSelection(FileList *fileList, hydra::Token *query, QItemSelection &outselection);
+    static void queryToSelection(FileList *fileList, hydra::Token *query,
+                                 QItemSelection &outselection);
 
   private slots:
     void onClear(void);
@@ -38,4 +37,3 @@ class desktop::TagSelectView : public desktop::View
 };
 
 #endif
-

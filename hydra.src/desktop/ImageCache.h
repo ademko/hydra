@@ -8,18 +8,17 @@
 #ifndef __INCLUDED_HYDRADESKTOP_IMAGECACHE_H__
 #define __INCLUDED_HYDRADESKTOP_IMAGECACHE_H__
 
-#include <list>
 #include <hydra/TR1.h>
+#include <list>
 
-#include <QString>
 #include <QImage>
 #include <QPixmap>
+#include <QString>
 
 #include <desktop/LoadCache.h>
 
-namespace desktop
-{
-  class ImageCache;
+namespace desktop {
+class ImageCache;
 }
 
 /**
@@ -27,9 +26,8 @@ namespace desktop
  * of the image as needed. The rescaled versions however are not cached.
  *
  * @author Aleksander Demko
- */ 
-class desktop::ImageCache
-{
+ */
+class desktop::ImageCache {
   public:
     /// constructor
     ImageCache(int maxhold = 5);
@@ -39,7 +37,9 @@ class desktop::ImageCache
      *
      * @author Aleksander Demko
      */
-    bool containsImage(const QString &fullfilename) const { return dm_cache.containsItem(fullfilename); }
+    bool containsImage(const QString &fullfilename) const {
+        return dm_cache.containsItem(fullfilename);
+    }
 
     /**
      * Loads the given file as an image, from cache if possible.
@@ -47,22 +47,23 @@ class desktop::ImageCache
      * image will be returned.
      *
      * @author Aleksander Demko
-     */ 
-    desktop::cache_ptr<QImage> getImage(const QString &fullfilename) { return dm_cache.getItem(fullfilename); }
+     */
+    desktop::cache_ptr<QImage> getImage(const QString &fullfilename) {
+        return dm_cache.getItem(fullfilename);
+    }
 
     /**
-      * Note that this is a static function, and can take in image.
-      * Obviously, the resulting QPixmaps are saved or cached in any way.
-      *
-      * @author Aleksander Demko
-      */ 
-    static QPixmap getPixmap(QImage &image, int windoww, int windowh, bool growtofit);
+     * Note that this is a static function, and can take in image.
+     * Obviously, the resulting QPixmaps are saved or cached in any way.
+     *
+     * @author Aleksander Demko
+     */
+    static QPixmap getPixmap(QImage &image, int windoww, int windowh,
+                             bool growtofit);
 
   private:
-
   private:
-    class ImageLoader
-    {
+    class ImageLoader {
       public:
         // never returns null... failed loads will simply be empty images
         std::shared_ptr<QImage> operator()(const QString &fullfilename);
@@ -72,4 +73,3 @@ class desktop::ImageCache
 };
 
 #endif
-

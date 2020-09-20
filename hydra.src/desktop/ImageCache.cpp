@@ -9,9 +9,9 @@
 
 #include <QDebug>
 
-#include <hydra/Thumb.h>
 #include <hydra/Exif.h>
 #include <hydra/RotateCode.h>
+#include <hydra/Thumb.h>
 
 using namespace desktop;
 
@@ -21,40 +21,39 @@ using namespace desktop;
 //
 //
 
-ImageCache::ImageCache(int maxhold)
-  : dm_cache(maxhold)
-{
+ImageCache::ImageCache(int maxhold) : dm_cache(maxhold) {}
+
+QPixmap ImageCache::getPixmap(QImage &image, int windoww, int windowh,
+                              bool growtofit) {
+    unsigned long final_w, final_h;
+
+    hydra::calcAspect(image.width(), image.height(), windoww, windowh, final_w,
+                      final_h, growtofit);
+
+    QImage scaled_image =
+        image.scaled(QSize(final_w, final_h), Qt::IgnoreAspectRatio,
+                     Qt::SmoothTransformation);
+    return QPixmap::fromImage(scaled_image);
 }
 
-QPixmap ImageCache::getPixmap(QImage &image, int windoww, int windowh, bool growtofit)
-{
-  unsigned long final_w, final_h;
+std::shared_ptr<QImage>
+ImageCache::ImageLoader::operator()(const QString &fullfilename) {
+    std::shared_ptr<QImage> i(new QImage);
 
-  hydra::calcAspect(image.width(), image.height(), windoww, windowh, final_w, final_h, growtofit);
+    i->load(fullfilename);
 
-  QImage scaled_image = image.scaled(QSize(final_w, final_h), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-  return QPixmap::fromImage(scaled_image);
+    return i;
+
+    /*bool ok = i->load(fullfilename);
+    int rotatecode = hydra::detectExifRotate(fullfilename);
+
+    if (rotatecode < 0)
+      rotatecode = 0;
+
+    if (ok)
+      *i = hydra::rotateImageByCode(rotatecode, *i);
+    else
+      *i = QImage();
+
+    return i;*/
 }
-
-std::shared_ptr<QImage> ImageCache::ImageLoader::operator()(const QString &fullfilename)
-{
-  std::shared_ptr<QImage> i(new QImage);
-
-  i->load(fullfilename);
-
-  return i;
-
-  /*bool ok = i->load(fullfilename);
-  int rotatecode = hydra::detectExifRotate(fullfilename);
-
-  if (rotatecode < 0)
-    rotatecode = 0;
-
-  if (ok)
-    *i = hydra::rotateImageByCode(rotatecode, *i);
-  else
-    *i = QImage();
-
-  return i;*/
-}
-

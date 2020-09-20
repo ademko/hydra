@@ -12,28 +12,25 @@
 #include <map>
 #include <set>
 
-#include <QPixmap>
 #include <QMutex>
+#include <QPixmap>
 
 #include <desktop/ImageCache.h>
 #include <desktop/LoadCache.h>
 
-namespace desktop
-{
-  class ThreadedThumbCache;
+namespace desktop {
+class ThreadedThumbCache;
 
-  class FileList; //fwd
-};
-
+class FileList; // fwd
+};              // namespace desktop
 
 /**
  * A ThumbCache that queues background threads to fill in any missing
  * thumbnails.
  *
  * @author Aleksander Demko
- */ 
-class desktop::ThreadedThumbCache
-{
+ */
+class desktop::ThreadedThumbCache {
   public:
     /// constructor
     ThreadedThumbCache(void);
@@ -45,17 +42,24 @@ class desktop::ThreadedThumbCache
 
     /// check if this pixmap is in the cache
     /// done need the fullfilename (for now) as its all hash/rotateCode based
-    bool containsPixmap(/*const QString &fullfilename,*/ const QString &hash, int rotateCode, int windoww, int windowh);
+    bool containsPixmap(/*const QString &fullfilename,*/ const QString &hash,
+                        int rotateCode, int windoww, int windowh);
 
     /// returns a cached pixmap
-    /// if one needs to be generated, it does so via a background thread while immediatly returning a null ptr
-    /// rotate code can be -1 if "not specified"
-    desktop::cache_ptr<QPixmap> getPixmap(const QString &fullfilename, const QString &hash, int rotateCode, int windoww, int windowh, FileList *fileList = 0, int indexOfFile = -1);
+    /// if one needs to be generated, it does so via a background thread while
+    /// immediatly returning a null ptr rotate code can be -1 if "not specified"
+    desktop::cache_ptr<QPixmap> getPixmap(const QString &fullfilename,
+                                          const QString &hash, int rotateCode,
+                                          int windoww, int windowh,
+                                          FileList *fileList = 0,
+                                          int indexOfFile = -1);
 
   private:
-    void workerFunc(QString fullfilename, QString thumbName, QString hash, int rotateCode, int windoww, int windowh,
-        FileList *fileList, int indexOfFile);
-    void mainFunc(QString fullfilename, QString thumbName, QImage img, FileList *fileList, int indexOfFile);
+    void workerFunc(QString fullfilename, QString thumbName, QString hash,
+                    int rotateCode, int windoww, int windowh,
+                    FileList *fileList, int indexOfFile);
+    void mainFunc(QString fullfilename, QString thumbName, QImage img,
+                  FileList *fileList, int indexOfFile);
 
   private:
     // all access to the member variables and parent functions are protected
@@ -68,4 +72,3 @@ class desktop::ThreadedThumbCache
 };
 
 #endif
-

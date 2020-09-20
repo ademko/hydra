@@ -10,15 +10,13 @@
 
 #include <QString>
 
-namespace hydra
-{
-  // not a public function, used by hydra
-  // in the future, make this a public object
-  // that uses usable by the gui (takes a filename string,
-  // does some kind of progressable-iteration
-  // returns number of entries processed, or -1 on error
-  int commandImport(const QString &filename, bool smartmerge);
-}
+namespace hydra {
+// not a public function, used by hydra
+// in the future, make this a public object
+// that uses usable by the gui (takes a filename string,
+// does some kind of progressable-iteration
+// returns number of entries processed, or -1 on error
+int commandImport(const QString &filename, bool smartmerge);
+} // namespace hydra
 
 #endif
-

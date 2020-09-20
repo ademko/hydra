@@ -10,13 +10,11 @@
 
 #include <desktop/View.h>
 
-namespace desktop
-{
-  class VCRView;
+namespace desktop {
+class VCRView;
 }
 
-class desktop::VCRView : public desktop::View
-{
+class desktop::VCRView : public desktop::View {
     Q_OBJECT
   public:
     VCRView(MainWindow *mainwin, FileList *_source);
@@ -32,4 +30,3 @@ class desktop::VCRView : public desktop::View
 };
 
 #endif
-

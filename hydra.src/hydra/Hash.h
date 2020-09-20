@@ -10,16 +10,14 @@
 
 #include <QString>
 
-namespace hydra
-{
-  /**
-   * Calculates the has of the given file.
-   *
-   * @return The hash of the file (in ascii form) or an empty string on error.
-   * @author Aleksander Demko
-   */ 
-  QString calcFileHash(const QString &filename);
-}
+namespace hydra {
+/**
+ * Calculates the has of the given file.
+ *
+ * @return The hash of the file (in ascii form) or an empty string on error.
+ * @author Aleksander Demko
+ */
+QString calcFileHash(const QString &filename);
+} // namespace hydra
 
 #endif
-

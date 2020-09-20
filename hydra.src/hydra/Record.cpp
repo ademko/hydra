@@ -7,8 +7,6 @@
 
 #include <hydra/Record.h>
 
-const char* hydra::Record::Exception::what(void) const throw()
-{
-  return "hydra::Record::Exception or derived exception";
+const char *hydra::Record::Exception::what(void) const throw() {
+    return "hydra::Record::Exception or derived exception";
 }
-

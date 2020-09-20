@@ -10,8 +10,8 @@
 
 #include <hydra/TR1.h>
 
-#include <QString>
 #include <QDateTime>
+#include <QString>
 
 #define HYDRA_VERSION_STRING "0.24.0"
 #define HYDRA_COPYRIGHT_STRING "2007-2017"
@@ -21,15 +21,14 @@
  * of the core hydra library.
  *
  * @author Aleksander Demko
- */ 
-namespace hydra
-{
-  class Engine;
-  class DB;//forward
-  class FilePathRecord; //forward
-  class FileHashRecord; //forward
-  class FileItemRecord; //forward
-}
+ */
+namespace hydra {
+class Engine;
+class DB;             // forward
+class FilePathRecord; // forward
+class FileHashRecord; // forward
+class FileItemRecord; // forward
+} // namespace hydra
 
 /**
  * The main processing engine for hydra applications.
@@ -38,23 +37,23 @@ namespace hydra
  *
  * @author Aleksander Demko
  */
-class hydra::Engine
-{
+class hydra::Engine {
   public:
     // carious codes
     enum {
-      Add_New = 10,
-      Add_Exists,
-      Add_NewPath,
-      Add_UpdatedPath,
-      Add_Error,
+        Add_New = 10,
+        Add_Exists,
+        Add_NewPath,
+        Add_UpdatedPath,
+        Add_Error,
 
-      Load_OK = 100,        // typically, you should just use Load_OK
-      Load_ErrorNeedsUpdate,    // its in the DB, but it needs an update
-      Load_ErrorNotFound, // not in db
-      Load_ErrorFatal,    // some serious error
-      Load_ErrorFileMissing,  // file missing or access error
+        Load_OK = 100,         // typically, you should just use Load_OK
+        Load_ErrorNeedsUpdate, // its in the DB, but it needs an update
+        Load_ErrorNotFound,    // not in db
+        Load_ErrorFatal,       // some serious error
+        Load_ErrorFileMissing, // file missing or access error
     };
+
   public:
     /// constructor
     Engine(void);
@@ -66,14 +65,14 @@ class hydra::Engine
      *
      * @author Aleksander Demko
      */
-    static Engine * instance(void) { return dm_instance; }
+    static Engine *instance(void) { return dm_instance; }
 
     /**
      * Gets the path to the user's home directory, or "."
      * if not found.
      *
      * @author Aleksander Demko
-     */ 
+     */
     static QString homeDir(void);
 
     /**
@@ -83,17 +82,17 @@ class hydra::Engine
      * This will also create it, if necesary.
      *
      * @author Aleksander Demko
-     */ 
+     */
     static QString dbDir(void);
 
     /**
      * Adds a file to the db.
      * This will also repair/update any outof date records.
-     * If precalchash is provided, then it is assumed to be the hash of the given
-     * file.
+     * If precalchash is provided, then it is assumed to be the hash of the
+     * given file.
      *
      * @author Aleksander Demko
-     */ 
+     */
     int addFile(const QString &fullfilename, const QString *precalchash = 0);
 
     /**
@@ -101,7 +100,7 @@ class hydra::Engine
      * Returns true on success (which for now, is always)
      *
      * @author Aleksander Demko
-     */ 
+     */
     bool erasePath(const QString &fullfilename);
 
     /**
@@ -112,7 +111,7 @@ class hydra::Engine
      * Returns true on success (which for now, is always)
      *
      * @author Aleksander Demko
-     */ 
+     */
     bool eraseHash(const QString &hash);
 
     /**
@@ -121,9 +120,9 @@ class hydra::Engine
      *
      * @return a Load_* error code
      * @author Aleksander Demko
-     */ 
-    int getFileItem(const QString &fullfilename, hydra::FileItemRecord *item, hydra::FileHashRecord *hash,
-        hydra::FilePathRecord *path);
+     */
+    int getFileItem(const QString &fullfilename, hydra::FileItemRecord *item,
+                    hydra::FileHashRecord *hash, hydra::FilePathRecord *path);
     /**
      * Loads the given file from the DB
      *
@@ -131,7 +130,7 @@ class hydra::Engine
      *
      * @return a Load_* error code
      * @author Aleksander Demko
-     */ 
+     */
     int getFileItem(const QString &fullfilename, hydra::FileItemRecord &rec);
 
     /**
@@ -139,8 +138,9 @@ class hydra::Engine
      *
      * @return a Load_* error code
      * @author Aleksander Demko
-     */ 
-    int getFileItemByHash(const QString &hashkey, hydra::FileItemRecord *item, hydra::FileHashRecord *hash);
+     */
+    int getFileItemByHash(const QString &hashkey, hydra::FileItemRecord *item,
+                          hydra::FileHashRecord *hash);
 
     /**
      * Reloads the given file item from db.
@@ -150,7 +150,7 @@ class hydra::Engine
      * Returns the same codes as getFileItem()
      *
      * @author Aleksander Demko
-     */ 
+     */
     int regetFileItem(hydra::FileItemRecord &rec);
 
     /**
@@ -158,30 +158,33 @@ class hydra::Engine
      *
      *
      * @param rec the record to save
-     * @param newmodtime the modification time to use. If this isValid, rec.modtime will be set to this before saving
+     * @param newmodtime the modification time to use. If this isValid,
+     * rec.modtime will be set to this before saving
      * @return true on success
      * @author Aleksander Demko
      */
     bool saveFileItem(hydra::FileItemRecord &rec, const QDateTime &newmodtime);
 
     // future, uses the internal cache bank
-    //std::tr1::shared_ptr<FileItemRecord> getFileItem(const QString &fullfilename);
+    // std::tr1::shared_ptr<FileItemRecord> getFileItem(const QString
+    // &fullfilename);
 
-    hydra::DB & filePathDB(void) { return *dm_filepathdb; }
-    hydra::DB & fileHashDB(void) { return *dm_filehashdb; }
-    hydra::DB & fileItemDB(void) { return *dm_fileitemdb; }
+    hydra::DB &filePathDB(void) { return *dm_filepathdb; }
+    hydra::DB &fileHashDB(void) { return *dm_filehashdb; }
+    hydra::DB &fileItemDB(void) { return *dm_fileitemdb; }
 
     /**
      * This converts any of the errors codes into a ascii char
      * that may be suitable for status output.
      *
      * @author Aleksander Demko
-     */ 
+     */
     static char codeToChar(int code);
 
     /// gets the mod time and file size of the given file
     /// returns true on success
-    static bool statFile(const QString &fullfilename, double &modtime, qint64 &filesize);
+    static bool statFile(const QString &fullfilename, double &modtime,
+                         qint64 &filesize);
 
   private:
     static Engine *dm_instance;
@@ -190,4 +193,3 @@ class hydra::Engine
 };
 
 #endif
-

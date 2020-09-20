@@ -14,12 +14,11 @@
 
 #include <QDebug>
 
-namespace hydra
-{
-  template <class BASE, class SUB> BASE* loadfunc_impl(void) { return new SUB(); }
-  template <class BASE> class Registry;
-  template <class SUB> class Register;
-}
+namespace hydra {
+template <class BASE, class SUB> BASE *loadfunc_impl(void) { return new SUB(); }
+template <class BASE> class Registry;
+template <class SUB> class Register;
+} // namespace hydra
 
 /**
  * This allows you to setup a load-time registering plugin system
@@ -35,27 +34,30 @@ namespace hydra
  * the members of BASE::registry
  *
  * @author Aleksander Demko
- */ 
-template <class BASE> class hydra::Registry
-{
+ */
+template <class BASE> class hydra::Registry {
   public:
     typedef BASE base_type;
-    typedef BASE* (*loadfunc_t)(void);
-    template <class SUB> BASE* loadfunc_impl(void) { return new SUB(); }
+    typedef BASE *(*loadfunc_t)(void);
+    template <class SUB> BASE *loadfunc_impl(void) { return new SUB(); }
 
     class payload_t {
       public:
         loadfunc_t loader;
-        const char *name;    /// a name, might be null
+        const char *name; /// a name, might be null
       public:
-        payload_t(loadfunc_t _loader, const char *_name = 0) : loader(_loader), name(_name) { }
+        payload_t(loadfunc_t _loader, const char *_name = 0)
+            : loader(_loader), name(_name) {}
     };
 
   public:
-    //Registry(void) { qDebug() << __FUNCTION__; }
-    //Registry<BASE> & instance(Registry<BASE> & *ptr);
+    // Registry(void) { qDebug() << __FUNCTION__; }
+    // Registry<BASE> & instance(Registry<BASE> & *ptr);
 
-    void appendFunc(loadfunc_t func, const char *name = 0) { instance(); dm_funcs->push_back(payload_t(func,name)); }
+    void appendFunc(loadfunc_t func, const char *name = 0) {
+        instance();
+        dm_funcs->push_back(payload_t(func, name));
+    }
 
     // none of the following methods are const as they all call instance()
 
@@ -63,22 +65,31 @@ template <class BASE> class hydra::Registry
      * Returns the number of currently registered types in this registry.
      *
      * @author Aleksander Demko
-     */ 
-    size_t size(void) { instance(); return dm_funcs->size(); }
+     */
+    size_t size(void) {
+        instance();
+        return dm_funcs->size();
+    }
 
     /**
      * Instatite the registered type.
      *
      * @author Aleksander Demko
-     */ 
-    std::shared_ptr<BASE> create(size_t index) { instance(); return std::shared_ptr<BASE>((*dm_funcs)[index].loader()); }
+     */
+    std::shared_ptr<BASE> create(size_t index) {
+        instance();
+        return std::shared_ptr<BASE>((*dm_funcs)[index].loader());
+    }
     /**
      * Returns the set name of the given registered type.
      * Might be null if it was never set.
      *
      * @author Aleksander Demko
-     */ 
-    const char * name(size_t index) { instance(); return (*dm_funcs)[index].name; }
+     */
+    const char *name(size_t index) {
+        instance();
+        return (*dm_funcs)[index].name;
+    }
 
   private:
     // makes sure dm_funcs is not null
@@ -89,7 +100,7 @@ template <class BASE> class hydra::Registry
     // resolution (ie. we can control it somewhat)
     // also, auto_ptr since we still want initilization/destruction
     // at ctor/dtor time
-    std::unique_ptr<std::vector<payload_t> > dm_funcs;
+    std::unique_ptr<std::vector<payload_t>> dm_funcs;
 };
 
 /*template <class BASE>
@@ -100,12 +111,10 @@ hydra::Registry<BASE> & hydra::Registry<BASE>::instance(Registry<BASE> & *ptr)
   return *ptr;
 }*/
 
-template <class BASE>
-void hydra::Registry<BASE>::instance(void)
-{
-  //qDebug() << __FUNCTION__ << (dm_funcs !=0);
-  if (!dm_funcs.get())
-    dm_funcs.reset(new std::vector<payload_t>);
+template <class BASE> void hydra::Registry<BASE>::instance(void) {
+    // qDebug() << __FUNCTION__ << (dm_funcs !=0);
+    if (!dm_funcs.get())
+        dm_funcs.reset(new std::vector<payload_t>);
 }
 
 /**
@@ -120,31 +129,30 @@ void hydra::Registry<BASE>::instance(void)
  * (see Registry)
  *
  * @author Aleksander Demko
- */ 
-template <class SUB> class hydra::Register
-{
+ */
+template <class SUB> class hydra::Register {
   public:
     /**
      * Registering constructor.
      *
      * @author Aleksander Demko
-     */ 
-    Register(void)
-      {
-        //if (!SUB::registry)
-          //SUB::registry = new typename SUB::registry_type;
-        SUB::registry.appendFunc(&hydra::loadfunc_impl<typename SUB::registry_type::base_type, SUB>);
-      }
+     */
+    Register(void) {
+        // if (!SUB::registry)
+        // SUB::registry = new typename SUB::registry_type;
+        SUB::registry.appendFunc(
+            &hydra::loadfunc_impl<typename SUB::registry_type::base_type, SUB>);
+    }
     /**
      * Registering constructor, with a name.
      *
      * @author Aleksander Demko
-     */ 
-    Register(const char *name)
-      {
-        SUB::registry.appendFunc(&hydra::loadfunc_impl<typename SUB::registry_type::base_type, SUB>, name);
-      }
+     */
+    Register(const char *name) {
+        SUB::registry.appendFunc(
+            &hydra::loadfunc_impl<typename SUB::registry_type::base_type, SUB>,
+            name);
+    }
 };
 
 #endif
-

@@ -11,33 +11,26 @@
 
 using namespace desktop;
 
-ShuffleView::ShuffleView(FileList *_filelist)
-  : View(_filelist)
-{
-  initGui();
+ShuffleView::ShuffleView(FileList *_filelist) : View(_filelist) { initGui(); }
+
+void ShuffleView::onToggle(int state) {
+    if ((state != 0) == fileList()->isBaseShuffle())
+        return;
+
+    FileListLoader loader(*fileList());
+
+    loader.setBaseShuffle(state != 0);
 }
 
-void ShuffleView::onToggle(int state)
-{
-  if ( (state != 0) == fileList()->isBaseShuffle() )
-    return;
+void ShuffleView::initGui(void) {
+    QHBoxLayout *lay = new QHBoxLayout;
 
-  FileListLoader loader(*fileList());
+    dm_check = new QCheckBox("Randomly Shuffle Image List");
+    dm_check->setChecked(fileList()->isBaseShuffle());
 
-  loader.setBaseShuffle(state != 0);
+    lay->addWidget(dm_check);
+
+    connect(dm_check, SIGNAL(stateChanged(int)), this, SLOT(onToggle(int)));
+
+    setLayout(lay);
 }
-
-void ShuffleView::initGui(void)
-{
-  QHBoxLayout *lay = new QHBoxLayout;
-
-  dm_check = new QCheckBox("Randomly Shuffle Image List");
-  dm_check->setChecked(fileList()->isBaseShuffle());
-
-  lay->addWidget(dm_check);
-
-  connect(dm_check, SIGNAL(stateChanged(int)), this, SLOT(onToggle(int)));
-
-  setLayout(lay);
-}
-

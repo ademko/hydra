@@ -51,4 +51,3 @@
   directly, and instead use all the methods provided
   by the \ref hydra::Engine class.
  */
-

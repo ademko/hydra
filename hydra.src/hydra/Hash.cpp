@@ -7,32 +7,30 @@
 
 #include <hydra/Hash.h>
 
-#include <QFile>
 #include <QCryptographicHash>
+#include <QFile>
 
-QString hydra::calcFileHash(const QString &filename)
-{
-  QString ret;
+QString hydra::calcFileHash(const QString &filename) {
+    QString ret;
 
-  QFile inf(filename);
+    QFile inf(filename);
 
-  if (!inf.open(QIODevice::ReadOnly))
-    return ret;
+    if (!inf.open(QIODevice::ReadOnly))
+        return ret;
 
-  char buf[4096];
-  int len;
-  bool null_file = true;
-  QCryptographicHash hasher(QCryptographicHash::Sha1);
+    char buf[4096];
+    int len;
+    bool null_file = true;
+    QCryptographicHash hasher(QCryptographicHash::Sha1);
 
-  // do the hashing
-  while ( (len = inf.read(buf, 4096)) > 0 ) {
-    null_file = false;
-    hasher.addData(buf, len);
-  }
+    // do the hashing
+    while ((len = inf.read(buf, 4096)) > 0) {
+        null_file = false;
+        hasher.addData(buf, len);
+    }
 
-  if (null_file)
-    return ret;
+    if (null_file)
+        return ret;
 
-  return hasher.result().toHex().constData();
+    return hasher.result().toHex().constData();
 }
-

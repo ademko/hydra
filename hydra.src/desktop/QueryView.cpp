@@ -7,58 +7,53 @@
 
 #include <desktop/QueryView.h>
 
-#include <QHBoxLayout>
-#include <QPushButton>
 #include <QApplication>
-#include <QStyle>
-#include <QLabel>
 #include <QDebug>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QPushButton>
+#include <QStyle>
 
 using namespace desktop;
 
-QueryView::QueryView(FileList *_filelist)
-  : View(_filelist)
-{
-  initGui();
+QueryView::QueryView(FileList *_filelist) : View(_filelist) {
+    initGui();
 
-  setWindowTitle("Tag Filter");
+    setWindowTitle("Tag Filter");
 }
 
-void QueryView::onClear(void)
-{
-  dm_query->clear();
+void QueryView::onClear(void) {
+    dm_query->clear();
 
-  onEntry();
+    onEntry();
 }
 
-void QueryView::onEntry(void)
-{
-  // performance optimization
-  if (dm_query->text() == fileList()->baseQueryString())
-    return;
+void QueryView::onEntry(void) {
+    // performance optimization
+    if (dm_query->text() == fileList()->baseQueryString())
+        return;
 
-  FileListLoader loader(*fileList());
+    FileListLoader loader(*fileList());
 
-  if (!loader.setBaseQuery(dm_query->text()))
-    dm_query->selectAll();
+    if (!loader.setBaseQuery(dm_query->text()))
+        dm_query->selectAll();
 }
 
-void QueryView::initGui(void)
-{
-  QHBoxLayout *lay = new QHBoxLayout;
-  QPushButton *but;
+void QueryView::initGui(void) {
+    QHBoxLayout *lay = new QHBoxLayout;
+    QPushButton *but;
 
-  but = new QPushButton(QApplication::style()->standardIcon(QStyle::SP_TrashIcon), "Clear");
+    but = new QPushButton(
+        QApplication::style()->standardIcon(QStyle::SP_TrashIcon), "Clear");
 
-  dm_query = new QLineEdit(fileList()->baseQueryString());
+    dm_query = new QLineEdit(fileList()->baseQueryString());
 
-  lay->addWidget(new QLabel("Tags:"));
-  lay->addWidget(dm_query);
-  lay->addWidget(but);
+    lay->addWidget(new QLabel("Tags:"));
+    lay->addWidget(dm_query);
+    lay->addWidget(but);
 
-  connect(but, SIGNAL(clicked(bool)), this, SLOT(onClear()));
-  connect(dm_query, SIGNAL(editingFinished()), this, SLOT(onEntry()));
+    connect(but, SIGNAL(clicked(bool)), this, SLOT(onClear()));
+    connect(dm_query, SIGNAL(editingFinished()), this, SLOT(onEntry()));
 
-  setLayout(lay);
+    setLayout(lay);
 }
-

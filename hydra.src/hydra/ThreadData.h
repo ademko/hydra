@@ -10,38 +10,38 @@
 
 #include <QMutex>
 
-namespace hydra
-{
-  template <class T> class MutexData;
+namespace hydra {
+template <class T> class MutexData;
 
-  template <class T> class MutexPtr;
-}
+template <class T> class MutexPtr;
+} // namespace hydra
 
-template <class T> class hydra::MutexData
-{
+template <class T> class hydra::MutexData {
   public:
     typedef T DataType;
+
   public:
     volatile T data;
     QMutex mutex;
 };
 
-template <class T> class hydra::MutexPtr
-{
+template <class T> class hydra::MutexPtr {
   public:
     typedef T DataType;
+
   public:
     MutexPtr(MutexData<T> &sa)
-      : dm_ptr(const_cast<T*>(&sa.data)), dm_data(sa)
-      { dm_data.mutex.lock(); }
+        : dm_ptr(const_cast<T *>(&sa.data)), dm_data(sa) {
+        dm_data.mutex.lock();
+    }
     ~MutexPtr() { dm_data.mutex.unlock(); }
 
-    T& operator*(void) { return *dm_ptr; }
-    T* operator->(void) { return dm_ptr; }
+    T &operator*(void) { return *dm_ptr; }
+    T *operator->(void) { return dm_ptr; }
+
   private:
-    T * dm_ptr;
+    T *dm_ptr;
     MutexData<T> &dm_data;
 };
 
 #endif
-

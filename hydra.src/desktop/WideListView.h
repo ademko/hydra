@@ -12,13 +12,11 @@
 
 #include <desktop/View.h>
 
-namespace desktop
-{
-  class WideListView;
+namespace desktop {
+class WideListView;
 }
 
-class desktop::WideListView : public desktop::View
-{
+class desktop::WideListView : public desktop::View {
     Q_OBJECT
 
   public:
@@ -32,4 +30,3 @@ class desktop::WideListView : public desktop::View
 };
 
 #endif
-

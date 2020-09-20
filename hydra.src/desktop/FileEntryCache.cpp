@@ -9,8 +9,4 @@
 
 using namespace desktop;
 
-FileEntryCache::FileEntryCache(void)
-  : dm_loader(10000)
-{
-}
-
+FileEntryCache::FileEntryCache(void) : dm_loader(10000) {}

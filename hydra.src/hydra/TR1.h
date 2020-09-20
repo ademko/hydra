@@ -15,12 +15,11 @@
 #include <QtGlobal>
 
 #ifdef Q_OS_WIN32
-#include <memory>
-#include <functional>
 #include <array>
+#include <functional>
+#include <memory>
 #else
-#include <memory>
-#include <functional>
 #include <array>
+#include <functional>
+#include <memory>
 #endif
-

@@ -8,20 +8,19 @@
 #ifndef __INCLUDED_HYDRADESKTOP_TAGEDITOR_H__
 #define __INCLUDED_HYDRADESKTOP_TAGEDITOR_H__
 
-#include <desktop/View.h>
 #include <desktop/FlowLayout.h>
+#include <desktop/View.h>
 
 #include <QCheckBox>
 
 #include <ui_TagEditorView.h>
 
-namespace desktop
-{
-  class TagEditorView;
+namespace desktop {
+class TagEditorView;
 }
 
-class desktop::TagEditorView : public desktop::View, public Ui_TagEditorDialog2
-{
+class desktop::TagEditorView : public desktop::View,
+                               public Ui_TagEditorDialog2 {
     Q_OBJECT
 
   public:
@@ -48,9 +47,8 @@ class desktop::TagEditorView : public desktop::View, public Ui_TagEditorDialog2
 
     std::set<QString> dm_recently_added;
 
-    typedef std::map<QString, QCheckBox*> boxes_t;
+    typedef std::map<QString, QCheckBox *> boxes_t;
     boxes_t dm_boxes;
 };
 
 #endif
-

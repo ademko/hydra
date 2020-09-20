@@ -12,41 +12,39 @@
 
 #include <vector>
 
-#include <QString>
-#include <QMutex>
-#include <QAbstractListModel>
 #include <QAbstractItemView>
-#include <QProgressDialog>
+#include <QAbstractListModel>
 #include <QFileSystemWatcher>
+#include <QMutex>
+#include <QProgressDialog>
+#include <QString>
 
-#include <hydra/TR1.h>
-#include <hydra/Records.h>
 #include <hydra/Query.h>
+#include <hydra/Records.h>
+#include <hydra/TR1.h>
 
 #include <desktop/FileEntry.h>
 #include <desktop/FileEntryCache.h>
 
-namespace desktop
-{
-  class FileEntryCache; //forward
+namespace desktop {
+class FileEntryCache; // forward
 
-  class FileList;
-  class FileEntryLessThan;
-  class FileListLoader;
-  class FileListReloader;
+class FileList;
+class FileEntryLessThan;
+class FileListLoader;
+class FileListReloader;
 
-  class FileListListener; //forward
+class FileListListener; // forward
 
-  class FileSystemWatcher;
-}
+class FileSystemWatcher;
+} // namespace desktop
 
 /**
  * A class that monitors the file system and updates the FileList as needed
  *
  * @author Aleksander Demko
- */ 
-class desktop::FileSystemWatcher : public QObject
-{
+ */
+class desktop::FileSystemWatcher : public QObject {
     Q_OBJECT
 
   public:
@@ -72,9 +70,8 @@ class desktop::FileSystemWatcher : public QObject
  * Can be backed by a FileMonitor.
  *
  * @author Aleksander Demko
- */ 
-class desktop::FileList : public QAbstractListModel
-{
+ */
+class desktop::FileList : public QAbstractListModel {
   public:
     /// constructor
     FileList(FileEntryCache *_cache);
@@ -84,7 +81,8 @@ class desktop::FileList : public QAbstractListModel
     // QAbstractListModel
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
     virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
-    virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+    virtual QVariant headerData(int section, Qt::Orientation orientation,
+                                int role = Qt::DisplayRole) const;
     virtual QVariant data(const QModelIndex &index, int role) const;
     virtual void sort(int column, Qt::SortOrder order = Qt::AscendingOrder);
 
@@ -96,12 +94,14 @@ class desktop::FileList : public QAbstractListModel
 
     // base stuff
 
-    const QString & baseDir(void) const { return dm_base_dir; }
+    const QString &baseDir(void) const { return dm_base_dir; }
     bool isBaseRecurse(void) const { return dm_base_recurse; }
     bool isBaseShuffle(void) const { return dm_base_shuffle; }
     bool hasBaseQuery(void) const { return !dm_base_query.isEmpty(); }
-    const QString & baseQueryString(void) const { return dm_base_query; }
-    std::shared_ptr<hydra::Token> baseQueryToken(void) const { return dm_base_query_token; }
+    const QString &baseQueryString(void) const { return dm_base_query; }
+    std::shared_ptr<hydra::Token> baseQueryToken(void) const {
+        return dm_base_query_token;
+    }
 
     // file stuff
 
@@ -109,60 +109,62 @@ class desktop::FileList : public QAbstractListModel
      * Does the given index refer to a valid file entry?
      *
      * @author Aleksander Demko
-     */ 
-    bool isValid(int index) const { return index>=0 && index<dm_filtered_files.size(); }
+     */
+    bool isValid(int index) const {
+        return index >= 0 && index < dm_filtered_files.size();
+    }
 
     /**
      * Is there a currently selected file?
      *
      * @author Aleksander Demko
-     */ 
+     */
     bool isValid(void) const { return isValid(selectedFileIndex()); }
 
     /**
      * Return the FileEntry at the given index
      *
      * @author Aleksander Demko
-     */ 
-    const FileEntry & fileAt(int index) const {
-      assert(isValid(index));
-      return *dm_filtered_files[index];
+     */
+    const FileEntry &fileAt(int index) const {
+        assert(isValid(index));
+        return *dm_filtered_files[index];
     }
 
     /**
      * Return the FileEntry at the given index
      *
      * @author Aleksander Demko
-     */ 
-    FileEntry & fileAt(int index) {
-      assert(isValid(index));
-      return *dm_filtered_files[index];
+     */
+    FileEntry &fileAt(int index) {
+        assert(isValid(index));
+        return *dm_filtered_files[index];
     }
 
     /**
      * Return the FileEntry at the given QModelIndex
      *
      * @author Aleksander Demko
-     */ 
-    const FileEntry & fileAt(const QModelIndex & index) const {
-      return fileAt(index.row());
+     */
+    const FileEntry &fileAt(const QModelIndex &index) const {
+        return fileAt(index.row());
     }
 
     /**
      * Return the FileEntry at the given QModelIndex
      *
      * @author Aleksander Demko
-     */ 
-    FileEntry & fileAt(const QModelIndex & index) {
-      return fileAt(index.row());
-    }
+     */
+    FileEntry &fileAt(const QModelIndex &index) { return fileAt(index.row()); }
 
     /**
      * Returns the number of files in the list (basically a size() function)
      *
      * @author Aleksander Demko
-     */ 
-    int numFiles(void) const { return static_cast<int>(dm_filtered_files.size()); }
+     */
+    int numFiles(void) const {
+        return static_cast<int>(dm_filtered_files.size());
+    }
 
     /**
      * Returns the currently selected file's index.
@@ -171,7 +173,7 @@ class desktop::FileList : public QAbstractListModel
      * helper for selectionModel.
      *
      * @author Aleksander Demko
-     */ 
+     */
     int selectedFileIndex(void) const;
 
     /**
@@ -180,15 +182,15 @@ class desktop::FileList : public QAbstractListModel
      * Also a helper for selectionModel()
      *
      * @author Aleksander Demko
-     */ 
-    FileEntry & selectedFile(void) { return fileAt(selectedFileIndex()); }
+     */
+    FileEntry &selectedFile(void) { return fileAt(selectedFileIndex()); }
 
     /**
      * Finds the file index that has the given fullfilename.
      * Returns -1 on failure.
      *
      * @author Aleksander Demko
-     */ 
+     */
     int findFileIndexByName(const QString &fullfilename) const;
 
     /**
@@ -203,7 +205,7 @@ class desktop::FileList : public QAbstractListModel
     void setSelectedFile(int index);
 
     // quickcopy an existing list
-    //void quickCopy(FileList *src);
+    // void quickCopy(FileList *src);
 
     // possibly obsolete, will keep around for now
     void addListener(FileListListener *v);
@@ -216,19 +218,19 @@ class desktop::FileList : public QAbstractListModel
      * This works through thr FileListListener system.
      *
      * @author Aleksander Demko
-     */ 
+     */
     void emitBaseChange(FileListListener *source = 0);
 
     /**
      * Calls onImageChange on all the Views that are listenting to the FileList.
      *
-     * This is usually called when the image is changed, usually because its rotation
-     * has been changed.
+     * This is usually called when the image is changed, usually because its
+     * rotation has been changed.
      *
      * This works through thr FileListListener system.
      *
      * @author Aleksander Demko
-     */ 
+     */
     void emitImageChange(int fileIndex, FileListListener *source = 0);
 
     /**
@@ -237,9 +239,8 @@ class desktop::FileList : public QAbstractListModel
      * Use isSelected(fileList()->index(x,0)) to test.
      *
      * @author Aleksander Demko
-     */ 
-    QItemSelectionModel * selectionModel(void) { return &dm_selectionmodel; }
-
+     */
+    QItemSelectionModel *selectionModel(void) { return &dm_selectionmodel; }
 
     /**
      * Smits a signal for the data model that all the tags changed.
@@ -248,7 +249,7 @@ class desktop::FileList : public QAbstractListModel
      * This works through the QAbstractListModel system.
      *
      * @author Aleksander Demko
-     */ 
+     */
     void emitChangedTagsAll(void);
 
     /**
@@ -259,7 +260,7 @@ class desktop::FileList : public QAbstractListModel
      * This works through the QAbstractListModel system.
      *
      * @author Aleksander Demko
-     */ 
+     */
     void emitChangedTagsOne(int idx);
 
     /// signals all the jobs to die quickly
@@ -272,17 +273,18 @@ class desktop::FileList : public QAbstractListModel
      * Upon completion, a tag emit event will be sent.
      *
      * @author Aleksander Demko
-     */ 
+     */
     void enqueueLoad(const QString &fullfilename, int idx);
 
   private:
     static inline bool EntryListComp(const desktop::cache_ptr<FileEntry> &lhs,
-        const desktop::cache_ptr<FileEntry> &rhs) {
-      return lhs->fullfilename() < rhs->fullfilename();
+                                     const desktop::cache_ptr<FileEntry> &rhs) {
+        return lhs->fullfilename() < rhs->fullfilename();
     }
 
     void metaLoaderFunc(const QString &fullfilename, int idx);
-    void metaLoaderFuncCommit(const QString &fullfilename, int idx, const QString &hash);
+    void metaLoaderFuncCommit(const QString &fullfilename, int idx,
+                              const QString &hash);
 
   private:
     friend class desktop::FileListLoader;
@@ -301,7 +303,7 @@ class desktop::FileList : public QAbstractListModel
     QString dm_base_query;
     std::shared_ptr<hydra::Token> dm_base_query_token;
 
-    typedef std::vector<desktop::cache_ptr<FileEntry> > EntryList;
+    typedef std::vector<desktop::cache_ptr<FileEntry>> EntryList;
     EntryList dm_filtered_files, dm_all_files;
 
     typedef std::list<desktop::FileListListener *> listeners_t;
@@ -316,25 +318,25 @@ class desktop::FileList : public QAbstractListModel
  * A flexible sorting functor suitable for passing to qSort.
  *
  * @author Aleksander Demko
- */ 
-class desktop::FileEntryLessThan
-{
+ */
+class desktop::FileEntryLessThan {
   public:
     enum {
-      colJustName,
-      colFullFileName,
-      colRecordTags,
-      colFileLastModified,
-      colFileSize,
+        colJustName,
+        colFullFileName,
+        colRecordTags,
+        colFileLastModified,
+        colFileSize,
     };
 
   public:
     FileEntryLessThan(short col, Qt::SortOrder order = Qt::AscendingOrder);
 
-    bool operator()(const desktop::cache_ptr<desktop::FileEntry> &left, const desktop::cache_ptr<desktop::FileEntry> &right) const;
+    bool operator()(const desktop::cache_ptr<desktop::FileEntry> &left,
+                    const desktop::cache_ptr<desktop::FileEntry> &right) const;
 
     static bool tagsLessThan(const hydra::FileItemRecord::tags_t &left,
-        const hydra::FileItemRecord::tags_t &right);
+                             const hydra::FileItemRecord::tags_t &right);
 
   private:
     short dm_col;
@@ -346,17 +348,17 @@ class desktop::FileEntryLessThan
  * while taking care of signal emission and consolidation.
  *
  * You instantite the class, and set various options. Note that the options are
- * by default, based on the existing filelist. Upon destruction, the list will be loaded
- * and signals sent.
+ * by default, based on the existing filelist. Upon destruction, the list will
+ * be loaded and signals sent.
  *
  * @author Aleksander Demko
- */ 
-class desktop::FileListLoader
-{
+ */
+class desktop::FileListLoader {
   public:
     /// constructor
     /// future: progress dialog option/system?
-    FileListLoader(FileList &filelist, FileListListener *source = 0, bool resetSelectionTo0 = true);
+    FileListLoader(FileList &filelist, FileListListener *source = 0,
+                   bool resetSelectionTo0 = true);
     /// destructor will commit the changes and emit some signals
     ~FileListLoader();
 
@@ -384,7 +386,7 @@ class desktop::FileListLoader
      *
      * @return the number of entries scanned
      * @author Aleksander Demko
-     */ 
+     */
     int appendListDir(const QString &dirname);
 
   private:
@@ -405,9 +407,8 @@ class desktop::FileListLoader
  * Does a "fast" update/merge with the files on disk.
  *
  * @author Aleksander Demko
- */ 
-class desktop::FileListReloader
-{
+ */
+class desktop::FileListReloader {
   public:
     /// constructor
     FileListReloader(FileList &filelist, FileListListener *source = 0);
@@ -420,4 +421,3 @@ class desktop::FileListReloader
 };
 
 #endif
-

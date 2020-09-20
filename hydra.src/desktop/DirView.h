@@ -13,13 +13,11 @@
 
 #include <desktop/View.h>
 
-namespace desktop
-{
-  class DirView;
+namespace desktop {
+class DirView;
 }
 
-class desktop::DirView : public desktop::View
-{
+class desktop::DirView : public desktop::View {
     Q_OBJECT
 
   public:
@@ -28,7 +26,7 @@ class desktop::DirView : public desktop::View
     virtual void onBaseChange(FileList *fl);
 
   protected:
-    virtual void contextMenuEvent(QContextMenuEvent * event);
+    virtual void contextMenuEvent(QContextMenuEvent *event);
 
   private slots:
     void onMenuOpenDir(void);
@@ -50,5 +48,3 @@ class desktop::DirView : public desktop::View
 };
 
 #endif
-
-

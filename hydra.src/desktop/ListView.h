@@ -12,20 +12,18 @@
 
 #include <desktop/View.h>
 
-namespace desktop
-{
-  class ListView;
+namespace desktop {
+class ListView;
 }
 
-class desktop::ListView : public desktop::View
-{
+class desktop::ListView : public desktop::View {
     Q_OBJECT
 
   public:
     ListView(MainWindow *mainwin, FileList *_filelist);
 
   protected:
-    virtual void contextMenuEvent(QContextMenuEvent * event);
+    virtual void contextMenuEvent(QContextMenuEvent *event);
 
   private:
     void initGui(void);
@@ -35,4 +33,3 @@ class desktop::ListView : public desktop::View
 };
 
 #endif
-

@@ -12,13 +12,11 @@
 
 #include <QLayout>
 
-namespace desktop
-{
-  class FlowLayout;
+namespace desktop {
+class FlowLayout;
 }
 
-class desktop::FlowLayout : public QLayout
-{
+class desktop::FlowLayout : public QLayout {
   public:
     FlowLayout(bool horizorder);
     virtual ~FlowLayout();
@@ -39,9 +37,9 @@ class desktop::FlowLayout : public QLayout
     QRect boundingBox(void) const { return dm_boundingBox; }
 
   private:
-    int & fastPoint(QPoint &p) const;
+    int &fastPoint(QPoint &p) const;
     int fastPoint(const QPoint &p) const;
-    int & slowPoint(QPoint &p) const;
+    int &slowPoint(QPoint &p) const;
     int slowPoint(const QPoint &p) const;
     int fastSize(const QSize &s) const;
     int slowSize(const QSize &s) const;
@@ -51,10 +49,9 @@ class desktop::FlowLayout : public QLayout
   private:
     bool dm_horizorder;
 
-    std::vector<QLayoutItem*> dm_items;
+    std::vector<QLayoutItem *> dm_items;
 
     QRect dm_boundingBox;
 };
 
 #endif
-

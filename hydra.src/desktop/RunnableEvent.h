@@ -8,32 +8,30 @@
 #ifndef __INCLUDED_HYDRA_DESKTOP_RUNNABLEEVENT_H__
 #define __INCLUDED_HYDRA_DESKTOP_RUNNABLEEVENT_H__
 
-#include <QObject>
 #include <QEvent>
+#include <QObject>
 #include <QRunnable>
 
 #include <hydra/TR1.h>
 
-namespace desktop
-{
-  class RunnableEventProcessor;
-  class RunnableEvent;
-  class RunnableEventFunction;
-}
+namespace desktop {
+class RunnableEventProcessor;
+class RunnableEvent;
+class RunnableEventFunction;
+} // namespace desktop
 
 // in the future, make this also a decendant of QRunnable
 // (or has a QRunnable member that it calls?)
 
-class desktop::RunnableEventProcessor : public QObject
-{
+class desktop::RunnableEventProcessor : public QObject {
   public:
     RunnableEventProcessor(void);
     virtual ~RunnableEventProcessor();
 
-    static RunnableEventProcessor * instance(void) { return dm_instance; }
+    static RunnableEventProcessor *instance(void) { return dm_instance; }
 
   protected:
-    virtual void customEvent(QEvent * event);
+    virtual void customEvent(QEvent *event);
 
   private:
     static RunnableEventProcessor *dm_instance;
@@ -48,9 +46,8 @@ class desktop::RunnableEventProcessor : public QObject
  * RunnableEvent::customEvent.
  *
  * @author Aleksander Demko
- */ 
-class desktop::RunnableEvent : public QEvent
-{
+ */
+class desktop::RunnableEvent : public QEvent {
   public:
     RunnableEvent(void);
 
@@ -63,7 +60,7 @@ class desktop::RunnableEvent : public QEvent
      * Not mutex protected, call only in the main thread.
      *
      * @author Aleksander Demko
-     */ 
+     */
     static int nextPriority(void);
 };
 
@@ -74,9 +71,8 @@ class desktop::RunnableEvent : public QEvent
  * or QEvent's (via the RunnableEvent base).
  *
  * @author Aleksander Demko
- */ 
-class desktop::RunnableEventFunction : public RunnableEvent, public QRunnable
-{
+ */
+class desktop::RunnableEventFunction : public RunnableEvent, public QRunnable {
   public:
     RunnableEventFunction(std::function<void()> f);
 
@@ -87,14 +83,14 @@ class desktop::RunnableEventFunction : public RunnableEvent, public QRunnable
      * gui thread via QCoreApplication::postEvent
      *
      * @author Aleksander Demko
-     */ 
+     */
     static void enqueueMain(std::function<void()> f);
 
     /**
      * Queues a function to the background worker thread pool.
      *
      * @author Aleksander Demko
-     */ 
+     */
     static void enqueueWorker(std::function<void()> f, int priority = 0);
 
   private:
@@ -102,4 +98,3 @@ class desktop::RunnableEventFunction : public RunnableEvent, public QRunnable
 };
 
 #endif
-

@@ -8,26 +8,24 @@
 #ifndef __INCLUDED_HYDRADESKTOP_SEARCHVIEW_H__
 #define __INCLUDED_HYDRADESKTOP_SEARCHVIEW_H__
 
-#include <QLineEdit>
 #include <QHBoxLayout>
+#include <QLineEdit>
 
-#include <hydra/Query.h>
 #include <desktop/View.h>
+#include <hydra/Query.h>
 
-namespace desktop
-{
-  class SearchView;
-  class SearchSelectView;
-}
+namespace desktop {
+class SearchView;
+class SearchSelectView;
+} // namespace desktop
 
 /**
  * A view that presents a tag search box to the user, with four VCR
  * controls for advancing based on that search.
  *
  * @author Aleksander Demko
- */ 
-class desktop::SearchView : public desktop::View
-{
+ */
+class desktop::SearchView : public desktop::View {
     Q_OBJECT
 
   public:
@@ -49,7 +47,8 @@ class desktop::SearchView : public desktop::View
     QLineEdit *dm_query;
 
     QString dm_last_query;
-    std::shared_ptr<hydra::Token> dm_last_tok;  // null if the last query isnt valid
+    std::shared_ptr<hydra::Token>
+        dm_last_tok; // null if the last query isnt valid
 
     QHBoxLayout *dm_buttonbox;
 };
@@ -58,9 +57,8 @@ class desktop::SearchView : public desktop::View
  * Adds a "selected-by-tags" option to SearchView.
  *
  * @author Aleksander Demko
- */ 
-class desktop::SearchSelectView : public desktop::SearchView
-{
+ */
+class desktop::SearchSelectView : public desktop::SearchView {
     Q_OBJECT
 
   public:
@@ -71,8 +69,6 @@ class desktop::SearchSelectView : public desktop::SearchView
 
   protected:
     void initGui(void);
-
 };
 
 #endif
-

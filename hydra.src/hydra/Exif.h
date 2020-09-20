@@ -8,26 +8,25 @@
 #ifndef __INCLUDED_HYDRA_EXIF_H__
 #define __INCLUDED_HYDRA_EXIF_H__
 
-#include <QString>
 #include <QImage>
+#include <QString>
 
-namespace hydra
-{
-  /**
-   * Detects the auto rotation information in the file, if any.
-   * returns:
-   * -1 error/no exif found.
-   * 0 do not rotate
-   * 1 rotate 90 degrees cw
-   * 2 rotate 180 degrees cw
-   * 3 rotate 270 degrees cw
-   *
-   * If exif detection support is not compiled, this function will always return 0.
-   *
-   * @author Aleksander Demko
-   */ 
-  short detectExifRotate(const QString &filename);
-}
+namespace hydra {
+/**
+ * Detects the auto rotation information in the file, if any.
+ * returns:
+ * -1 error/no exif found.
+ * 0 do not rotate
+ * 1 rotate 90 degrees cw
+ * 2 rotate 180 degrees cw
+ * 3 rotate 270 degrees cw
+ *
+ * If exif detection support is not compiled, this function will always return
+ * 0.
+ *
+ * @author Aleksander Demko
+ */
+short detectExifRotate(const QString &filename);
+} // namespace hydra
 
 #endif
-

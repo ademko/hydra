@@ -20,26 +20,23 @@ using namespace desktop;
 //
 //
 
-RunnableEventProcessor * RunnableEventProcessor::dm_instance;
+RunnableEventProcessor *RunnableEventProcessor::dm_instance;
 
-RunnableEventProcessor::RunnableEventProcessor(void)
-{
-  assert(dm_instance == 0);
-  dm_instance = this;
+RunnableEventProcessor::RunnableEventProcessor(void) {
+    assert(dm_instance == 0);
+    dm_instance = this;
 }
 
-RunnableEventProcessor::~RunnableEventProcessor()
-{
-  assert(dm_instance == this);
-  dm_instance = 0;
+RunnableEventProcessor::~RunnableEventProcessor() {
+    assert(dm_instance == this);
+    dm_instance = 0;
 }
 
-void RunnableEventProcessor::customEvent(QEvent *event)
-{
-  RunnableEvent *e = dynamic_cast<RunnableEvent*>(event);
+void RunnableEventProcessor::customEvent(QEvent *event) {
+    RunnableEvent *e = dynamic_cast<RunnableEvent *>(event);
 
-  if (e)
-    e->run();
+    if (e)
+        e->run();
 }
 
 //
@@ -48,16 +45,12 @@ void RunnableEventProcessor::customEvent(QEvent *event)
 //
 //
 
-RunnableEvent::RunnableEvent(void)
-  : QEvent(QEvent::User)
-{
-}
+RunnableEvent::RunnableEvent(void) : QEvent(QEvent::User) {}
 
-int RunnableEvent::nextPriority(void)
-{
-  static int prio = 1;
+int RunnableEvent::nextPriority(void) {
+    static int prio = 1;
 
-  return prio++;
+    return prio++;
 }
 
 //
@@ -67,24 +60,19 @@ int RunnableEvent::nextPriority(void)
 //
 
 RunnableEventFunction::RunnableEventFunction(std::function<void()> f)
-  : dm_f(f)
-{
+    : dm_f(f) {}
+
+void RunnableEventFunction::run(void) { dm_f(); }
+
+void RunnableEventFunction::enqueueMain(std::function<void()> f) {
+    QCoreApplication::postEvent(RunnableEventProcessor::instance(),
+                                new RunnableEventFunction(f));
 }
 
-void RunnableEventFunction::run(void)
-{
-  dm_f();
+void RunnableEventFunction::enqueueWorker(std::function<void()> f,
+                                          int priority) {
+    // QtConcurrent::run(f);
+    assert(QThreadPool::globalInstance());
+    QThreadPool::globalInstance()->start(new RunnableEventFunction(f),
+                                         priority);
 }
-
-void RunnableEventFunction::enqueueMain(std::function<void()> f)
-{
-  QCoreApplication::postEvent(RunnableEventProcessor::instance(), new RunnableEventFunction(f));
-}
-
-void RunnableEventFunction::enqueueWorker(std::function<void()> f, int priority)
-{
-  //QtConcurrent::run(f);
-  assert(QThreadPool::globalInstance());
-  QThreadPool::globalInstance()->start(new RunnableEventFunction(f), priority);
-}
-

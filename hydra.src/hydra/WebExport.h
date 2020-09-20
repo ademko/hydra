@@ -9,49 +9,47 @@
 #define __INCLUDED_HYDRA_WEBEXPORT_H__
 
 #include <QString>
-#include <QUuid>
 #include <QTextStream>
+#include <QUuid>
 
+#include <hydra/TR1.h>
+#include <map>
 #include <stdint.h>
 #include <vector>
-#include <map>
-#include <hydra/TR1.h>
 
-namespace hydra
-{
-  class WebExport;
-  class FileItemRecord; //forward
-};
+namespace hydra {
+class WebExport;
+class FileItemRecord; // forward
+};                    // namespace hydra
 
 /**
  * A class that exports a collection pics for web site building.
  *
  * @author Aleksander Demko
- */ 
-class hydra::WebExport
-{
+ */
+class hydra::WebExport {
   public:
     /**
      * Export a site to the given website output directory.
      *
      * @author Aleksander Demko
-     */ 
+     */
     WebExport(const QString &outputdir, QTextStream &out);
 
     /**
      * Sets the title of the exported web site
      *
      * @author Aleksander Demko
-     */ 
+     */
     void setTitle(const QString &title);
 
     /**
      * Adds a given file to the output list.
      *
      * @author Aleksander Demko
-     */ 
+     */
     void addFile(const QString &fullfilename, const QString &basedir,
-        hydra::FileItemRecord &item, const QString &filehash);
+                 hydra::FileItemRecord &item, const QString &filehash);
 
     /**
      * Commit and actually build the web site.
@@ -59,7 +57,7 @@ class hydra::WebExport
      * Returns the number of files made, or -1 on error.
      *
      * @author Aleksander Demko
-     */ 
+     */
     int commitWebSite(void);
 
     /**
@@ -68,15 +66,16 @@ class hydra::WebExport
      * Returns the number of files made, or -1 on error.
      *
      * @author Aleksander Demko
-     */ 
+     */
     int commitFileCopy(void);
-    
+
   private:
     struct DirEntry;
     struct FileEntry;
 
     // returns the full file name of the given thumbnail
-    QString thumbFileName(const QString &hash, unsigned long w, unsigned long h);
+    QString thumbFileName(const QString &hash, unsigned long w,
+                          unsigned long h);
 
     void addDirComponents(const QString &dir);
 
@@ -91,10 +90,11 @@ class hydra::WebExport
 
     void sortDirIndex(DirEntry &entry);
     /// returns true on sccess
-    bool writeImageHtml(const QString &outfilename, int myid, int randomId, int numpeers, const FileEntry &entry);
+    bool writeImageHtml(const QString &outfilename, int myid, int randomId,
+                        int numpeers, const FileEntry &entry);
     /// returns true on sccess
     bool writeDirIndexHtml(const QString &outfilename, const DirEntry &entry);
-    
+
     /**
      * Call writeImageHtml for each subimages in the given directory
      */
@@ -104,80 +104,81 @@ class hydra::WebExport
     int fileCopyCopyFiles(void);
 
   private:
-    typedef std::vector<std::shared_ptr<DirEntry> > DirSet;
+    typedef std::vector<std::shared_ptr<DirEntry>> DirSet;
 
     static bool DirEntryLT(const std::shared_ptr<DirEntry> &lhs,
-        const std::shared_ptr<DirEntry> &rhs);
+                           const std::shared_ptr<DirEntry> &rhs);
 
-    typedef std::vector<std::shared_ptr<FileEntry> > FileSet;
+    typedef std::vector<std::shared_ptr<FileEntry>> FileSet;
 
     static bool FileEntryLT(const std::shared_ptr<FileEntry> &lhs,
-        const std::shared_ptr<FileEntry> &rhs);
+                            const std::shared_ptr<FileEntry> &rhs);
 
     static void writeHydraImg(QTextStream &out, int id, const FileEntry &entry);
 
     struct DirEntry {
-      bool isroot;
-      ptrdiff_t totalfiles;
+        bool isroot;
+        ptrdiff_t totalfiles;
 
-      QString basedir;       // the map KEY
-      // derived:
-      QString urlname;       // basedir, but suitable for url display
-      QString justname;      // just the last name
+        QString basedir; // the map KEY
+        // derived:
+        QString urlname;  // basedir, but suitable for url display
+        QString justname; // just the last name
 
-      std::weak_ptr<DirEntry> parent;    // parent dir, null for the root node
+        std::weak_ptr<DirEntry> parent; // parent dir, null for the root node
 
-      // they all store map keys, ofcourse
-      DirSet subdirs;       // sub dirs
-      FileSet subimages;     // images (thumbable) in this dir
-      FileSet subfiles;      // non-image files in this dir
+        // they all store map keys, ofcourse
+        DirSet subdirs;    // sub dirs
+        FileSet subimages; // images (thumbable) in this dir
+        FileSet subfiles;  // non-image files in this dir
 
-      DirEntry(const QString &_basedir);
-
+        DirEntry(const QString &_basedir);
     };
 
-    typedef std::map<QString, std::shared_ptr<DirEntry> > DirMap;
+    typedef std::map<QString, std::shared_ptr<DirEntry>> DirMap;
 
     struct FileEntry {
-      QUuid id;       // db id
+        QUuid id; // db id
 
-      std::weak_ptr<DirEntry> parent;    // parent dir
+        std::weak_ptr<DirEntry> parent; // parent dir
 
-      int rotateCode;        // rotattion to apply, if any
+        int rotateCode; // rotattion to apply, if any
 
-      QString fullfilename;  // full on disk filename
-      QString justname;      // just the filename (as on disk)
-      QString basedir;       // basic web path (the parent directory)
-      QString basejustname;  // justname, but possibly adjusted for conflicts
-      QString basefilename;  // the baedir + filename, also, this is the map KEY
-      QString title;         // title from the db
-      QString desc;          // desc from the db
-      int filetype;          // same as in the item record
-      QString filehash;      // binary hash for this file
+        QString fullfilename; // full on disk filename
+        QString justname;     // just the filename (as on disk)
+        QString basedir;      // basic web path (the parent directory)
+        QString basejustname; // justname, but possibly adjusted for conflicts
+        QString
+            basefilename; // the baedir + filename, also, this is the map KEY
+        QString title;    // title from the db
+        QString desc;     // desc from the db
+        int filetype;     // same as in the item record
+        QString filehash; // binary hash for this file
 
-      // these are all set by calc()
-      QString urlnamebase;   // core url name (/ -> , substiution), from basefilename
-      QString urlhtml;       // urlnamebase + .html
-      QString urlorigimage;  // urlnamebase
-      QString urlviewimage;  // VIEW, + urlnamebase
-      QString urlthumbimage; // THUMB, + urlnamebase
+        // these are all set by calc()
+        QString urlnamebase;   // core url name (/ -> , substiution), from
+                               // basefilename
+        QString urlhtml;       // urlnamebase + .html
+        QString urlorigimage;  // urlnamebase
+        QString urlviewimage;  // VIEW, + urlnamebase
+        QString urlthumbimage; // THUMB, + urlnamebase
 
-      uint64_t original_file_size;    // in bytes
+        uint64_t original_file_size; // in bytes
 
-      void calc(void);        // calculates various computed strings after the others are set
+        void calc(void); // calculates various computed strings after the others
+                         // are set
     };
 
-    typedef std::map<QString, std::shared_ptr<FileEntry> > FileMap;
+    typedef std::map<QString, std::shared_ptr<FileEntry>> FileMap;
 
   private:
     QTextStream &dm_out;
 
     QString dm_outdir, dm_title;
 
-    FileMap dm_basefiles;   // built incrementally when caller adds files
+    FileMap dm_basefiles; // built incrementally when caller adds files
 
     DirMap dm_basedirs; // built from dm_basefiles upton BuildDirTree()
 };
 
 #endif
-

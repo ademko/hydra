@@ -8,46 +8,47 @@
 #ifndef __INCLUDED_HYDRA_THUMB_H__
 #define __INCLUDED_HYDRA_THUMB_H__
 
-#include <QString>
 #include <QImage>
+#include <QString>
 
-namespace hydra
-{
-  /**
-   * Retains the aspect ratio on resized dimensions.
-   *
-   * C, R current image width, heigth
-   * WC WR the designed (wanted) width, heigth
-   * c, r the resulting width, height
-   * @param growtofit if true, images smaller than desired will be scaled UP to fit
-   * @author Aleksander Demko
-   */ 
-  void calcAspect(unsigned long C, unsigned long R, unsigned long WC, unsigned long WR, unsigned long &c, unsigned long &r, 
-      bool growtofit);
+namespace hydra {
+/**
+ * Retains the aspect ratio on resized dimensions.
+ *
+ * C, R current image width, heigth
+ * WC WR the designed (wanted) width, heigth
+ * c, r the resulting width, height
+ * @param growtofit if true, images smaller than desired will be scaled UP to
+ * fit
+ * @author Aleksander Demko
+ */
+void calcAspect(unsigned long C, unsigned long R, unsigned long WC,
+                unsigned long WR, unsigned long &c, unsigned long &r,
+                bool growtofit);
 
-  class Thumb;
-}
+class Thumb;
+} // namespace hydra
 
 /**
  * Generator and maintainer of image thumbnails (and other scaled versions
  * of an image).
  *
- * Thumbnails are stores in ~/.hydradb/thumbs/imghash.wantedsize.rotatecode.jpg and generated when needed.
+ * Thumbnails are stores in ~/.hydradb/thumbs/imghash.wantedsize.rotatecode.jpg
+ * and generated when needed.
  *
- * Where size is the thumbnail-desired size (but maybe not the final thumb size, as the
- * aspect ratio will be conserved and therefore the image size will often be smaller
- * than the thumbnail size.
- * The rotatecode is the rotate code that was applied to the thumbnail.
+ * Where size is the thumbnail-desired size (but maybe not the final thumb size,
+ * as the aspect ratio will be conserved and therefore the image size will often
+ * be smaller than the thumbnail size. The rotatecode is the rotate code that
+ * was applied to the thumbnail.
  *
  * @author Aleksander Demko
  */
-class hydra::Thumb
-{
+class hydra::Thumb {
   public:
     enum {
-      Generate_Ok = 0,
-      Generate_FileExists,
-      Generate_LoadError,
+        Generate_Ok = 0,
+        Generate_FileExists,
+        Generate_LoadError,
     };
 
     static const int DEFAULT_VIEW_W = 800;
@@ -71,7 +72,7 @@ class hydra::Thumb
      * @param note that no additional rotating will be done on this image
      *
      * @author Aleksander Demko
-     */ 
+     */
     Thumb(QImage &srcimg);
     /// dtor
     ~Thumb();
@@ -81,7 +82,7 @@ class hydra::Thumb
      * of Engine::dbDir()
      *
      * @author Aleksander Demko
-     */ 
+     */
     static QString thumbDir(void);
 
     /**
@@ -92,19 +93,20 @@ class hydra::Thumb
     static void mkThumbDir(void);
 
     /**
-     * Computes the standard thumbnail filename (suitable to be given to generate())
-     * for an image with the given hash and desired dimensions.
+     * Computes the standard thumbnail filename (suitable to be given to
+     * generate()) for an image with the given hash and desired dimensions.
      *
      * @author Aleksander Demko
-     */ 
-    static QString fileName(const QString &hash, int rotateCode, unsigned long desiredW, unsigned long desiredH);
+     */
+    static QString fileName(const QString &hash, int rotateCode,
+                            unsigned long desiredW, unsigned long desiredH);
 
     /**
      * Makes the thumbnail and saves it to the given filename.
      *
      * If destimage is non-null, then the given image object will be loaded with
-     * the genered thumbnail. If no thumbnail needed to be generated, then the existing one
-     * will be read into the destimage.
+     * the genered thumbnail. If no thumbnail needed to be generated, then the
+     * existing one will be read into the destimage.
      *
      * A Generate_* error code is returned.
      *
@@ -113,10 +115,9 @@ class hydra::Thumb
      * @param rotateCode is how to rotate the image. it must be >=0
      * @author Aleksander Demko
      */
-    int generate(const QString &destfilename, QImage *destimage,
-        int rotateCode,
-        unsigned long desiredW, unsigned long desiredH,
-        unsigned long *actualW = 0, unsigned long *actualH = 0);
+    int generate(const QString &destfilename, QImage *destimage, int rotateCode,
+                 unsigned long desiredW, unsigned long desiredH,
+                 unsigned long *actualW = 0, unsigned long *actualH = 0);
 
   private:
     QString dm_filename;
@@ -128,4 +129,3 @@ class hydra::Thumb
 };
 
 #endif
-

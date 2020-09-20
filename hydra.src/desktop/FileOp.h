@@ -12,18 +12,17 @@
 
 #include <hydra/FileOp.h>
 
-namespace desktop
-{
-  class FileOp;
+namespace desktop {
+class FileOp;
 
-  class FileOpGuiTest;
-  class FileOpDisk;
-  class FileOpDB;
-  //class FileOpEvents;
+class FileOpGuiTest;
+class FileOpDisk;
+class FileOpDB;
+// class FileOpEvents;
 
-  int guiFileOpFiles(QWidget *parent, int op, const QStringList &srcfiles, 
-      const QString &destDir, FileOp *handler = 0);
-};
+int guiFileOpFiles(QWidget *parent, int op, const QStringList &srcfiles,
+                   const QString &destDir, FileOp *handler = 0);
+}; // namespace desktop
 
 /**
  * This provides a common interface to file operations.
@@ -31,14 +30,13 @@ namespace desktop
  * interface for callers to use.
  *
  * @author Aleksander Demko
- */ 
-class desktop::FileOp
-{
+ */
+class desktop::FileOp {
   public:
     enum {
-      Op_Del = 1,
-      Op_Move,
-      Op_Copy,
+        Op_Del = 1,
+        Op_Move,
+        Op_Copy,
     };
 
   public:
@@ -58,21 +56,18 @@ class desktop::FileOp
      * of Op_Del, Op_Move or Op_Copy
      *
      * @author Aleksander Demko
-     */ 
+     */
     bool opFile(int op, const QString &srcfile, const QString &destfile);
 };
 
 /**
- * This class 
+ * This class
  * @author Aleksander Demko
- */ 
-class desktop::FileOpGuiTest : public desktop::FileOp
-{
+ */
+class desktop::FileOpGuiTest : public desktop::FileOp {
   public:
     // this may be thrown by any of the following functions
-    class UserCanceled
-    {
-    };
+    class UserCanceled {};
 
   public:
     FileOpGuiTest(QWidget *parent);
@@ -97,9 +92,8 @@ class desktop::FileOpGuiTest : public desktop::FileOp
  * Performs the actual operations on the file system (disk)
  *
  * @author Aleksander Demko
- */ 
-class desktop::FileOpDisk : public desktop::FileOp
-{
+ */
+class desktop::FileOpDisk : public desktop::FileOp {
   public:
     FileOpDisk(void);
 
@@ -113,8 +107,7 @@ class desktop::FileOpDisk : public desktop::FileOp
     virtual bool delDir(const QString &dirname);
 };
 
-class desktop::FileOpDB : public desktop::FileOp
-{
+class desktop::FileOpDB : public desktop::FileOp {
   public:
     FileOpDB(void);
 
@@ -129,4 +122,3 @@ class desktop::FileOpDB : public desktop::FileOp
 };
 
 #endif
-

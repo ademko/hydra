@@ -12,13 +12,11 @@
 
 #include <desktop/View.h>
 
-namespace desktop
-{
-  class QueryView;
+namespace desktop {
+class QueryView;
 }
 
-class desktop::QueryView : public desktop::View
-{
+class desktop::QueryView : public desktop::View {
     Q_OBJECT
 
   public:
@@ -36,4 +34,3 @@ class desktop::QueryView : public desktop::View
 };
 
 #endif
-

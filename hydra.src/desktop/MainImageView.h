@@ -8,22 +8,21 @@
 #ifndef __INCLUDED_HYDRADESKTOP_MAINIMAGEVIEW_H__
 #define __INCLUDED_HYDRADESKTOP_MAINIMAGEVIEW_H__
 
-#include <desktop/View.h>
 #include <desktop/ImageCache.h>
+#include <desktop/View.h>
 
-namespace desktop
-{
-  class MainWindow; // forward
+namespace desktop {
+class MainWindow; // forward
 
-  class MainImageView;
-}
+class MainImageView;
+} // namespace desktop
 
-class desktop::MainImageView : public desktop::View
-{
+class desktop::MainImageView : public desktop::View {
     Q_OBJECT
   public:
     /// constructor
-    MainImageView(MainWindow *mainwin, FileList *_filelist, ImageCache *_loader);
+    MainImageView(MainWindow *mainwin, FileList *_filelist,
+                  ImageCache *_loader);
 
     virtual void onImageChange(FileList *fl, int fileIndex);
 
@@ -32,11 +31,11 @@ class desktop::MainImageView : public desktop::View
   protected:
     virtual void resizeEvent(QResizeEvent *event);
     virtual void paintEvent(QPaintEvent *event);
-    virtual void mousePressEvent(QMouseEvent * event);
+    virtual void mousePressEvent(QMouseEvent *event);
     virtual void mouseDoubleClickEvent(QMouseEvent *event);
-    virtual void timerEvent(QTimerEvent * event);
-    virtual void keyPressEvent(QKeyEvent * event);
-    virtual void contextMenuEvent(QContextMenuEvent * event);
+    virtual void timerEvent(QTimerEvent *event);
+    virtual void keyPressEvent(QKeyEvent *event);
+    virtual void contextMenuEvent(QContextMenuEvent *event);
 
   private slots:
     void onCurrentChanged(void);
@@ -55,4 +54,3 @@ class desktop::MainImageView : public desktop::View
 };
 
 #endif
-

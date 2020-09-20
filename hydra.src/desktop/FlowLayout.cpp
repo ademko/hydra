@@ -9,206 +9,189 @@
 
 #include <assert.h>
 
-#include <QWidget>
 #include <QDebug>
+#include <QWidget>
 
 using namespace desktop;
 
-FlowLayout::FlowLayout(bool horizorder)
-  : dm_horizorder(horizorder)
-{
+FlowLayout::FlowLayout(bool horizorder) : dm_horizorder(horizorder) {}
+
+FlowLayout::~FlowLayout(void) {
+    // deleteAllItems();
+
+    for (int i = 0; i < dm_items.size(); ++i)
+        delete dm_items[i];
 }
 
-FlowLayout::~FlowLayout(void)
-{
-  //deleteAllItems();
+bool FlowLayout::hasHeightForWidth() const { return true; }
 
-  for (int i=0; i<dm_items.size(); ++i)
-    delete dm_items[i];
+int FlowLayout::heightForWidth(int w) const {
+    QSize boundingbox = computeLayout(QRect(0, 0, w, 0), false).size();
+
+    return boundingbox.height();
 }
 
-bool FlowLayout::hasHeightForWidth () const
-{
-  return true;
+void FlowLayout::addItem(QLayoutItem *item) {
+    dm_items.push_back(item);
+
+    // qDebug() << __FUNCTION__ << dm_items.size();
 }
 
-int FlowLayout::heightForWidth(int w) const
-{
-  QSize boundingbox = computeLayout(QRect(0, 0, w, 0), false).size();
+QSize FlowLayout::sizeHint() const {
+    return minimumSize();
+    /*
+    QSize firstsize(100, 100);
 
-  return boundingbox.height();
+    if (!dm_items.empty())
+      firstsize = dm_items[0]->sizeHint();
+    QSize boundingbox = computeLayout(QRect(QPoint(0,0), firstsize),
+  false).size();
+
+  qDebug() << __FUNCTION__ << boundingbox;
+    return boundingbox;*/
 }
 
-void FlowLayout::addItem(QLayoutItem *item)
-{
-  dm_items.push_back(item);
-
-  //qDebug() << __FUNCTION__ << dm_items.size();
+QSize FlowLayout::minimumSize() const {
+    // return sizeHint();
+    if (dm_items.empty())
+        return QSize(100, 100);
+    else
+        return dm_items[0]->minimumSize();
 }
 
-QSize FlowLayout::sizeHint() const
-{
-  return minimumSize();
-  /*
-  QSize firstsize(100, 100);
+QLayoutItem *FlowLayout::itemAt(int index) const {
+    if (index < 0 || index >= dm_items.size())
+        return 0;
 
-  if (!dm_items.empty())
-    firstsize = dm_items[0]->sizeHint();
-  QSize boundingbox = computeLayout(QRect(QPoint(0,0), firstsize), false).size();
-
-qDebug() << __FUNCTION__ << boundingbox;
-  return boundingbox;*/
+    return dm_items[index];
 }
 
-QSize FlowLayout::minimumSize() const
-{
-//return sizeHint();
-  if (dm_items.empty())
-    return QSize(100, 100);
-  else
-    return dm_items[0]->minimumSize();
+QLayoutItem *FlowLayout::takeAt(int index) {
+    if (index < 0 || index >= dm_items.size())
+        return 0;
+
+    QLayoutItem *item = dm_items[index];
+
+    dm_items.erase(dm_items.begin() + index);
+
+    return item;
 }
 
-QLayoutItem *FlowLayout::itemAt(int index) const
-{
-  if (index < 0 || index >= dm_items.size())
-    return 0;
+void FlowLayout::setGeometry(const QRect &rect) {
+    QLayout::setGeometry(rect);
 
-  return dm_items[index];
+    // qDebug() << __FUNCTION__ << dm_items.size() << rect;
+    QRect boundingbox = computeLayout(rect, true);
+    // qDebug() << __FUNCTION__ << " afterset geometry" << geometry();
+
+    dm_boundingBox = boundingbox;
+
+    // qDebug() << " boundingbox" << boundingbox;
+
+    // QLayout::setGeometry(boundingbox);
+
+    // if (parentWidget() && !parentWidget()->geometry().contains(boundingbox))
+    // parentWidget()->setGeometry(boundingbox);
 }
 
-QLayoutItem *FlowLayout::takeAt(int index)
-{
-  if (index < 0 || index >= dm_items.size())
-    return 0;
+void FlowLayout::insertWidget(int indexAt, QWidget *widget) {
+    addChildWidget(widget);
 
-  QLayoutItem *item = dm_items[index];
+    dm_items.insert(dm_items.begin() + indexAt, new QWidgetItem(widget));
 
-  dm_items.erase(dm_items.begin() + index);
-
-  return item;
+    // qDebug() << __FUNCTION__ << dm_items.size();
 }
 
-void FlowLayout::setGeometry(const QRect &rect)
-{
-  QLayout::setGeometry(rect);
-
-  //qDebug() << __FUNCTION__ << dm_items.size() << rect;
-  QRect boundingbox = computeLayout(rect, true);
-  //qDebug() << __FUNCTION__ << " afterset geometry" << geometry();
-
-  dm_boundingBox = boundingbox;
-
-  //qDebug() << " boundingbox" << boundingbox;
-
-  //QLayout::setGeometry(boundingbox);
-
-  //if (parentWidget() && !parentWidget()->geometry().contains(boundingbox))
-    //parentWidget()->setGeometry(boundingbox);
+int &FlowLayout::fastPoint(QPoint &p) const {
+    if (dm_horizorder)
+        return p.rx();
+    else
+        return p.ry();
 }
 
-void FlowLayout::insertWidget(int indexAt, QWidget *widget)
-{
-  addChildWidget(widget);
-
-  dm_items.insert(dm_items.begin() + indexAt, new QWidgetItem(widget));
-
-  //qDebug() << __FUNCTION__ << dm_items.size();
+int FlowLayout::fastPoint(const QPoint &p) const {
+    if (dm_horizorder)
+        return p.x();
+    else
+        return p.y();
 }
 
-int & FlowLayout::fastPoint(QPoint &p) const
-{
-  if (dm_horizorder)
-    return p.rx();
-  else
-    return p.ry();
+int &FlowLayout::slowPoint(QPoint &p) const {
+    if (dm_horizorder)
+        return p.ry();
+    else
+        return p.rx();
 }
 
-int FlowLayout::fastPoint(const QPoint &p) const
-{
-  if (dm_horizorder)
-    return p.x();
-  else
-    return p.y();
+int FlowLayout::slowPoint(const QPoint &p) const {
+    if (dm_horizorder)
+        return p.y();
+    else
+        return p.x();
 }
 
-int & FlowLayout::slowPoint(QPoint &p) const
-{
-  if (dm_horizorder)
-    return p.ry();
-  else
-    return p.rx();
+int FlowLayout::fastSize(const QSize &s) const {
+    if (dm_horizorder)
+        return s.width();
+    else
+        return s.height();
 }
 
-int FlowLayout::slowPoint(const QPoint &p) const
-{
-  if (dm_horizorder)
-    return p.y();
-  else
-    return p.x();
+int FlowLayout::slowSize(const QSize &s) const {
+    if (dm_horizorder)
+        return s.height();
+    else
+        return s.width();
 }
 
-int FlowLayout::fastSize(const QSize &s) const
-{
-  if (dm_horizorder)
-    return s.width();
-  else
-    return s.height();
+QRect FlowLayout::computeLayout(const QRect &rect,
+                                bool performSetGeometry) const {
+    QPoint nextp = rect.topLeft();
+    int slowinc = 0;
+    QRect boundingbox(rect);
+
+    // qDebug() << "initial boundingbox" << boundingbox;
+    for (int index = 0; index < dm_items.size(); ++index) {
+        QSize itemsizehint(dm_items[index]->sizeHint());
+        QRect nextrect(nextp, itemsizehint);
+
+        // qDebug() << " nextrect " << nextrect << " contains? " <<
+        // rect.contains(nextrect, false);
+        if (fastPoint(nextp) != fastPoint(rect.topLeft()) &&
+            fastPoint(nextrect.bottomRight()) >=
+                fastPoint(rect.bottomRight())) {
+            // qDebug() << " NEWLINE nextp=" << nextp << "rect.bottomRight" <<
+            // rect.bottomRight();
+            fastPoint(nextp) = fastPoint(rect.topLeft());
+            slowPoint(nextp) += slowinc + spacing();
+
+            nextrect = QRect(nextp, dm_items[index]->sizeHint());
+
+            slowinc = 0;
+        }
+        // qDebug() << " nextrect " << nextrect;
+
+        // place the widget here
+        if (performSetGeometry)
+            dm_items[index]->setGeometry(nextrect);
+
+        if (nextrect.right() > boundingbox.right())
+            boundingbox.setRight(nextrect.right());
+        if (nextrect.bottom() > boundingbox.bottom())
+            boundingbox.setBottom(nextrect.bottom());
+        // qDebug() << "index" << index << "nextrect" << nextrect <<
+        // "boundingbox" << boundingbox << "nextrect.x" <<
+        // nextrect.topLeft().x(); qDebug() << " subset" << index << nextrect <<
+        // "itemsizehint" << itemsizehint;
+
+        if (slowSize(itemsizehint) > slowinc)
+            slowinc = slowSize(itemsizehint);
+
+        // increment
+        fastPoint(nextp) += fastSize(itemsizehint) + spacing();
+
+        // qDebug() << " nextp" << nextp;
+    } // for
+
+    return boundingbox;
 }
-
-int FlowLayout::slowSize(const QSize &s) const
-{
-  if (dm_horizorder)
-    return s.height();
-  else
-    return s.width();
-}
-
-QRect FlowLayout::computeLayout(const QRect &rect, bool performSetGeometry) const
-{
-  QPoint nextp = rect.topLeft();
-  int slowinc = 0;
-  QRect boundingbox(rect);
-
-  //qDebug() << "initial boundingbox" << boundingbox;
-  for (int index=0; index<dm_items.size(); ++index) {
-    QSize itemsizehint(dm_items[index]->sizeHint());
-    QRect nextrect(nextp, itemsizehint);
-
-    //qDebug() << " nextrect " << nextrect << " contains? " << rect.contains(nextrect, false);
-    if (fastPoint(nextp) != fastPoint(rect.topLeft()) &&
-        fastPoint(nextrect.bottomRight()) >= fastPoint(rect.bottomRight())
-       ) {
-      //qDebug() << " NEWLINE nextp=" << nextp << "rect.bottomRight" << rect.bottomRight();
-      fastPoint(nextp) = fastPoint(rect.topLeft());
-      slowPoint(nextp) += slowinc + spacing();
-
-      nextrect = QRect(nextp, dm_items[index]->sizeHint());
-
-      slowinc = 0;
-    }
-    //qDebug() << " nextrect " << nextrect;
-
-    // place the widget here
-    if (performSetGeometry)
-      dm_items[index]->setGeometry(nextrect);
-
-    if (nextrect.right() > boundingbox.right())
-      boundingbox.setRight(nextrect.right());
-    if (nextrect.bottom() > boundingbox.bottom())
-      boundingbox.setBottom(nextrect.bottom());
-    //qDebug() << "index" << index << "nextrect" << nextrect << "boundingbox" << boundingbox << "nextrect.x" << nextrect.topLeft().x();
-    //qDebug() << " subset" << index << nextrect << "itemsizehint" << itemsizehint;
-
-    if (slowSize(itemsizehint) > slowinc)
-      slowinc = slowSize(itemsizehint);
-
-    // increment
-    fastPoint(nextp) += fastSize(itemsizehint) + spacing();
-
-    //qDebug() << " nextp" << nextp;
-  }//for
-
-  return boundingbox;
-}
-

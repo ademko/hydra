@@ -8,30 +8,29 @@
 #ifndef __INCLUDED_HYDRADESKTOP_VIEW_H__
 #define __INCLUDED_HYDRADESKTOP_VIEW_H__
 
-#include <QWidget>
 #include <QAbstractItemView>
+#include <QWidget>
 
 #include <desktop/FileList.h>
 
-namespace desktop
-{
-  class MainWindow; //fwd
+namespace desktop {
+class MainWindow; // fwd
 
-  class FileListListener;
-  class View;
-}
+class FileListListener;
+class View;
+} // namespace desktop
 
-class desktop::FileListListener
-{
+class desktop::FileListListener {
   public:
     FileListListener(FileList *_filelist);
     virtual ~FileListListener();
 
-    /// sometimes called by FileList's destructor (doesn't modify the FileList listener list)
+    /// sometimes called by FileList's destructor (doesn't modify the FileList
+    /// listener list)
     void resetFileList(void);
 
     // may be null, in dtor phases
-    FileList * fileList(void) const { return dm_filelist; }
+    FileList *fileList(void) const { return dm_filelist; }
 
     /**
      * Called when the base changes of the filelist.
@@ -39,7 +38,7 @@ class desktop::FileListListener
      * This handler does nothing by default.
      *
      * @author Aleksander Demko
-     */ 
+     */
     virtual void onBaseChange(FileList *fl);
 
     /**
@@ -50,20 +49,19 @@ class desktop::FileListListener
      * This handler does nothing by default.
      *
      * @author Aleksander Demko
-     */ 
+     */
     virtual void onImageChange(FileList *fl, int fileIndex);
 
   private:
-    FileList * dm_filelist;
+    FileList *dm_filelist;
 };
 
 /**
  * A View is a graphical (QWidget) compoenent that can monitor a FileList.
  *
  * @author Aleksander Demko
- */ 
-class desktop::View : public QWidget, public FileListListener
-{
+ */
+class desktop::View : public QWidget, public FileListListener {
   public:
     /// constructor
     View(FileList *_filelist);
@@ -77,7 +75,7 @@ class desktop::View : public QWidget, public FileListListener
     MainWindow *mainWindow(void) const { return dm_mainwindow; }
 
   protected:
-    //virtual void contextMenuEvent(QContextMenuEvent * event);
+    // virtual void contextMenuEvent(QContextMenuEvent * event);
 
     // used by tag-changing views, for convience
     // origianlly from TagEditorView2
@@ -91,4 +89,3 @@ class desktop::View : public QWidget, public FileListListener
 };
 
 #endif
-

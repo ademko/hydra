@@ -12,13 +12,11 @@
 
 #include <desktop/View.h>
 
-namespace desktop
-{
-  class ShuffleView;
+namespace desktop {
+class ShuffleView;
 }
 
-class desktop::ShuffleView : public desktop::View
-{
+class desktop::ShuffleView : public desktop::View {
     Q_OBJECT
 
   public:
@@ -35,4 +33,3 @@ class desktop::ShuffleView : public desktop::View
 };
 
 #endif
-

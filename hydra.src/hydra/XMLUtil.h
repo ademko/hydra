@@ -10,10 +10,8 @@
 
 #include <QString>
 
-namespace hydra
-{
-  QString escapeForXML(const QString &s);
+namespace hydra {
+QString escapeForXML(const QString &s);
 }
 
 #endif
-

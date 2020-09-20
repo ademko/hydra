@@ -13,9 +13,8 @@
 
 #include <QMutex>
 
-namespace desktop
-{
-  class FutureLoader;
+namespace desktop {
+class FutureLoader;
 }
 
 /**
@@ -23,9 +22,8 @@ namespace desktop
  * of a FileList.
  *
  * @author Aleksander Demko
- */ 
-class desktop::FutureLoader : public FileListListener
-{
+ */
+class desktop::FutureLoader : public FileListListener {
   public:
     /// constructor
     FutureLoader(ThreadedThumbCache *thumbcache, FileList *flist);
@@ -58,4 +56,3 @@ class desktop::FutureLoader : public FileListListener
 };
 
 #endif
-

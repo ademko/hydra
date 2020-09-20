@@ -11,9 +11,8 @@
 #include <QCoreApplication>
 #include <QStringList>
 
-namespace hydra
-{
-  class ArgumentParser;
+namespace hydra {
+class ArgumentParser;
 }
 
 /**
@@ -27,25 +26,24 @@ namespace hydra
  * to forward-inspect the stream.
  *
  * @author Aleksander Demko
- */ 
-class hydra::ArgumentParser
-{
+ */
+class hydra::ArgumentParser {
   public:
-    class Exception : public std::exception
-    {
+    class Exception : public std::exception {
       public:
-        virtual const char* what(void) const throw();
+        virtual const char *what(void) const throw();
     };
     class ErrorException : public Exception {
       public:
         ErrorException(const QString &errormsg);
-        virtual ~ErrorException() throw () { }
-        virtual const char* what(void) const throw();
+        virtual ~ErrorException() throw() {}
+        virtual const char *what(void) const throw();
+
       private:
         QByteArray dm_msg;
     };
-    //class BadParamException
-    class HelpException : public Exception { };
+    // class BadParamException
+    class HelpException : public Exception {};
 
   public:
     /**
@@ -53,7 +51,7 @@ class hydra::ArgumentParser
      * It uses the QCoreApplication arguments by default.
      *
      * @author Aleksander Demko
-     */ 
+     */
     ArgumentParser(const QStringList &args = QCoreApplication::arguments());
 
     /**
@@ -62,13 +60,13 @@ class hydra::ArgumentParser
      * Note the the program name is the first parameter, always.
      *
      * @author Aleksander Demko
-     */ 
+     */
     bool hasNext(void) const;
     /**
      * Is there a parameter available?
      *
      * @author Aleksander Demko
-     */ 
+     */
     bool hasNextParam(void) const;
 
     /**
@@ -79,7 +77,7 @@ class hydra::ArgumentParser
      * Throws ArgsEmptyException on error. You can pre-test via hasNext
      *
      * @author Aleksander Demko
-     */ 
+     */
     QString next(bool *isswitch = 0);
 
     /**
@@ -87,7 +85,7 @@ class hydra::ArgumentParser
      *
      * @param switchName is only used for exception generation purposes
      * @author Aleksander Demko
-     */ 
+     */
     QString nextParam(const QString &switchName = 0);
 
   private:
@@ -100,4 +98,3 @@ class hydra::ArgumentParser
 };
 
 #endif
-
