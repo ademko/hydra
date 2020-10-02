@@ -314,20 +314,20 @@ int MyHandler::commit(void) {
         bool domerge;
 
         if (ii->second.existingid.isNull())
-            domerge = eng->fileItemDB().get(ii->second.item.id, myitem);
+            domerge = eng->fileItemDB().get(ii->second.item.id.toString(), myitem);
         else
-            domerge = eng->fileItemDB().get(ii->second.existingid, myitem);
+            domerge = eng->fileItemDB().get(ii->second.existingid.toString(), myitem);
 
         if (domerge) {
             if ((!dm_smartmerge && copyItem(ii->second.item, myitem)) ||
                 (dm_smartmerge && modtimeMergeItem(ii->second.item, myitem))) {
-                eng->fileItemDB().insert(myitem.id, myitem);
+                eng->fileItemDB().insert(myitem.id.toString(), myitem);
                 ++count;
             }
         } else {
             // not merge, new item
             assert(!ii->second.item.id.isNull());
-            eng->fileItemDB().insert(ii->second.item.id, ii->second.item);
+            eng->fileItemDB().insert(ii->second.item.id.toString(), ii->second.item);
             ++count;
         }
     } // for dm_itemmap

@@ -197,8 +197,9 @@ void FileList::sort(int column, Qt::SortOrder order) {
 
     qSort(dm_filtered_files.begin(), dm_filtered_files.end(),
           FileEntryLessThan(sortby, order));
+    beginResetModel();
+    endResetModel();
 
-    reset();
     emitChangedTagsAll();
 }
 
@@ -506,7 +507,8 @@ FileListLoader::~FileListLoader() {
     if (dm_changed_list) {
         // emit some signals
         // qDebug () << "1";
-        dm_filelist.reset();
+        dm_filelist.beginResetModel();
+        dm_filelist.endResetModel();
 
         // qDebug () << "2";
         // dm_filelist.dm_selectionmodel.clear();
@@ -792,7 +794,8 @@ FileListReloader::~FileListReloader() {
     int selfile = dm_filelist.selectedFileIndex();
 
     // copied from FileListLoader
-    dm_filelist.reset();
+    dm_filelist.beginResetModel();
+    dm_filelist.endResetModel();
 
     if (selfile != -1 && dm_filelist.numFiles() > 0) {
         if (selfile >= dm_filelist.numFiles())

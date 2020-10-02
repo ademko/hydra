@@ -13,8 +13,8 @@
 #include <QDateTime>
 #include <QString>
 
-#define HYDRA_VERSION_STRING "0.24.0"
-#define HYDRA_COPYRIGHT_STRING "2007-2017"
+#define HYDRA_VERSION_STRING "1.0.0"
+#define HYDRA_COPYRIGHT_STRING "2007-2020"
 
 /**
  * The core hydra namespace contains all the classes

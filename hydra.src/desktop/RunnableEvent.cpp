@@ -10,7 +10,7 @@
 #include <assert.h>
 
 #include <QCoreApplication>
-#include <QtConcurrentRun>
+#include <QThreadPool>
 
 using namespace desktop;
 

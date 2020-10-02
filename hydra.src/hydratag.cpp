@@ -23,6 +23,11 @@
 
 using namespace hydra;
 
+QTextStream & operator<<(QTextStream &out, QUuid uuid) {
+    out << uuid.toString();
+    return out;
+}
+
 /*QString clipUuidBraces(const QUuid &uuid)
 {
   QString s(uuid);

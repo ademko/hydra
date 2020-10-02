@@ -84,7 +84,7 @@ int Engine::addFile(const QString &fullfilename, const QString *precalchash) {
         new_path = false;
 
         if (dm_filehashdb->get(path.hash, hash))
-            if (dm_fileitemdb->contains(hash.id))
+            if (dm_fileitemdb->contains(hash.id.toString()))
                 old_path_itemid = hash.id;
 
         // check if PATH needs updating
@@ -150,7 +150,7 @@ int Engine::addFile(const QString &fullfilename, const QString *precalchash) {
     else
         item.filetype = 1;
 
-    if (!dm_fileitemdb->insert(item.id, item))
+    if (!dm_fileitemdb->insert(item.id.toString(), item))
         return Add_Error; // perhaps throw an exception instead?
 
     return Add_New;
@@ -193,7 +193,7 @@ int Engine::getFileItem(const QString &fullfilename,
     if (!dm_filehashdb->get(path->hash, *hash))
         return Load_ErrorNotFound;
 
-    return dm_fileitemdb->get(hash->id, *item) ? Load_OK : Load_ErrorNotFound;
+    return dm_fileitemdb->get(hash->id.toString(), *item) ? Load_OK : Load_ErrorNotFound;
 }
 
 int Engine::getFileItem(const QString &fullfilename,
@@ -215,19 +215,19 @@ int Engine::getFileItemByHash(const QString &hashkey,
     if (!dm_filehashdb->get(hashkey, *hash))
         return Load_ErrorNotFound;
 
-    return dm_fileitemdb->get(hash->id, *item) ? Load_OK : Load_ErrorNotFound;
+    return dm_fileitemdb->get(hash->id.toString(), *item) ? Load_OK : Load_ErrorNotFound;
 }
 
 int Engine::regetFileItem(hydra::FileItemRecord &rec) {
     assert(!rec.id.isNull());
-    return dm_fileitemdb->get(rec.id, rec) ? Load_OK : Load_ErrorFatal;
+    return dm_fileitemdb->get(rec.id.toString(), rec) ? Load_OK : Load_ErrorFatal;
 }
 
 bool Engine::saveFileItem(hydra::FileItemRecord &rec,
                           const QDateTime &newmodtime) {
     if (newmodtime.isValid())
         rec.modtime = newmodtime;
-    return dm_fileitemdb->insert(rec.id, rec);
+    return dm_fileitemdb->insert(rec.id.toString(), rec);
 }
 
 char Engine::codeToChar(int code) {
