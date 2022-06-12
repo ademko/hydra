@@ -30,7 +30,7 @@ bool hydra::isNormalDirectory(const QString &justdirname) {
 bool hydra::isImageFile(const QString &justname) {
     QString ext(QFileInfo(justname).suffix().toUpper());
 
-    return ext == "JPG" || ext == "PNG" || ext == "GIF" || ext == "BMP";
+    return ext == "JPG" || ext == "PNG" || ext == "GIF" || ext == "BMP" || ext == "WEBP";
 }
 
 bool hydra::mkDir(const QString &name) {
