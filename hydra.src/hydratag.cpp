@@ -129,11 +129,11 @@ static void showHelp(QTextStream &out) {
            "  L R xor    true if either L or R are true (but not both)\n"
            "  empty      true if the file contains no tags\n"
            "  all        always returns true\n"
-        << endl;
+        << Qt::endl;
 }
 
 static void showError(QTextStream &out, ArgumentParser::Exception &e) {
-    out << "error: " << e.what() << endl;
+    out << "error: " << e.what() << Qt::endl;
 }
 
 static void commandAdd(QTextStream &out, ArgumentParser &parser) {
@@ -191,7 +191,7 @@ static void commandAdd(QTextStream &out, ArgumentParser &parser) {
 
             int addcode = Engine::instance()->addFile(fullcur);
 
-            out << Engine::codeToChar(addcode) << ' ' << fullcur << endl;
+            out << Engine::codeToChar(addcode) << ' ' << fullcur << Qt::endl;
 
             if (addcode != Engine::Add_Error) {
                 int code = Engine::instance()->getFileItem(fullcur, rec);
@@ -250,7 +250,7 @@ static void commandList(QTextStream &out, ArgumentParser &parser) {
 
     // perform the command
     if (format_xml)
-        out << "<hydradb>" << endl;
+        out << "<hydradb>" << Qt::endl;
     for (QStringList::const_iterator ii = fileList.begin();
          ii != fileList.end(); ++ii) {
         FileIterator I(*ii);
@@ -275,7 +275,7 @@ static void commandList(QTextStream &out, ArgumentParser &parser) {
             if (format_file || format_null) {
                 out << fullcur;
                 if (format_file)
-                    out << endl;
+                    out << Qt::endl;
                 else
                     out << '\0';
                 continue;
@@ -287,9 +287,9 @@ static void commandList(QTextStream &out, ArgumentParser &parser) {
                               // db
 
                 out << "<path filename=\"" << escapeForXML(fullcur)
-                    << "\" hash=\"" << path.hash << "\" />" << endl;
+                    << "\" hash=\"" << path.hash << "\" />" << Qt::endl;
                 out << "<hash hash=\"" << path.hash << "\" id=\"" << hash.id
-                    << "\" />" << endl;
+                    << "\" />" << Qt::endl;
                 out << "<item id=\"" << hash.id << "\" title=\""
                     << escapeForXML(item.title) << "\" desc=\""
                     << escapeForXML(item.desc) << "\" filetype=\""
@@ -301,7 +301,7 @@ static void commandList(QTextStream &out, ArgumentParser &parser) {
                 for (FileItemRecord::tags_t::iterator ii = item.tags.begin();
                      ii != item.tags.end(); ++ii)
                     out << "<tag title=\"" << escapeForXML(*ii) << "\" />";
-                out << "</item>" << endl;
+                out << "</item>" << Qt::endl;
                 continue;
             } // format_xml
 
@@ -310,12 +310,12 @@ static void commandList(QTextStream &out, ArgumentParser &parser) {
             out << Engine::codeToChar(code) << ' ' << fullcur;
 
             if (code == Engine::Load_ErrorNeedsUpdate) {
-                out << " !NEEDS_UPDATE" << endl;
+                out << " !NEEDS_UPDATE" << Qt::endl;
                 continue;
             }
 
             if (code != Engine::Load_OK) {
-                out << endl;
+                out << Qt::endl;
                 continue;
             }
 
@@ -325,11 +325,11 @@ static void commandList(QTextStream &out, ArgumentParser &parser) {
             for (FileItemRecord::tags_t::iterator ii = item.tags.begin();
                  ii != item.tags.end(); ++ii)
                 out << ' ' << *ii;
-            out << " }" << endl;
+            out << " }" << Qt::endl;
         } // while
     }     // for fileList
     if (format_xml)
-        out << "</hydradb>" << endl;
+        out << "</hydradb>" << Qt::endl;
 }
 
 static void commandTag(QTextStream &out, ArgumentParser &parser) {
@@ -394,7 +394,7 @@ static void commandTag(QTextStream &out, ArgumentParser &parser) {
                  ii != rm_tags.end(); ++ii)
                 did_something = rec.tags.eraseTag(*ii) || did_something;
 
-            out << (did_something ? "T " : "  ") << fullcur << endl;
+            out << (did_something ? "T " : "  ") << fullcur << Qt::endl;
 
             if (did_something)
                 Engine::instance()->saveFileItem(rec, now);
@@ -415,11 +415,11 @@ static void commandExport(QTextStream &out, ArgumentParser &parser) {
         throw ArgumentParser::ErrorException("can't open file for writing: " +
                                              filename);
 
-    out << "writing to xml file: " << filename << endl;
+    out << "writing to xml file: " << filename << Qt::endl;
 
     QTextStream outfile(&file);
 
-    outfile << "<hydradb>" << endl;
+    outfile << "<hydradb>" << Qt::endl;
     {
         FilePathRecord path;
         Cursor cur(eng->filePathDB());
@@ -429,7 +429,7 @@ static void commandExport(QTextStream &out, ArgumentParser &parser) {
                 continue;
 
             outfile << "<path filename=\"" << escapeForXML(cur.getKey())
-                    << "\" hash=\"" << path.hash << "\" />" << endl;
+                    << "\" hash=\"" << path.hash << "\" />" << Qt::endl;
         } // while
     }
     {
@@ -441,7 +441,7 @@ static void commandExport(QTextStream &out, ArgumentParser &parser) {
                 continue;
 
             outfile << "<hash hash=\"" << cur.getKey() << "\" id=\"" << hash.id
-                    << "\" />" << endl;
+                    << "\" />" << Qt::endl;
         } // while
     }
     {
@@ -463,10 +463,10 @@ static void commandExport(QTextStream &out, ArgumentParser &parser) {
             for (FileItemRecord::tags_t::iterator ii = item.tags.begin();
                  ii != item.tags.end(); ++ii)
                 outfile << "<tag title=\"" << escapeForXML(*ii) << "\" />";
-            outfile << "</item>" << endl;
+            outfile << "</item>" << Qt::endl;
         } // while
     }
-    outfile << "</hydradb>" << endl;
+    outfile << "</hydradb>" << Qt::endl;
 }
 
 static void commandImport(QTextStream &out, ArgumentParser &parser) {
@@ -488,7 +488,7 @@ static void commandImport(QTextStream &out, ArgumentParser &parser) {
     if (filename.isEmpty())
         throw ArgumentParser::ErrorException("import filename required");
 
-    out << "processing xml file: " << filename << endl;
+    out << "processing xml file: " << filename << Qt::endl;
 
     int count = commandImport(filename, smartmerge);
 
@@ -496,7 +496,7 @@ static void commandImport(QTextStream &out, ArgumentParser &parser) {
         throw ArgumentParser::ErrorException("failed to import data from: " +
                                              filename);
 
-    out << count << " (new) file items added or merged" << endl;
+    out << count << " (new) file items added or merged" << Qt::endl;
 }
 
 static void commandTest(QTextStream &out, ArgumentParser &parser) {
@@ -537,7 +537,7 @@ static void commandTest(QTextStream &out, ArgumentParser &parser) {
             if (isNormalFile(justname) && isImageFile(justname)) {
                 curok = true;
                 if (verbose)
-                    out << fullcur << endl;
+                    out << fullcur << Qt::endl;
 
                 // hash the file
                 QString filehash = calcFileHash(fullcur);
@@ -560,13 +560,13 @@ static void commandTest(QTextStream &out, ArgumentParser &parser) {
     }         // for
 
     if (failed.empty())
-        out << okcount << " files all OK" << endl;
+        out << okcount << " files all OK" << Qt::endl;
     else {
-        out << "Files not in DB:" << endl;
+        out << "Files not in DB:" << Qt::endl;
         for (failed_t::const_iterator ii = failed.begin(); ii != failed.end();
              ++ii)
-            out << *ii << endl;
-        out << failed.size() << " failed files listed" << endl;
+            out << *ii << Qt::endl;
+        out << failed.size() << " failed files listed" << Qt::endl;
     }
 }
 
@@ -732,7 +732,7 @@ static void commandTouch(QTextStream &out, ArgumentParser &parser) {
 
             int addcode = Engine::instance()->addFile(fullcur);
 
-            out << Engine::codeToChar(addcode) << ' ' << fullcur << endl;
+            out << Engine::codeToChar(addcode) << ' ' << fullcur << Qt::endl;
         } // while I
     }     // for ii
 }
@@ -780,7 +780,7 @@ static void commandForget(QTextStream &out, ArgumentParser &parser) {
                 did_something =
                     Engine::instance()->eraseHash(path.hash) || did_something;
 
-            out << (did_something ? "F " : "  ") << fullcur << endl;
+            out << (did_something ? "F " : "  ") << fullcur << Qt::endl;
         } // while I
     }     // for ii
 }

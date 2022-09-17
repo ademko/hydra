@@ -54,7 +54,7 @@ static void showHelp(QTextStream &out) {
 }
 
 static void showError(QTextStream &out, ArgumentParser::Exception &e) {
-    out << "error: " << e.what() << endl;
+    out << "error: " << e.what() << Qt::endl;
 }
 
 static QString prepPrefix(const QString &prefix) {
@@ -185,7 +185,7 @@ static void commandWebExport(QTextStream &out, ArgumentParser &parser) {
                 parseQueryTokens(pivot_tag + "*", pivot_tok);
             } else {
                 out << "passing empty tag parameter to pivot subcommand!"
-                    << endl;
+                    << Qt::endl;
                 curtype = flat_type; // fail
             }
         } else if (param == "webpath") {
@@ -209,7 +209,7 @@ static void commandWebExport(QTextStream &out, ArgumentParser &parser) {
 
                 scanned_count++;
                 if (verbose_output && scanned_count % 100 == 0)
-                    out << "Files scanned: " << scanned_count << endl;
+                    out << "Files scanned: " << scanned_count << Qt::endl;
                 // load and check query
                 if (Engine::instance()->getFileItem(fullcur, &item, 0, &path) !=
                     Engine::Load_OK)
@@ -248,14 +248,14 @@ static void commandWebExport(QTextStream &out, ArgumentParser &parser) {
         if (count == -1)
             throw ArgumentParser::ErrorException("failed to copy files");
 
-        out << count << " files copied" << endl;
+        out << count << " files copied" << Qt::endl;
     } else {
         int count = exporter.commitWebSite();
 
         if (count == -1)
             throw ArgumentParser::ErrorException("failed to build site");
 
-        out << count << " files processed for the web site" << endl;
+        out << count << " files processed for the web site" << Qt::endl;
     }
 }
 

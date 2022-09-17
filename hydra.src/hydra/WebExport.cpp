@@ -171,9 +171,9 @@ int WebExport::commitWebSite(void) {
         QString outfilename(dm_outdir + "/" + ii->second->urlname);
 
         if (writeDirIndexHtml(outfilename, *(ii->second)))
-            dm_out << "INDEX " << outfilename << endl;
+            dm_out << "INDEX " << outfilename << Qt::endl;
         else
-            dm_out << "!ERROR " << outfilename << endl;
+            dm_out << "!ERROR " << outfilename << Qt::endl;
 
         writeAllImageHtmls(*(ii->second));
     }
@@ -293,7 +293,7 @@ int WebExport::writeImageFiles(void) {
 
         outfile = dm_outdir + "/" + entry.urlorigimage;
         if (!QFileInfo(outfile).exists()) {
-            dm_out << "  ORIGINAL " << entry.fullfilename << endl;
+            dm_out << "  ORIGINAL " << entry.fullfilename << Qt::endl;
 
             smartCopy(entry.fullfilename, outfile);
         }
@@ -315,14 +315,14 @@ int WebExport::writeImageFiles(void) {
                 Thumb::fileName(entry.filehash, entry.rotateCode,
                                 Thumb::DEFAULT_THUMB_W, Thumb::DEFAULT_THUMB_H);
 
-            dm_out << "  THUMB " << entry.fullfilename << endl;
+            dm_out << "  THUMB " << entry.fullfilename << Qt::endl;
 
             code = T.generate(outthumb, 0, entry.rotateCode,
                               Thumb::DEFAULT_THUMB_W, Thumb::DEFAULT_THUMB_H);
             if (code != Thumb::Generate_Ok &&
                 code != Thumb::Generate_FileExists) {
                 dm_out << "!ERROR THUMB " << outthumb << " code " << code
-                       << endl;
+                       << Qt::endl;
                 continue;
             }
             smartCopy(outthumb, outfile);
@@ -334,14 +334,14 @@ int WebExport::writeImageFiles(void) {
                 Thumb::fileName(entry.filehash, entry.rotateCode,
                                 Thumb::DEFAULT_VIEW_W, Thumb::DEFAULT_VIEW_H);
 
-            dm_out << "  VIEWTHUMB " << entry.fullfilename << endl;
+            dm_out << "  VIEWTHUMB " << entry.fullfilename << Qt::endl;
 
             code = T.generate(outthumb, 0, entry.rotateCode,
                               Thumb::DEFAULT_VIEW_W, Thumb::DEFAULT_VIEW_H);
             if (code != Thumb::Generate_Ok &&
                 code != Thumb::Generate_FileExists) {
                 dm_out << "!ERROR VIEWTHUMB " << outthumb << " code " << code
-                       << endl;
+                       << Qt::endl;
                 continue;
             }
             smartCopy(outthumb, outfile);
@@ -566,6 +566,55 @@ bool WebExport::writeImageHtml(const QString &outfilename, int myid,
     writeHydraImg(out, randomId, *parent->subimages[randomId]);
     out << "</hydrainfo>\n";
 
+    // the following script html tag is all for keyboard control
+    out << "<script>\n"
+            "var handleEvent = function (event) {\n"
+            "switch (event.key) {\n"
+                "case \"ArrowLeft\":\n"
+                "case \"k\":\n";
+    if (myid > 0)
+        out << "window.location = \"" << escapeForXML(parent->subimages[myid - 1]->urlhtml) << "\";\n";
+    out <<
+                    "break;\n";
+    out <<
+                "case \" \":\n"
+                "case \"ArrowRight\":\n"
+                "case \"Enter\":\n"
+                "case \"j\":\n";
+    if (myid + 1 < numpeers)
+        out << "window.location = \"" << escapeForXML(parent->subimages[myid + 1]->urlhtml) << "\";\n";
+    out <<
+                    "break;\n";
+    out <<
+                "case \"Home\":\n";
+    if (myid > 0)
+        out << "window.location = \"" << escapeForXML(parent->subimages[0]->urlhtml) << "\";\n";
+    out <<
+                    "break;\n"
+                "case \"End\":\n";
+    if (myid + 1 < numpeers)
+        out << "window.location = \"" <<  escapeForXML(parent->subimages[numpeers - 1]->urlhtml) << "\";\n";
+    out <<
+                    "break;\n"
+                "case \"r\":\n"
+                "case \"Tab\":\n";
+    out << "window.location = \"" <<  escapeForXML(parent->subimages[randomId]->urlhtml) << "\";\n";
+    out <<
+                    "break;\n"
+                "case \"d\":\n"
+                "case \"f\":\n";
+    out << "window.location = \"" << escapeForXML(entry.urlorigimage) << "\";\n";
+    out <<
+                    "break;\n"
+                "case \"t\":\n"
+                    "window.open(window.location, \"_blank\", \"\", \"\");\n"
+                    "break;\n";
+    out <<
+        "}\n"//switch
+        "}\n"//handleEvent
+        "document.addEventListener('keydown', (event) => { handleEvent(event); });\n"
+        "</script>\n";
+
     out << "</body>\n";
 
     out << "</html>\n";
@@ -679,10 +728,10 @@ void WebExport::writeAllImageHtmls(DirEntry &entry) {
 
         if (writeImageHtml(outfilename, i, random_ids[i],
                            static_cast<int>(entry.subimages.size()), *(*ii)))
-            dm_out << "  VIEW " << outfilename << endl;
+            dm_out << "  VIEW " << outfilename << Qt::endl;
         else
             dm_out << "!ERROR failed to open for output: " << outfilename
-                   << endl;
+                   << Qt::endl;
         ++i;
     }
 }
