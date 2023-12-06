@@ -425,8 +425,7 @@ text-align: right; background: black; padding: 6px 4px 10px 10px; border-radius:
 .optionsLink { margin: 2px 0; white-space: nowrap; }
 .optionsDropDown:hover .optionsContent { display: block; }
 
-div#viewImageHolder { width: 100%; }
-div#viewImageHolder img { max-width: 100%; max-height: 100%; display: block; margin: auto auto; vertical-align: middle; border="0"; }
+img#mainImage { width: 98vw; object-fit: contain; max-height: 90vh; }
 
 div.wideLinkListHeader { font-family: Arial; font-weight: bold; text-align: center; }
 div.wideLinkList div { font-family: Arial; display: inline-block; width: 17em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border: 1px solid #000000; }
@@ -537,13 +536,13 @@ bool WebExport::writeImageHtml(const QString &outfilename, int myid,
     out << "</div>\n\n";
 
     // image
-    out << "<div id=\"viewImageHolder\"><a href=\"";
+    out << "<a href=\"";
     if (myid + 1 < numpeers)
         out << escapeForXML(parent->subimages[myid + 1]->urlhtml);
     else
         out << escapeForXML(parent->subimages[0]->urlhtml);
-    out << "\"><img border=\"0\" src=\"" << escapeForXML(entry.urlviewimage)
-        << "\" /></a></div>\n";
+    out << "\"><img id=\"mainImage\" border=\"0\" src=\"" << escapeForXML(entry.urlviewimage)
+        << "\" /></a>\n";
 
     out << "<div id=\"imageCaption\">#" << (myid + 1) << " / " << numpeers
         << "</div>\n";
@@ -567,8 +566,27 @@ bool WebExport::writeImageHtml(const QString &outfilename, int myid,
     out << "</hydrainfo>\n";
 
     // the following script html tag is all for keyboard control
-    out << "<script>\n"
-            "var handleEvent = function (event) {\n"
+    out << R"EOF(<script>
+let timerId = -1;
+function getSlideShowValue() {
+   return sessionStorage.getItem("slideShow") === "true";
+}
+function setSlideShowValue(value) {
+   sessionStorage.setItem("slideShow", String(Boolean(value)));
+}
+function setSlideShowHandler(value) {
+   if (timerId !== -1) {
+      clearTimeout(timerId);
+      timerId = -1;
+   }
+   if (value) {
+      timerId = setTimeout(() => {
+         handleEvent({ key: "Enter"});
+      }, 8000);
+   }
+}
+)EOF";
+    out << "var handleEvent = function (event) {\n"
             "switch (event.key) {\n"
                 "case \"ArrowLeft\":\n"
                 "case \"k\":\n";
@@ -604,20 +622,32 @@ bool WebExport::writeImageHtml(const QString &outfilename, int myid,
                 "case \"d\":\n"
                 "case \"f\":\n";
     out << "window.location = \"" << escapeForXML(entry.urlorigimage) << "\";\n";
-    out <<
-                    "break;\n"
-                "case \"t\":\n"
-                    "window.open(window.location, \"_blank\", \"\", \"\");\n"
-                    "break;\n";
-    out <<
-        "}\n"//switch
-        "}\n"//handleEvent
-        "document.addEventListener('keydown', (event) => { handleEvent(event); });\n"
-        "</script>\n";
+    out << R"EOF(
+break;
+case "t":
+window.open(window.location, "_blank", "", "");
+break;
+case "s":
+setSlideShowValue(!getSlideShowValue());
+setSlideShowHandler(getSlideShowValue());
+break;
+}//switch
+}//handleEvent
+setSlideShowHandler(getSlideShowValue());
+document.addEventListener('keydown', (event) => { handleEvent(event); });
+)EOF";
 
-    out << "</body>\n";
+    // delay loader for full res image
+    out << "setTimeout(() => {\n"
+        "document.getElementById(\"mainImage\").src = \""
+        <<  escapeForXML(entry.urlorigimage)
+        << "\"; }, 12000);\n";
 
-    out << "</html>\n";
+    out << R"EOF(
+</script>
+</body>
+</html>
+)EOF";
 
     return true;
 }
