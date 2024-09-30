@@ -15,6 +15,7 @@
 #include <QDebug>
 #include <QDir>
 #include <QFileInfo>
+#include <QRandomGenerator>
 
 #include <hydra/Engine.h>
 #include <hydra/FileOp.h>
@@ -756,7 +757,8 @@ void WebExport::writeAllImageHtmls(DirEntry &entry) {
 
     for (unsigned i = 0; i < random_ids.size(); ++i)
         random_ids[i] = i;
-    std::random_shuffle(random_ids.begin(), random_ids.end());
+    auto rng = QRandomGenerator::securelySeeded();
+    std::shuffle(random_ids.begin(), random_ids.end(), rng);
 
     for (FileSet::const_iterator ii = entry.subimages.begin();
          ii != entry.subimages.end(); ++ii) {

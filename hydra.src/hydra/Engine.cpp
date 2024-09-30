@@ -25,12 +25,8 @@ using namespace hydra;
 
 Engine *Engine::dm_instance;
 
-Engine::Engine(void) {
-    // this is a work around bug
-    // http://bugreports.qt.nokia.com/browse/QTBUG-11213
-    qsrand(QDateTime::currentDateTime().toTime_t());
-    // needed since we use std::random_shuffle
-    srand(QDateTime::currentDateTime().toTime_t());
+Engine::Engine(void)
+{
     qDebug() << "Engine random boot UUID" << QUuid::createUuid().toString();
 
     assert(dm_instance == 0);

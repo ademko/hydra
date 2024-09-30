@@ -624,7 +624,7 @@ void MainWindow::initPlugins(void) {
 
     for (int x = 0; x < MainPlugin::registry.size(); ++x)
         dm_allplugins.push_back(MainPlugin::registry.create(x));
-    qSort(dm_allplugins.begin(), dm_allplugins.end(), allpluginLessthan);
+    std::sort(dm_allplugins.begin(), dm_allplugins.end(), allpluginLessthan);
 }
 
 QWidget *MainWindow::initLayout(short ty, QWidget *&focuswidget) {

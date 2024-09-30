@@ -16,8 +16,10 @@
 #include <QThreadPool>
 #include <QTime>
 #include <QTimer>
+#include <QRandomGenerator>
 
 #include <desktop/View.h>
+#include <desktop/Ticker.h>
 #include <hydra/Engine.h>
 #include <hydra/FileIterator.h>
 #include <hydra/Hash.h>
@@ -195,7 +197,7 @@ void FileList::sort(int column, Qt::SortOrder order) {
         return;
     }
 
-    qSort(dm_filtered_files.begin(), dm_filtered_files.end(),
+    std::sort(dm_filtered_files.begin(), dm_filtered_files.end(),
           FileEntryLessThan(sortby, order));
     beginResetModel();
     endResetModel();
@@ -417,30 +419,6 @@ bool FileEntryLessThan::tagsLessThan(
 //
 //
 
-// merge this from pixscore into a common base class?
-namespace {
-class Ticker {
-  public:
-    Ticker(int ms);
-
-    bool dequeueTick(void);
-
-  private:
-    QTime dm_time;
-    int dm_ms;
-};
-} // namespace
-
-Ticker::Ticker(int ms) : dm_ms(ms) { dm_time.start(); }
-
-bool Ticker::dequeueTick(void) {
-    if (dm_time.elapsed() > dm_ms) {
-        dm_time.restart();
-        return true;
-    }
-    return false;
-}
-
 FileListLoader::FileListLoader(FileList &filelist, FileListListener *source,
                                bool resetSelectionTo0)
     : dm_filelist(filelist), dm_source(source),
@@ -466,13 +444,13 @@ FileListLoader::~FileListLoader() {
         dm_filelist.dm_watcher.setWatchDir(dm_filelist.dm_base_dir);
     }
     if (dm_changed_list || dm_changed_shuffle) {
-        // sort or shuffle the list
-        if (dm_filelist.isBaseShuffle())
-            std::random_shuffle(dm_filelist.dm_all_files.begin(),
-                                dm_filelist.dm_all_files.end());
-        else
+        if (dm_filelist.isBaseShuffle()) {
+            auto rng = QRandomGenerator::securelySeeded();
+            std::shuffle(dm_filelist.dm_all_files.begin(), dm_filelist.dm_all_files.end(), rng);
+        } else {
             std::sort(dm_filelist.dm_all_files.begin(),
                       dm_filelist.dm_all_files.end(), FileList::EntryListComp);
+        }
 
         dm_changed_list = true; // trigger the next secion
     }

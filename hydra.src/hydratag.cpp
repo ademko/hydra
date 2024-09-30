@@ -41,7 +41,7 @@ QTextStream & operator<<(QTextStream &out, QUuid uuid) {
  * @author Aleksander Demko
  */
 static void parseOutTags(const QString &s, std::set<QString> &out) {
-    QStringList list(s.split(' ', QString::SkipEmptyParts));
+    QStringList list(s.split(' ', Qt::SkipEmptyParts));
 
     for (QStringList::const_iterator ii = list.begin(); ii != list.end(); ++ii)
         out.insert(*ii);

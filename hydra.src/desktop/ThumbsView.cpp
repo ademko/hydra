@@ -192,11 +192,11 @@ class MyListView : public QListView {
 MyListView::MyListView(QWidget *parent) : QListView(parent) {}
 
 void MyListView::wheelEvent(QWheelEvent *e) {
-    // qDebug() << __FUNCTION__ << e->delta();
-
     // half the delta
-    QWheelEvent newevent(e->pos(), e->globalPos(), e->delta() / 2, e->buttons(),
-                         e->modifiers(), e->orientation());
+    QWheelEvent newevent(e->position(), e->globalPosition(),
+        QPoint(e->pixelDelta().x()/2, e->pixelDelta().y()/2),
+        QPoint(e->angleDelta().x()/2, e->angleDelta().y()/2),
+        e->buttons(), e->modifiers(), e->phase(), e->inverted());
 
     QListView::wheelEvent(&newevent);
 }
