@@ -93,11 +93,17 @@ void WebExport::FileEntry::calc(void) {
 //
 
 WebExport::WebExport(const QString &outputdir, QTextStream &out)
-    : dm_out(out), dm_outdir(outputdir), dm_title("Gallery") {
+    : dm_out(out), dm_outdir(outputdir), dm_title("Gallery"), dm_configDelayImageLoadMS(12000) {
     addDirComponents("");
 }
 
-void WebExport::setTitle(const QString &title) { dm_title = title; }
+void WebExport::setTitle(const QString &title) {
+    dm_title = title;
+}
+
+void WebExport::setImageLoadDelay(int delayMs) {
+    dm_configDelayImageLoadMS = delayMs;
+}
 
 void WebExport::addFile(const QString &fullfilename, const QString &basedir,
                         hydra::FileItemRecord &item, const QString &filehash) {
@@ -641,7 +647,7 @@ document.addEventListener('keydown', (event) => { handleEvent(event); });
     out << "setTimeout(() => {\n"
         "document.getElementById(\"mainImage\").src = \""
         <<  escapeForXML(entry.urlorigimage)
-        << "\"; }, 12000);\n";
+        << "\"; }, " << dm_configDelayImageLoadMS <<  ");\n";
 
     out << R"EOF(
 </script>

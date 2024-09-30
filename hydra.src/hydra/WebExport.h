@@ -44,6 +44,13 @@ class hydra::WebExport {
     void setTitle(const QString &title);
 
     /**
+     * Sets the auth-image delay load time from medium to full quality.
+     *
+     * @author Aleksander Demko
+     */ 
+    void setImageLoadDelay(int delayMs);
+
+    /**
      * Adds a given file to the output list.
      *
      * @author Aleksander Demko
@@ -175,6 +182,7 @@ class hydra::WebExport {
     QTextStream &dm_out;
 
     QString dm_outdir, dm_title;
+    int dm_configDelayImageLoadMS;
 
     FileMap dm_basefiles; // built incrementally when caller adds files
 

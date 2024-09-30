@@ -33,7 +33,8 @@ static void showHelp(QTextStream &out) {
            "Where options include:\n"
            "  -o outdir           REQUIRED. The output directory to write the "
            "website too\n"
-           "  -t --title=desc     set the title variable to be desc\n"
+           "  -t                  set the title variable to be desc\n"
+           "  -D                  sets the default medium-to-full load delay, in msec. Default 12000\n"
            "  -f                  Build a file tree rather than a website\n"
            "  -v                  Verbose output/display progress\n"
            "\n"
@@ -118,6 +119,7 @@ static bool PivotPath(const QString &pivot_tag,
 static void commandWebExport(QTextStream &out, ArgumentParser &parser) {
     std::vector<QString> ops;
     QString outputdir, title;
+    int delay = -1;
     bool build_file_tree = false;
     bool verbose_output = false;
 
@@ -130,7 +132,16 @@ static void commandWebExport(QTextStream &out, ArgumentParser &parser) {
             outputdir = parser.nextParam("-o");
         else if (cmd == "-t")
             title = parser.nextParam("-t");
-        else if (cmd == "-f")
+        else if (cmd == "-D") {
+            auto delay_as_string = parser.nextParam("-D");
+            bool success;
+            auto delay_as_int = delay_as_string.toInt(&success);
+            if (!success)
+                throw ArgumentParser::ErrorException("Delay must be an integer: " + delay_as_string);
+            if (delay_as_int < 0)
+                throw ArgumentParser::ErrorException("Delay must be non-negative: " + delay_as_string);
+            delay = delay_as_int;
+        } else if (cmd == "-f")
             build_file_tree = true;
         else if (cmd == "-v")
             verbose_output = true;
@@ -167,6 +178,9 @@ static void commandWebExport(QTextStream &out, ArgumentParser &parser) {
 
     if (!title.isEmpty())
         exporter.setTitle(title);
+
+    if (delay != -1)
+        exporter.setImageLoadDelay(delay);
 
     maxj = static_cast<int>(ops.size());
     j = 0;
